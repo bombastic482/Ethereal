@@ -1,0 +1,83 @@
+---
+import { SITE } from '@/lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path-only canonical, e.g. "/tools/bmi/". Defaults to current URL. */
+  path?: string;
+  type?: 'website' | 'article';
+  image?: string;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  noindex?: boolean;
+  /** Extra JSON-LD objects to embed. */
+  jsonLd?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  path,
+  type = 'website',
+  image = '/og.png',
+  publishedTime,
+  modifiedTime,
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
+const site = Astro.site ?? new URL('https://ethereal.pages.dev');
+const canonical = new URL(path ?? Astro.url.pathname, site).toString();
+const imageUrl = new URL(image, site).toString();
+const fullTitle =
+  title === SITE.name ? `${SITE.name} — ${SITE.tagline}` : `${title} · ${SITE.name}`;
+
+const graph = [
+  {
+    '@type': 'WebSite',
+    '@id': `${site}#website`,
+    url: site.toString(),
+    name: SITE.name,
+    description: SITE.description,
+    inLanguage: 'en',
+    publisher: { '@id': `${site}#org` },
+  },
+  {
+    '@type': 'Organization',
+    '@id': `${site}#org`,
+    name: SITE.name,
+    url: site.toString(),
+    logo: { '@type': 'ImageObject', url: new URL('/icons/icon-512.png', site).toString() },
+  },
+  ...jsonLd,
+];
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content={SITE.locale} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${SITE.name} — ${SITE.tagline}`} />
+{publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+{modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+
+<script
+  is:inline
+  type="application/ld+json"
+  set:html={JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })}
+></script>

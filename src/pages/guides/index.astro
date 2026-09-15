@@ -1,0 +1,51 @@
+---
+import Base from '@/layouts/Base.astro';
+import { readingTime } from '@/lib/reading-time';
+import { getCollection } from 'astro:content';
+
+const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort(
+  (a, b) =>
+    Number(b.data.featured) - Number(a.data.featured) ||
+    b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+const categories = [...new Set(guides.map((g) => g.data.category))];
+---
+
+<Base
+  title="Weight-Loss Guides"
+  description="Plain-English, evidence-based guides on calorie deficits, protein, plateaus, training while dieting and the habits that make weight loss stick."
+  path="/guides/"
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <header class="max-w-2xl">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Guides</h1>
+      <p class="text-muted mt-4 text-lg">
+        Everything the calculators assume, explained. Short enough to read on the bus, deep enough
+        to change what you do.
+      </p>
+    </header>
+    {categories.map((cat) => (
+      <section class="mt-12" aria-labelledby={`cat-${cat}`}>
+        <h2 id={`cat-${cat}`} class="text-subtle text-xs font-semibold tracking-wide uppercase">
+          {cat}
+        </h2>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+          {guides
+            .filter((g) => g.data.category === cat)
+            .map((g) => (
+              <a
+                href={`/guides/${g.id}/`}
+                class="surface hover:shadow-glow flex flex-col gap-2 p-6 transition hover:-translate-y-0.5"
+              >
+                <span class="text-lg font-bold tracking-tight">{g.data.title}</span>
+                <span class="text-muted text-sm leading-relaxed">{g.data.description}</span>
+                <span class="text-subtle mt-auto pt-2 text-xs">
+                  {readingTime(g.body ?? '')} min read
+                </span>
+              </a>
+            ))}
+        </div>
+      </section>
+    ))}
+  </div>
+</Base>

@@ -1,0 +1,106 @@
+---
+import Base from '@/layouts/Base.astro';
+---
+
+<Base
+  title="About & Methodology"
+  description="What Ethereal is, why it exists, and exactly which equations and evidence sit behind every calculator on the site."
+  path="/about/"
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <article class="prose-ethereal max-w-3xl">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">About Ethereal</h1>
+      <p class="text-lg">
+        Ethereal is a free set of weight-loss calculators and guides built on one principle: give
+        people the right number, explain where it came from, and never get in the way.
+      </p>
+
+      <h2>Why it exists</h2>
+      <p>
+        Most calorie calculators are the top of a sales funnel. They give you a number, hide the
+        reasoning and ask for your email. We wanted the opposite: a fast, private, honest toolkit
+        that a dietitian would be comfortable recommending.
+      </p>
+
+      <h2>Methodology</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Method</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Calories</td>
+            <td>
+              Mifflin-St Jeor (default), revised Harris-Benedict, Katch-McArdle; standard 1.2–1.9
+              activity multipliers
+            </td>
+            <td>
+              Deficits capped at 25% of TDEE (550 kcal always allowed); floors of 1,200 (women) and
+              1,500 kcal (men)
+            </td>
+          </tr>
+          <tr>
+            <td>Timeline</td>
+            <td>Weekly simulation recomputing TDEE from projected weight; 7,700 kcal per kg</td>
+            <td>Does not model adaptive thermogenesis; real timelines run 10–20% longer</td>
+          </tr>
+          <tr>
+            <td>Macros</td>
+            <td>4/4/9 kcal per gram; 14 g fibre per 1,000 kcal</td>
+            <td>Protein-first mode fixes protein in g/kg and fat as % of calories</td>
+          </tr>
+          <tr>
+            <td>BMI</td>
+            <td>WHO adult categories; ponderal index</td>
+            <td>Lower risk thresholds apply for some ethnic groups</td>
+          </tr>
+          <tr>
+            <td>Body fat</td>
+            <td>U.S. Navy circumference method (Hodgdon &amp; Beckett); ACE categories</td>
+            <td>±3–4% versus DEXA</td>
+          </tr>
+          <tr>
+            <td>Protein</td>
+            <td>
+              Ranges from recent meta-analyses: 1.6–2.2 g/kg training, 1.6–2.4 g/kg in a deficit,
+              ≥1.2 g/kg over 65
+            </td>
+            <td>Lean-adjusted mass above 30% body fat</td>
+          </tr>
+          <tr>
+            <td>Ideal weight</td>
+            <td>Devine, Robinson, Miller, Hamwi; BMI 18.5–24.9 range</td>
+            <td>Reference points only</td>
+          </tr>
+          <tr>
+            <td>Water</td>
+            <td>
+              35 ml/kg baseline + 12 ml per minute of exercise + climate and pregnancy allowances
+            </td>
+            <td>Drinking-water guidance; food supplies ~20% more</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>How it is built</h2>
+      <p>
+        The site is a static build with no server, no database and no third-party scripts.
+        Calculators are small islands of JavaScript that run entirely in your browser. Your profile
+        is stored in your browser's local storage so you type it once; clearing site data removes it
+        completely. The code is open and every calculation has automated tests.
+      </p>
+
+      <h2>Limits</h2>
+      <p>
+        Every equation is a population average with roughly ±10% error for an individual. The tools
+        are educational and are not a substitute for a clinician, especially if you are under 18,
+        pregnant, have a medical condition, or have a history of disordered eating. Read the{' '}
+        <a href="/disclaimer/">full disclaimer</a>.
+      </p>
+    </article>
+  </div>
+</Base>

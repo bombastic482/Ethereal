@@ -1,0 +1,224 @@
+---
+import ToolCard from '@/components/ToolCard.astro';
+import Faq from '@/components/Faq.astro';
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { SITE } from '@/lib/site';
+import { TOOLS } from '@/lib/tools';
+import { getCollection } from 'astro:content';
+
+const tools = [...TOOLS].sort((a, b) => a.order - b.order);
+const featured = tools.filter((t) => t.featured);
+const rest = tools.filter((t) => !t.featured);
+const guides = (await getCollection('guides', ({ data }) => !data.draft))
+  .sort(
+    (a, b) =>
+      Number(b.data.featured) - Number(a.data.featured) ||
+      b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  )
+  .slice(0, 3);
+
+const faq = [
+  {
+    q: 'Is Ethereal really free?',
+    a: 'Yes. No account, no paywall, no "premium" tier. The site is static and runs entirely in your browser, which costs almost nothing to host.',
+  },
+  {
+    q: 'Where does my data go?',
+    a: 'Nowhere. Your stats are saved in your own browser so you only type them once. There are no analytics trackers, no cookies and no server that ever sees them.',
+  },
+  {
+    q: 'How accurate are the calculators?',
+    a: 'They use the equations recommended in clinical nutrition (Mifflin-St Jeor, the U.S. Navy body-fat method, protein ranges from recent meta-analyses). All estimates carry about ±10% error, so treat them as a starting point and adjust from real-world results.',
+  },
+  {
+    q: 'Can I use this to gain weight or maintain?',
+    a: 'Yes. The calorie, macro, protein and timeline tools all support maintenance and muscle-gain goals with sensible surplus limits.',
+  },
+];
+
+const steps = [
+  {
+    icon: 'flame',
+    title: 'Find your calories',
+    text: 'Get maintenance and a safe target in ten seconds.',
+    href: '/tools/calories/',
+  },
+  {
+    icon: 'calendar',
+    title: 'See your goal date',
+    text: 'A realistic, adaptive projection of when you get there.',
+    href: '/tools/timeline/',
+  },
+  {
+    icon: 'pie',
+    title: 'Set protein and macros',
+    text: 'Turn calories into a plate you can actually eat.',
+    href: '/tools/macros/',
+  },
+] as const;
+---
+
+<Base title={SITE.name} description={SITE.description} path="/">
+  <section class="relative overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      <div class="bg-brand-300/40 dark:bg-brand-500/20 absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full blur-3xl"></div>
+      <div class="bg-accent-400/30 dark:bg-accent-500/15 absolute top-20 right-[-10rem] h-[24rem] w-[24rem] rounded-full blur-3xl"></div>
+    </div>
+    <div class="container-page pt-16 pb-12 sm:pt-24 sm:pb-16">
+      <div class="animate-rise mx-auto max-w-3xl text-center">
+        <span class="chip">
+          <Icon name="shield" size={14} /> Science-backed · Free forever · No tracking
+        </span>
+        <h1 class="mt-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+          Weight loss, <span class="text-gradient">done properly.</span>
+        </h1>
+        <p class="text-muted mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty sm:text-xl">
+          Calories, macros, body fat, protein and a realistic timeline to your goal. The same
+          equations dietitians use, explained in plain English, running privately in your browser.
+        </p>
+        <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+          <a href="/tools/calories/" class="btn btn-primary h-12 px-6 text-base">
+            Calculate my calories <Icon name="arrow" size={18} />
+          </a>
+          <a href="/tools/" class="btn btn-secondary h-12 px-6 text-base">
+            See all tools
+          </a>
+        </div>
+        <p class="text-subtle mt-5 text-xs">
+          Takes 10 seconds · Type your stats once, every tool remembers them
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-page" aria-labelledby="start">
+    <h2 id="start" class="sr-only">
+      Start here
+    </h2>
+    <div class="grid gap-4 md:grid-cols-3">
+      {steps.map((s, i) => (
+        <a
+          href={s.href}
+          class="surface hover:shadow-glow animate-rise flex gap-4 p-5 transition hover:-translate-y-0.5"
+          style={`animation-delay:${120 + i * 60}ms`}
+        >
+          <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 shrink-0 place-items-center rounded-2xl">
+            <Icon name={s.icon} size={22} />
+          </span>
+          <span>
+            <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
+              Step {i + 1}
+            </span>
+            <span class="block font-bold tracking-tight">{s.title}</span>
+            <span class="text-muted block text-sm">{s.text}</span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="container-page mt-20" aria-labelledby="tools">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="tools" class="text-3xl font-bold tracking-tight">
+          Every tool you need
+        </h2>
+        <p class="text-muted mt-2">Eight calculators, one shared profile, zero fluff.</p>
+      </div>
+      <a href="/tools/" class="text-brand-600 dark:text-brand-300 text-sm font-semibold">
+        All tools →
+      </a>
+    </div>
+    <div class="mt-8 grid gap-4 md:grid-cols-3">
+      {featured.map((t) => (
+        <ToolCard tool={t} featured />
+      ))}
+    </div>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {rest.map((t) => (
+        <ToolCard tool={t} />
+      ))}
+    </div>
+  </section>
+
+  <section class="container-page mt-24" aria-labelledby="why">
+    <div class="surface-muted grid gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
+      <div>
+        <h2 id="why" class="text-3xl font-bold tracking-tight">
+          Why people trust it
+        </h2>
+        <p class="text-muted mt-4 leading-relaxed">
+          Most calculators are lead magnets for a subscription. This one exists to give you the
+          right number and explain the reasoning, then get out of your way.
+        </p>
+      </div>
+      <ul class="grid gap-5 sm:grid-cols-2">
+        {[
+          [
+            'shield',
+            'Evidence first',
+            'Mifflin-St Jeor, U.S. Navy method, protein ranges from meta-analyses. Sources on every page.',
+          ],
+          [
+            'lock',
+            'Private by design',
+            'No account, no cookies, no analytics. Your stats live in your browser only.',
+          ],
+          [
+            'bolt',
+            'Instant everywhere',
+            'A static site with almost no JavaScript. Loads in well under a second on a phone.',
+          ],
+          [
+            'check',
+            'Honest guard rails',
+            'Deficits are capped, floors are enforced and the timeline slows down like real life does.',
+          ],
+        ].map(([icon, title, text]) => (
+          <li class="flex gap-3">
+            <span class="text-brand-600 dark:text-brand-300 mt-0.5 shrink-0">
+              <Icon name={icon as never} size={20} />
+            </span>
+            <span>
+              <span class="block font-semibold">{title}</span>
+              <span class="text-muted text-sm leading-relaxed">{text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="container-page mt-24" aria-labelledby="learn">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="learn" class="text-3xl font-bold tracking-tight">
+          Understand the why
+        </h2>
+        <p class="text-muted mt-2">Short, expert guides that make the numbers make sense.</p>
+      </div>
+      <a href="/guides/" class="text-brand-600 dark:text-brand-300 text-sm font-semibold">
+        All guides →
+      </a>
+    </div>
+    <div class="mt-8 grid gap-4 md:grid-cols-3">
+      {guides.map((g) => (
+        <a
+          href={`/guides/${g.id}/`}
+          class="surface hover:shadow-glow flex flex-col gap-2 p-6 transition hover:-translate-y-0.5"
+        >
+          <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
+            {g.data.category}
+          </span>
+          <span class="text-lg font-bold tracking-tight">{g.data.title}</span>
+          <span class="text-muted line-clamp-3 text-sm leading-relaxed">{g.data.description}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <div class="container-page">
+    <Faq items={faq} />
+  </div>
+</Base>

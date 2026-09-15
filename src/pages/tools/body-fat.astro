@@ -1,0 +1,49 @@
+---
+import BodyFatCalculator from '@/components/calculators/BodyFatCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'How accurate is the Navy method?',
+    a: 'Validation studies put its error at roughly ±3–4 percentage points compared with DEXA, similar to consumer bioimpedance scales and better than most visual estimates. Its real strength is tracking change over time with the same tape.',
+  },
+  {
+    q: 'How do I measure correctly?',
+    a: 'Use a flexible tape, snug but not compressing the skin. Neck: just below the larynx. Waist: men at the navel, women at the narrowest point. Hips (women): the widest point of the buttocks. Measure relaxed, standing, after a normal exhale.',
+  },
+  {
+    q: 'What is a healthy body-fat percentage?',
+    a: 'For men, 10–20% is lean-to-fit and up to about 24% is average. For women, essential fat is higher, so 18–28% is lean-to-fit and up to about 31% is average. Very low levels are not healthier and can disrupt hormones.',
+  },
+  {
+    q: 'Should I use this instead of BMI?',
+    a: 'Use both. BMI is a screening number; body fat tells you what your weight is made of. If BMI says overweight but body fat is in the fitness range, trust the body fat.',
+  },
+];
+---
+
+<ToolLayout
+  slug="body-fat"
+  title="Body-Fat Calculator"
+  description="Estimate your body-fat percentage with a tape measure using the U.S. Navy method. Get lean mass, fat mass and your category, then save it to unlock better calorie estimates."
+  lede="Estimate your body-fat percentage with nothing but a tape measure, using the U.S. Navy circumference method. See your lean and fat mass and where you sit on the fitness scale."
+  faq={faq}
+>
+  <BodyFatCalculator client:load slot="calculator" />
+
+  <h2>How the Navy method works</h2>
+  <p>
+    Developed by the Naval Health Research Center in the 1980s, the method uses a logarithmic
+    regression on neck, waist (and for women, hip) circumferences and height. It was validated
+    against underwater weighing across a large, diverse sample. It is the same test used for
+    military fitness standards precisely because it is fast, cheap and repeatable.
+  </p>
+  <h2>Why body fat matters more than weight</h2>
+  <p>
+    The scale cannot tell muscle from fat. When you lose weight without resistance training, up to a
+    quarter of the loss can be lean tissue. Tracking body fat alongside weight tells you whether
+    your deficit is doing its job. Combine this tool with the{' '}
+    <a href="/tools/protein/">protein calculator</a> and read{' '}
+    <a href="/guides/strength-training-while-dieting/">why lifting while dieting</a> matters.
+  </p>
+</ToolLayout>

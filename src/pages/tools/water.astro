@@ -1,0 +1,49 @@
+---
+import WaterCalculator from '@/components/calculators/WaterCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'Is "eight glasses a day" true?',
+    a: 'It is a rough average, not a rule. Needs scale with body size, activity and climate, which is why a 55 kg office worker and a 95 kg builder need very different amounts. About 20% of your water also comes from food.',
+  },
+  {
+    q: 'Does coffee dehydrate you?',
+    a: 'No. Moderate caffeine has a negligible diuretic effect in regular drinkers, and coffee, tea and milk all count towards your total.',
+  },
+  {
+    q: 'Can drinking water help me lose weight?',
+    a: 'Modestly. Trials show that 500 ml of water before meals reduces intake at that meal, and thirst is often mistaken for hunger. It is a helpful habit, not a fat burner.',
+  },
+  {
+    q: 'Can I drink too much?',
+    a: 'Yes, though it is rare. Drinking many litres in a short time during endurance events without electrolytes can cause hyponatremia. Spread intake through the day and drink to thirst during long efforts.',
+  },
+];
+---
+
+<ToolLayout
+  slug="water"
+  title="Water Intake Calculator"
+  description="How much water should you drink a day? Get a personal target from your weight, exercise and climate, with the reasoning behind the number."
+  lede="A daily water target built from your body weight, how much you train and the climate you live in, plus what the evidence actually says about hydration and fat loss."
+  faq={faq}
+>
+  <WaterCalculator client:load slot="calculator" />
+
+  <h2>How the estimate works</h2>
+  <p>
+    Dietitians commonly use 30–35 ml per kilogram of body weight as a baseline for healthy adults,
+    which lines up with the European Food Safety Authority's adequate intake of 2.0 L (women) and
+    2.5 L (men) for people of average size. We add about 12 ml for every minute of sweaty exercise
+    and a 500 ml allowance for hot or humid climates. Pregnancy and breastfeeding add roughly
+    300–700 ml.
+  </p>
+  <h2>Hydration during a diet</h2>
+  <p>
+    Cutting calories usually means cutting food-borne water too, and lower carbohydrate intake sheds
+    glycogen-bound water in the first week. Both raise the amount you need to drink. A simple check:
+    pale-yellow urine and rarely feeling thirsty means you are on track, whatever the calculator
+    says.
+  </p>
+</ToolLayout>

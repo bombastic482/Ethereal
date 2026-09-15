@@ -1,0 +1,45 @@
+---
+import IdealWeightCalculator from '@/components/calculators/IdealWeightCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'Which ideal weight formula is best?',
+    a: 'None is "best". Devine is the most widely used because hospitals dose some drugs with it. All four were built for adults of average build and agree within a few kilograms. The BMI healthy range is the more defensible guide for everyday use.',
+  },
+  {
+    q: 'Why do the formulas give a lower weight than I expected?',
+    a: 'They were derived from insurance tables and clinical populations decades ago and do not account for muscle. Athletic people routinely sit above every formula while being perfectly healthy.',
+  },
+  {
+    q: 'Should I aim for the ideal weight?',
+    a: 'Aim for a weight where your body fat is in the fitness range, your waist is less than half your height, and you feel strong. That may or may not match a formula.',
+  },
+];
+---
+
+<ToolLayout
+  slug="ideal-weight"
+  title="Ideal Weight Calculator"
+  description="Compare the Devine, Robinson, Miller and Hamwi ideal body weight formulas with the BMI healthy range for your height, in metric or imperial."
+  lede="See what the four classic ideal-weight formulas say for your height, side by side with the BMI healthy range, and learn which to actually pay attention to."
+  faq={faq}
+>
+  <IdealWeightCalculator client:load slot="calculator" />
+
+  <h2>About the formulas</h2>
+  <p>
+    Every formula here starts from a base weight at 5 feet (152 cm) and adds a fixed amount per inch
+    above that. <strong>Hamwi (1964)</strong> was a bedside rule of thumb for diabetic diets.{' '}
+    <strong>Devine (1974)</strong> was published to dose gentamicin and remains the clinical
+    standard. <strong>Robinson</strong> and <strong>Miller (1983)</strong> refined Devine against
+    life-insurance data. None of them measured body composition.
+  </p>
+  <h2>A better definition of ideal</h2>
+  <p>
+    Health outcomes track body-fat distribution far better than any single weight. Use the{' '}
+    <a href="/tools/body-fat/">body-fat calculator</a> and a waist measurement, set a target in the
+    fitness range for your sex, then plan the route with the{' '}
+    <a href="/tools/timeline/">timeline tool</a>.
+  </p>
+</ToolLayout>

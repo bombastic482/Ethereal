@@ -1,0 +1,41 @@
+---
+import ToolCard from '@/components/ToolCard.astro';
+import Base from '@/layouts/Base.astro';
+import { TOOLS } from '@/lib/tools';
+
+const tools = [...TOOLS].sort((a, b) => a.order - b.order);
+const site = Astro.site ?? new URL('https://ethereal.pages.dev');
+const jsonLd = [
+  {
+    '@type': 'ItemList',
+    itemListElement: tools.map((t, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: t.name,
+      url: new URL(`/tools/${t.slug}/`, site).toString(),
+    })),
+  },
+];
+---
+
+<Base
+  title="Weight-Loss Calculators"
+  description="Eight free weight-loss calculators: calories and TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight and water. Private, instant, no sign-up."
+  path="/tools/"
+  jsonLd={jsonLd}
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <header class="max-w-2xl">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">All tools</h1>
+      <p class="text-muted mt-4 text-lg">
+        Type your stats once. Every calculator shares the same private profile, so you can move
+        between them without re-entering anything.
+      </p>
+    </header>
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {tools.map((t) => (
+        <ToolCard tool={t} featured />
+      ))}
+    </div>
+  </div>
+</Base>

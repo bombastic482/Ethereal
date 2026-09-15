@@ -1,0 +1,42 @@
+---
+import Base from '@/layouts/Base.astro';
+---
+
+<Base
+  title="Privacy"
+  description="Ethereal collects nothing. No accounts, no cookies, no analytics. Your inputs stay in your own browser. Here is exactly how that works."
+  path="/privacy/"
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <article class="prose-ethereal max-w-3xl">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Privacy</h1>
+      <p class="text-lg">
+        Short version: we do not collect, store or transmit any personal data. There is nothing to
+        opt out of.
+      </p>
+      <h2>What happens to what you type</h2>
+      <p>
+        Your height, weight, age and other inputs are saved in your browser's{' '}
+        <code>localStorage</code> under the key <code>ethereal:profile:v1</code> so that every
+        calculator can pre-fill them. That data never leaves your device. You can erase it with the
+        Reset button on any calculator or by clearing site data in your browser.
+      </p>
+      <h2>Cookies and tracking</h2>
+      <p>
+        The site sets no cookies and loads no analytics, advertising or social-media scripts. Fonts
+        are self-hosted, so no third party sees your visit.
+      </p>
+      <h2>Hosting logs</h2>
+      <p>
+        Like every website, the hosting provider that serves these files may keep standard,
+        short-lived server logs (IP address, requested page, browser type) for security and capacity
+        planning. We do not access or analyse them for anything else.
+      </p>
+      <h2>Changes</h2>
+      <p>
+        If this policy ever changes, the update will be recorded on this page with the date. Last
+        updated: 15 September 2026.
+      </p>
+    </article>
+  </div>
+</Base>

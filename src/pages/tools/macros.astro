@@ -1,0 +1,58 @@
+---
+import MacroCalculator from '@/components/calculators/MacroCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'What macro split is best for fat loss?',
+    a: 'The one with enough protein (1.6–2.2 g per kg of body weight) and enough fat for hormones (20–35% of calories) that you can stick to. Beyond that, the carb/fat ratio has little effect on fat loss when calories and protein are matched.',
+  },
+  {
+    q: 'What is the protein-first method?',
+    a: 'You set protein in grams per kilogram, fat as a percentage of calories, and carbs fill the remainder. Coaches use it because it guarantees the two macros that matter most and lets carbs float with your training.',
+  },
+  {
+    q: 'Do I need to hit the numbers exactly?',
+    a: 'No. Within 10 g of protein and within 5–10% of total calories each day is plenty. Consistency across the week beats precision on any one day.',
+  },
+  {
+    q: 'Is keto better for weight loss?',
+    a: 'Not in controlled studies that match calories and protein. It works well for some people because it controls appetite; it works badly for others. Talk to a clinician before starting a very-low-carb diet if you take medication.',
+  },
+];
+---
+
+<ToolLayout
+  slug="macros"
+  title="Macro Calculator"
+  description="Free macro calculator: turn your daily calories into grams of protein, carbs and fat. Evidence-based presets plus a protein-first custom mode."
+  lede="Turn a calorie target into daily grams of protein, carbs and fat. Pick a proven preset or set protein first and let the rest fall into place."
+  faq={faq}
+>
+  <MacroCalculator client:load slot="calculator" />
+
+  <h2>How macros are calculated</h2>
+  <p>
+    Protein and carbohydrate provide 4 kcal per gram and fat provides 9. Once you have a calorie
+    target, a percentage split converts straight into grams. We also show a fibre target of 14 g per
+    1,000 kcal, the figure used in dietary guidelines, because fibre is the most under-eaten
+    nutrient in every food survey.
+  </p>
+  <h2>What actually matters</h2>
+  <ol>
+    <li>
+      <strong>Calories</strong> decide whether you lose fat.
+    </li>
+    <li>
+      <strong>Protein</strong> decides how much of what you lose is muscle. See the{' '}
+      <a href="/tools/protein/">protein calculator</a> for a target on its own.
+    </li>
+    <li>
+      <strong>Fibre</strong> and food quality decide how hungry you are.
+    </li>
+    <li>
+      <strong>The carb/fat ratio</strong> is personal preference. Pick whichever keeps you fuller
+      and performing better.
+    </li>
+  </ol>
+</ToolLayout>

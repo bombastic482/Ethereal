@@ -1,0 +1,55 @@
+---
+import BmiCalculator from '@/components/calculators/BmiCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'What is a healthy BMI?',
+    a: 'For adults, the World Health Organization defines 18.5–24.9 as the healthy range, 25–29.9 as overweight and 30 or above as obesity. Health risk rises gradually, not at a cliff edge.',
+  },
+  {
+    q: 'Is BMI accurate?',
+    a: 'At population level it tracks health risk well. For an individual it can mislead: muscular people read as overweight, and older adults can read as healthy while carrying excess fat. Pair it with waist circumference or a body-fat estimate.',
+  },
+  {
+    q: 'Does BMI differ by ethnicity?',
+    a: 'Yes. Health risks appear at lower BMIs in people of South Asian, Chinese and some other backgrounds; guidelines in the UK and elsewhere use 23 and 27.5 as the thresholds for those groups.',
+  },
+  {
+    q: 'What is the ponderal index?',
+    a: 'Weight divided by height cubed. It is fairer than BMI for very tall or very short people, whose BMI is skewed by the square-of-height formula. A healthy range is roughly 11–15 kg/m³.',
+  },
+];
+---
+
+<ToolLayout
+  slug="bmi"
+  title="BMI Calculator"
+  description="Free BMI calculator with the WHO categories, your healthy weight range and how far you are from it. Metric and imperial, instant results."
+  lede="Calculate your body mass index, see where it sits on the WHO scale and get the healthy weight range for your height. Then read why it is only a starting point."
+  faq={faq}
+>
+  <BmiCalculator client:load slot="calculator" />
+
+  <h2>How BMI is calculated</h2>
+  <p>
+    BMI is your weight in kilograms divided by your height in metres squared. A 70 kg person who is
+    1.75 m tall has a BMI of 70 ÷ (1.75 × 1.75) = 22.9. It was devised in the 1830s as a statistical
+    tool and became a clinical screening measure because it is free, fast and correlates with health
+    outcomes across large groups.
+  </p>
+  <h2>What it cannot tell you</h2>
+  <p>
+    BMI does not know how much of your weight is muscle, where your fat is stored, or how fit you
+    are. Two people with the same BMI can have completely different health profiles. If your BMI is
+    above 25, the most useful next step is a <a href="/tools/body-fat/">body-fat estimate</a> and a
+    waist measurement: a waist of more than half your height is a stronger warning sign than BMI
+    alone.
+  </p>
+  <h2>Using it well</h2>
+  <p>
+    Use the healthy weight range as a broad guide, then set a goal that reflects your build and your
+    body-fat percentage rather than the arithmetic midpoint. When you are ready, the{' '}
+    <a href="/tools/calories/">calorie calculator</a> will show you how to get there.
+  </p>
+</ToolLayout>

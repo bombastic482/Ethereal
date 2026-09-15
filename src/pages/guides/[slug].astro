@@ -1,0 +1,139 @@
+---
+import Disclaimer from '@/components/Disclaimer.astro';
+import ToolCard from '@/components/ToolCard.astro';
+import Base from '@/layouts/Base.astro';
+import { readingTime } from '@/lib/reading-time';
+import { SITE } from '@/lib/site';
+import { toolBySlug } from '@/lib/tools';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  return guides.map((g) => ({ params: { slug: g.id }, props: { guide: g } }));
+}
+
+const { guide } = Astro.props;
+const { Content, headings } = await render(guide);
+const path = `/guides/${guide.id}/`;
+const site = Astro.site ?? new URL('https://ethereal.pages.dev');
+const minutes = readingTime(guide.body ?? '');
+const related = guide.data.relatedTools.map(toolBySlug).filter((t) => t !== undefined);
+const toc = headings.filter((h) => h.depth === 2);
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const jsonLd = [
+  {
+    '@type': 'Article',
+    headline: guide.data.title,
+    description: guide.data.description,
+    datePublished: guide.data.pubDate.toISOString(),
+    dateModified: (guide.data.updatedDate ?? guide.data.pubDate).toISOString(),
+    author: { '@type': 'Organization', name: SITE.name },
+    publisher: { '@id': `${site}#org` },
+    mainEntityOfPage: new URL(path, site).toString(),
+    articleSection: guide.data.category,
+    keywords: guide.data.tags.join(', '),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: site.toString() },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Guides',
+        item: new URL('/guides/', site).toString(),
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: guide.data.title,
+        item: new URL(path, site).toString(),
+      },
+    ],
+  },
+];
+---
+
+<Base
+  title={guide.data.title}
+  description={guide.data.description}
+  path={path}
+  type="article"
+  publishedTime={guide.data.pubDate}
+  modifiedTime={guide.data.updatedDate}
+  jsonLd={jsonLd}
+>
+  <div class="container-page pt-10 pb-16 sm:pt-14">
+    <nav aria-label="Breadcrumb" class="text-subtle mb-6 flex items-center gap-2 text-sm">
+      <a class="hover:text-fg" href="/">
+        Home
+      </a>
+      <span aria-hidden="true">/</span>
+      <a class="hover:text-fg" href="/guides/">
+        Guides
+      </a>
+      <span aria-hidden="true">/</span>
+      <span class="text-fg" aria-current="page">
+        {guide.data.category}
+      </span>
+    </nav>
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      <article class="max-w-3xl">
+        <header class="animate-rise">
+          <span class="chip">{guide.data.category}</span>
+          <h1 class="mt-4 text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+            {guide.data.title}
+          </h1>
+          <p class="text-muted mt-4 text-lg leading-relaxed">{guide.data.description}</p>
+          <p class="text-subtle mt-4 text-sm">
+            {minutes} min read · Updated{' '}
+            <time datetime={(guide.data.updatedDate ?? guide.data.pubDate).toISOString()}>
+              {fmt(guide.data.updatedDate ?? guide.data.pubDate)}
+            </time>
+          </p>
+        </header>
+        <div class="prose-ethereal mt-10">
+          <Content />
+        </div>
+        <Disclaimer />
+      </article>
+      <aside class="hidden lg:block">
+        <div class="sticky top-24 grid gap-8">
+          {toc.length > 0 && (
+            <nav aria-label="On this page">
+              <p class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">
+                On this page
+              </p>
+              <ol class="border-line grid gap-2 border-l text-sm">
+                {toc.map((h) => (
+                  <li>
+                    <a
+                      href={`#${h.slug}`}
+                      class="text-muted hover:text-fg hover:border-brand-500 -ml-px block border-l border-transparent pl-4 transition"
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
+          {related.length > 0 && (
+            <div>
+              <p class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">
+                Try the tools
+              </p>
+              <div class="grid gap-3">
+                {related.map((t) => (
+                  <ToolCard tool={t} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </aside>
+    </div>
+  </div>
+</Base>

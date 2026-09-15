@@ -1,0 +1,58 @@
+---
+import ProteinCalculator from '@/components/calculators/ProteinCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'Is high protein bad for your kidneys?',
+    a: 'Not in healthy adults. Multiple trials at 2–3 g per kg for months show no harm to kidney function. If you have existing kidney disease, follow your clinician’s guidance.',
+  },
+  {
+    q: 'Does protein timing matter?',
+    a: 'Total daily intake matters most. Spreading it over three to five meals with 25–40 g each gives a small extra benefit for muscle retention, and a protein-rich breakfast helps with hunger later in the day.',
+  },
+  {
+    q: 'Can I get enough from plants?',
+    a: 'Yes, with a little planning. Combine legumes, tofu, tempeh, seitan and grains, aim for the upper end of the range because plant proteins are slightly less digestible, and consider a pea or soy protein powder to make it easy.',
+  },
+  {
+    q: 'Why does the calculator use lean mass for higher body fat?',
+    a: 'Fat tissue does not need much protein. For people above about 30% body fat, scaling protein to total weight overshoots, so we scale to an adjusted mass instead, which gives a realistic, achievable target.',
+  },
+];
+---
+
+<ToolLayout
+  slug="protein"
+  title="Protein Calculator"
+  description="Evidence-based daily protein calculator for fat loss, maintenance or muscle gain. Get your target in grams, a per-meal split and real foods that hit it."
+  lede="Get a daily protein target grounded in the research on fat loss and muscle retention, split across your meals, with real foods that get you there."
+  faq={faq}
+>
+  <ProteinCalculator client:load slot="calculator" />
+
+  <h2>Where the numbers come from</h2>
+  <p>
+    The RDA of 0.8 g per kg prevents deficiency but is not optimal. A large 2018 meta-analysis found
+    muscle gains plateau at about 1.6 g per kg in people who train, with benefit up to 2.2 g per kg.
+    During a calorie deficit, needs rise: reviews suggest 1.6–2.4 g per kg protects lean mass, with
+    lean, hard-training people at the top of that range. Adults over 65 need at least 1.2 g per kg
+    to offset age-related muscle loss.
+  </p>
+  <h2>Why protein is the fat-loss macro</h2>
+  <ul>
+    <li>
+      <strong>It preserves muscle</strong>, so more of what you lose is fat.
+    </li>
+    <li>
+      <strong>It is the most filling macronutrient</strong> per calorie.
+    </li>
+    <li>
+      <strong>It costs energy to digest</strong>: 20–30% of its calories are burned processing it.
+    </li>
+  </ul>
+  <p>
+    Once you know your protein, the <a href="/tools/macros/">macro calculator</a> will build the
+    rest of the day around it.
+  </p>
+</ToolLayout>

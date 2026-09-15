@@ -1,0 +1,32 @@
+---
+import { Icon } from '@/components/ui/Icon';
+---
+
+<button
+  type="button"
+  id="theme-toggle"
+  class="btn btn-ghost h-10 w-10 rounded-full p-0"
+  aria-label="Toggle dark mode"
+  title="Toggle dark mode"
+>
+  <span class="hidden dark:inline">
+    <Icon name="sun" size={18} />
+  </span>
+  <span class="inline dark:hidden">
+    <Icon name="moon" size={18} />
+  </span>
+</button>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  btn?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('ethereal:theme', next);
+    } catch {
+      /* ignore */
+    }
+  });
+</script>

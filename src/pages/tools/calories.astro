@@ -1,0 +1,72 @@
+---
+import CalorieCalculator from '@/components/calculators/CalorieCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'What is TDEE?',
+    a: 'Total Daily Energy Expenditure is everything you burn in a day: your basal metabolic rate (BMR) plus digestion, daily movement and exercise. Eat at your TDEE and your weight holds steady; eat below it and you lose.',
+  },
+  {
+    q: 'Which formula should I use?',
+    a: 'Mifflin-St Jeor is the most accurate for the general population and is what the Academy of Nutrition and Dietetics recommends. Use Katch-McArdle only if you have a reliable body-fat measurement; it is better for very lean or very muscular people.',
+  },
+  {
+    q: 'How big should my deficit be?',
+    a: 'Aim for 10–25% below maintenance, which usually means losing 0.5–1% of your body weight per week. Bigger deficits cost muscle, energy and adherence. This calculator caps deficits at 25% of TDEE (or the standard 550 kcal for 0.5 kg a week, whichever is larger) and never goes below 1,200 kcal (women) or 1,500 kcal (men).',
+  },
+  {
+    q: 'Why am I not losing weight at this number?',
+    a: 'Formulas have a ±10% error and food logging is usually 20–30% under. Track your weekly average weight for three weeks. If it has not moved, cut 100–150 kcal or add 2,000 steps, then re-check. See our <a href="/guides/weight-loss-plateaus/">plateau guide</a>.',
+  },
+  {
+    q: 'Should I eat back exercise calories?',
+    a: 'If you chose an activity level that already includes your workouts, no. Fitness trackers overestimate exercise burn by 30–90%, so eating those calories back usually erases the deficit.',
+  },
+];
+---
+
+<ToolLayout
+  slug="calories"
+  title="Calorie Calculator"
+  description="Free TDEE and calorie-deficit calculator. Get your maintenance calories and a safe daily target for fat loss using Mifflin-St Jeor, Harris-Benedict or Katch-McArdle."
+  lede="Find your maintenance calories and a daily target that loses fat at a pace you can sustain. Built on the equations dietitians actually use, with guard rails so it never suggests something reckless."
+  faq={faq}
+>
+  <CalorieCalculator client:load slot="calculator" />
+
+  <h2>How this calculator works</h2>
+  <p>
+    Weight change is governed by energy balance. Your body burns a baseline amount of energy at rest
+    (BMR), which is multiplied by an activity factor to estimate your Total Daily Energy Expenditure
+    (TDEE). Eating below TDEE creates a deficit; roughly 7,700 kcal of cumulative deficit equals one
+    kilogram of body weight.
+  </p>
+  <p>
+    We estimate BMR with the <strong>Mifflin-St Jeor</strong> equation by default, because
+    validation studies consistently show it predicts measured metabolic rate within 10% for more
+    people than any other formula. Harris-Benedict is offered for comparison. Katch-McArdle uses
+    lean mass instead of total weight, which matters if you are unusually lean or muscular.
+  </p>
+  <h2>Choosing a rate of loss</h2>
+  <ul>
+    <li>
+      <strong>0.25–0.5 kg per week</strong> (0.5–1 lb): gentle, easy to sustain, almost no muscle
+      loss. Ideal if you have less than 10 kg to lose or you lift weights.
+    </li>
+    <li>
+      <strong>0.5–0.75 kg per week</strong>: the standard recommendation for most people.
+    </li>
+    <li>
+      <strong>1 kg per week or more</strong>: only realistic with a lot of weight to lose and high
+      maintenance calories. The calculator will cap the deficit if it exceeds 25% of your TDEE.
+    </li>
+  </ul>
+  <h2>What to do with the number</h2>
+  <p>
+    Eat at your target for two to three weeks and weigh yourself daily, comparing weekly averages.
+    If you are losing at roughly the expected pace, change nothing. If not, adjust by 100–150 kcal
+    and repeat. Your target will need to drop slowly as you get lighter; the{' '}
+    <a href="/tools/timeline/">timeline tool</a> shows exactly how much.
+  </p>
+</ToolLayout>

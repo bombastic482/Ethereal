@@ -1,0 +1,95 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import { SITE } from '@/lib/site';
+import { TOOLS } from '@/lib/tools';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-line mt-24 border-t">
+  <div class="container-page grid gap-10 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
+    <div class="max-w-sm">
+      <a href="/" class="flex items-center gap-2.5 font-bold tracking-tight">
+        <span class="from-brand-500 to-accent-500 grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br text-white">
+          <Icon name="spark" size={18} />
+        </span>
+        <span class="text-lg">{SITE.name}</span>
+      </a>
+      <p class="text-muted mt-4 text-sm leading-relaxed">{SITE.description}</p>
+      <p class="text-subtle mt-4 flex items-center gap-2 text-xs">
+        <Icon name="lock" size={14} /> Everything runs in your browser. Nothing you type is sent
+        anywhere.
+      </p>
+    </div>
+    <div>
+      <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Calculators</h2>
+      <ul class="grid gap-2 text-sm">
+        {TOOLS.map((t) => (
+          <li>
+            <a class="text-muted hover:text-fg" href={`/tools/${t.slug}/`}>
+              {t.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Learn</h2>
+      <ul class="grid gap-2 text-sm">
+        <li>
+          <a class="text-muted hover:text-fg" href="/guides/">
+            All guides
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href="/guides/calorie-deficit-explained/">
+            Calorie deficit
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href="/guides/protein-for-fat-loss/">
+            Protein for fat loss
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href="/guides/weight-loss-plateaus/">
+            Breaking plateaus
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Site</h2>
+      <ul class="grid gap-2 text-sm">
+        <li>
+          <a class="text-muted hover:text-fg" href="/about/">
+            About &amp; methodology
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href="/disclaimer/">
+            Medical disclaimer
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href="/privacy/">
+            Privacy
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href="/sitemap-index.xml">
+            Sitemap
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-line border-t">
+    <div class="container-page text-subtle flex flex-wrap items-center justify-between gap-2 py-5 text-xs">
+      <p>
+        © {year} {SITE.name}. Educational information, not medical advice.
+      </p>
+      <p>Built for speed: no trackers, no cookies, no account.</p>
+    </div>
+  </div>
+</footer>

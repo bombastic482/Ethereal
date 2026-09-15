@@ -1,0 +1,28 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { TOOLS } from '@/lib/tools';
+---
+
+<Base
+  title="Page not found"
+  description="That page does not exist. Here is the way back to the calculators."
+  noindex
+>
+  <div class="container-page py-24 text-center">
+    <p class="chip">404</p>
+    <h1 class="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">Nothing here.</h1>
+    <p class="text-muted mt-4">The page may have moved. Try one of the calculators instead.</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-2">
+      {TOOLS.slice(0, 4).map((t) => (
+        <a href={`/tools/${t.slug}/`} class="btn btn-secondary text-sm">
+          <Icon name={t.icon} size={16} />
+          {t.short}
+        </a>
+      ))}
+    </div>
+    <a href="/" class="btn btn-primary mt-8">
+      Back home
+    </a>
+  </div>
+</Base>

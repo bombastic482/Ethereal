@@ -1,0 +1,61 @@
+---
+import TimelineCalculator from '@/components/calculators/TimelineCalculator';
+import ToolLayout from '@/layouts/ToolLayout.astro';
+
+const faq = [
+  {
+    q: 'Why does the projection curve flatten?',
+    a: 'As you lose weight, your body needs fewer calories to run and to move, so the same intake produces a smaller deficit each week. Most calculators ignore this and promise an unrealistic straight line. Ours recalculates your maintenance every week.',
+  },
+  {
+    q: 'Will I lose weight exactly like this?',
+    a: 'No. Real weight loss is noisy: water, glycogen, sodium and hormones move the scale by 1–2 kg day to day. Treat the projection as the trend line your weekly averages should roughly follow.',
+  },
+  {
+    q: 'What does the model not include?',
+    a: 'Adaptive thermogenesis (the extra 5–10% drop in metabolism during long diets), changes in activity, and diet breaks. Real timelines are often 10–20% longer than projected; plan for that.',
+  },
+  {
+    q: 'Can I use it for gaining weight?',
+    a: 'Yes. Set a goal above your current weight and an intake above maintenance. Keep surpluses small (200–300 kcal) to limit fat gain.',
+  },
+];
+---
+
+<ToolLayout
+  slug="timeline"
+  title="Weight-Loss Timeline Calculator"
+  description="Find out exactly when you will reach your goal weight. A week-by-week projection that adapts as your metabolism slows, with a chart and milestone dates."
+  lede="Enter your goal and daily calories to see the date you will get there, week by week. Unlike straight-line calculators, this one slows down as you do, so the date is one you can actually plan around."
+  faq={faq}
+>
+  <TimelineCalculator client:load slot="calculator" />
+
+  <h2>Why most timeline calculators are wrong</h2>
+  <p>
+    The common "3,500 calories per pound" shortcut assumes your deficit stays constant. It does not.
+    A lighter body has a lower basal metabolic rate and costs less energy to move around, so a fixed
+    intake produces a shrinking deficit over time. For someone losing 15 kg, that can add a month or
+    more to the timeline.
+  </p>
+  <p>
+    This tool runs a week-by-week simulation: each week it recomputes your maintenance calories from
+    your projected weight using Mifflin-St Jeor, applies your intake, and converts the difference to
+    weight change at 7,700 kcal per kilogram. The chart shows the resulting curve alongside the
+    naive estimate so you can see the difference.
+  </p>
+  <h2>Making the plan hold up</h2>
+  <ul>
+    <li>
+      <strong>Re-run it monthly.</strong> Update your current weight and the projection tightens.
+    </li>
+    <li>
+      <strong>Expect noise.</strong> Compare weekly averages, not single weigh-ins. Our{' '}
+      <a href="/guides/reading-the-scale/">guide to the scale</a> explains what to ignore.
+    </li>
+    <li>
+      <strong>Plan a diet break</strong> every 8–12 weeks for longer projects: two weeks at
+      maintenance restores energy and adherence.
+    </li>
+  </ul>
+</ToolLayout>
