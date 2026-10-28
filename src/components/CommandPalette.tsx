@@ -31,6 +31,12 @@ const PAGES: Array<{ label: string; href: string; icon: IconName; hint: string }
     hint: '68 high-protein meals, log in a tap',
   },
   {
+    label: 'Plan a day',
+    href: '/plan/#dayplan-h',
+    icon: 'calendar',
+    hint: 'Four recipes that hit your targets, plus a shopping list',
+  },
+  {
     label: 'Compare with other apps',
     href: '/compare/',
     icon: 'check',

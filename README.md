@@ -3,6 +3,7 @@
 Free, science-backed weight-loss planning that runs entirely in your browser. Live at **https://bombastic482.github.io/Ethereal/**.
 
 - **A food diary** (`/today/`): calorie ring, macro bars, four meals, a 1,500+ item offline food database (generic foods, world cuisines, brands and chains), Open Food Facts search and barcode scanning, "type what you ate" natural-language entry, quick add, custom foods, saved meals, exercise (MET-based), steps, water, copy-yesterday, favourites and "what to eat next" suggestions.
+- **A day planner** (on `/plan/`): four recipes chosen so the day lands on your calorie target with the protein covered; swap or lock any slot, log the whole day to today or tomorrow, save the recipes as your own meals, copy a 1, 3 or 7-day shopping list.
 - **68 starter recipes** (`/recipes/`): high-protein meals and snacks built from database foods, with calories and macros computed from the same rows as the diary. Filter by meal, time and diet, see what fits the calories you have left, log in one tap or save as your own meal.
 - **A personal plan** (`/start/` → `/plan/`): calories, protein, macros and a realistic goal date from your stats, in three steps; a measured expenditure estimate once you have logged a few weeks; pattern insights (weekend drift, protein hit rate, consistency).
 - **A weight tracker** (`/track/`): daily weigh-ins, an exponentially-smoothed trend line, weekly averages, waist, hips, chest, arm and thigh, notes, progress photos (stored in IndexedDB) and a shareable progress card.
@@ -72,7 +73,8 @@ src/
   lib/calc/trend.ts  smoothed trend, slope, progress assessment and adjustment
   lib/calc/nutrition.ts, exercise.ts, streaks.ts, expenditure.ts, insights.ts  diary maths
   lib/food-store.ts  food/exercise diary; lib/foods.ts local DB search; lib/off.ts Open Food Facts client
-  lib/recipes.ts     starter recipes resolved against the database; lib/quick-parse.ts natural-language entry
+  lib/recipes.ts     starter recipes resolved against the database; lib/day-plan.ts whole-day planner + shopping list
+  lib/quick-parse.ts natural-language entry
   data/foods-*.json  built-in food database (six lazy chunks); data/recipes.json starter recipes
   scripts/validate-foods.mjs, validate-recipes.mjs  data validators, run in CI
   lib/tools.ts       tool registry (nav, cards, sitemap)

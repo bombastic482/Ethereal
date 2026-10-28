@@ -78,3 +78,48 @@ test.describe('plan and tracker', () => {
     await expect(page.getByLabel('Weight', { exact: true })).toHaveValue('70');
   });
 });
+
+test.describe('day planner', () => {
+  test('plans four recipes on target, swaps a slot, logs the day and copies a list', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => undefined);
+    await ready(page, '/plan/');
+    const planner = page.getByRole('region', { name: /plan a day that hits your numbers/i });
+    await planner.scrollIntoViewIfNeeded();
+    await expect(planner.getByRole('heading', { level: 2 })).toBeVisible({ timeout: 15_000 });
+    const items = planner.getByRole('listitem');
+    await expect(items).toHaveCount(4);
+    const totals = planner.getByRole('status').first();
+    await expect(totals).toContainText(/vs target/);
+    await expect(totals).toContainText(/target met/);
+
+    // Swap lunch; the other three stay.
+    const names = async () =>
+      Promise.all((await items.all()).map((li) => li.getByRole('link').textContent()));
+    const before = await names();
+    await planner.getByRole('button', { name: 'Another lunch' }).click();
+    const after = await names();
+    expect(after[1]).not.toBe(before[1]);
+    expect(after[0]).toBe(before[0]);
+    expect(after[2]).toBe(before[2]);
+
+    // No snack → three slots.
+    await planner.getByRole('button', { name: 'No snack' }).click();
+    await expect(items).toHaveCount(3);
+
+    await planner.getByRole('button', { name: 'Copy shopping list' }).click();
+    await expect(planner.getByRole('status').last()).toContainText(/Shopping list/);
+
+    await planner.getByRole('button', { name: 'Log the day to Today' }).click();
+    await expect(planner.getByRole('status').last()).toContainText(/Logged \d+ items to today/);
+    await ready(page, '/today/');
+    await expect(
+      page
+        .getByRole('region', { name: 'Breakfast' })
+        .getByRole('button', { name: /^Delete / })
+        .first(),
+    ).toBeVisible();
+  });
+});

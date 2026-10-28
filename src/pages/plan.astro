@@ -1,4 +1,5 @@
 ---
+import DayPlanner from '@/components/calculators/DayPlanner';
 import PlanDashboard from '@/components/calculators/PlanDashboard';
 import AppLayout from '@/layouts/AppLayout.astro';
 ---
@@ -12,4 +13,7 @@ import AppLayout from '@/layouts/AppLayout.astro';
   current="plan"
 >
   <PlanDashboard client:load />
+  <div class="mt-6">
+    <DayPlanner client:visible />
+  </div>
 </AppLayout>
