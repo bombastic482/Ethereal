@@ -76,3 +76,9 @@ jobs:
           configPath: ./lighthouserc.json
           uploadArtifacts: true
           temporaryPublicStorage: false
+      - name: Lighthouse (simulated phone)
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.mobile.json
+          uploadArtifacts: false
+          temporaryPublicStorage: false

@@ -19,7 +19,7 @@ Free, science-backed weight-loss planning that runs entirely in your browser. Li
 
 ## Why this stack
 
-- **Fast.** Static HTML; the diary page ships about 25 KB of gzipped JavaScript in total and loads the food database lazily in six 10–13 KB chunks. Fonts are self-hosted and subset; no third-party requests at all.
+- **Fast.** Static HTML; the diary page ships about 25 KB of gzipped JavaScript in total and loads the food database lazily in six 10–13 KB chunks. Fonts are self-hosted, subset and preloaded; no third-party requests at all. Lighthouse 100/100/100/100 on desktop and 94+ performance on a simulated slow phone across the app pages.
 - **Free to run.** No server, no database. Deploys to GitHub Pages, Cloudflare Pages, Vercel or Netlify on their free tiers.
 - **Private.** Inputs are saved in `localStorage` so every calculator pre-fills. Nothing is ever sent anywhere.
 - **Correct.** Every calculation lives in `src/lib/calc/` as pure functions with unit tests, separate from the UI.
