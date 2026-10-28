@@ -11,6 +11,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
+    // Deterministic geometry: no smooth scrolling or entrance animations while clicking.
+    reducedMotion: 'reduce',
     // Lets a sandbox with a preinstalled Chromium run the suite without downloading a browser.
     ...(process.env.PW_CHROMIUM_PATH
       ? { launchOptions: { executablePath: process.env.PW_CHROMIUM_PATH } }

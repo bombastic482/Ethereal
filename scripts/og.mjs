@@ -3,17 +3,18 @@
 import sharp from 'sharp';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const brand = '#22c38a';
-const accent = '#5eead4';
+const brand = '#2bd38f';
+const accent = '#0f8a5f';
 
-const star = (cx, cy, r) =>
-  `M${cx} ${cy - r}l${r * 0.29} ${r * 0.71}L${cx + r} ${cy}l-${r * 0.71} ${r * 0.29}L${cx} ${cy + r}l-${r * 0.29}-${r * 0.71}L${cx - r} ${cy}l${r * 0.71}-${r * 0.29}Z`;
-
+// The mark: three bars that get shorter, an E and a downward trend (see src/components/Logo.astro).
+const bars =
+  '<rect x="16" y="16" width="32" height="7" rx="3.5"/><rect x="16" y="28.5" width="23" height="7" rx="3.5"/><rect x="16" y="41" width="14" height="7" rx="3.5"/>';
 const og = `
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f1217"/><stop offset="1" stop-color="#171b22"/></linearGradient>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${brand}"/><stop offset="1" stop-color="${accent}"/></linearGradient>
+    <linearGradient id="t" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5fe3ad"/><stop offset="1" stop-color="#22c38a"/></linearGradient>
     <radialGradient id="glow1" cx="0.2" cy="0.1" r="0.6"><stop offset="0" stop-color="${brand}" stop-opacity="0.45"/><stop offset="1" stop-color="${brand}" stop-opacity="0"/></radialGradient>
     <radialGradient id="glow2" cx="0.9" cy="0.9" r="0.6"><stop offset="0" stop-color="${accent}" stop-opacity="0.4"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient>
   </defs>
@@ -21,10 +22,10 @@ const og = `
   <rect width="1200" height="630" fill="url(#glow1)"/>
   <rect width="1200" height="630" fill="url(#glow2)"/>
   <rect x="80" y="80" width="72" height="72" rx="18" fill="url(#g)"/>
-  <path d="${star(116, 116, 22)}" fill="#fff"/>
+  <g fill="#fff" transform="translate(80 80) scale(1.125)">${bars}</g>
   <text x="172" y="134" font-family="Inter, Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff" letter-spacing="-1">Ethereal</text>
   <text x="80" y="330" font-family="Helvetica, Arial, sans-serif" font-size="88" font-weight="800" fill="#fff" letter-spacing="-4">Weight loss,</text>
-  <text x="80" y="420" font-family="Helvetica, Arial, sans-serif" font-size="88" font-weight="800" fill="url(#g)" letter-spacing="-4">done properly.</text>
+  <text x="80" y="420" font-family="Helvetica, Arial, sans-serif" font-size="88" font-weight="800" fill="url(#t)" letter-spacing="-4">done properly.</text>
   <text x="80" y="500" font-family="Inter, Helvetica, Arial, sans-serif" font-size="30" fill="#c3c8d1">Food diary, barcode scanning, adaptive calorie targets. Free and private.</text>
   <g transform="translate(900 150)">
     <circle cx="120" cy="120" r="96" fill="none" stroke="#ffffff14" stroke-width="22"/>
@@ -46,9 +47,10 @@ const og = `
 
 const icon = (size) => `
 <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${brand}"/><stop offset="1" stop-color="${accent}"/></linearGradient></defs>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${brand}"/><stop offset="1" stop-color="${accent}"/></linearGradient>
+    <linearGradient id="t" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5fe3ad"/><stop offset="1" stop-color="#22c38a"/></linearGradient></defs>
   <rect width="64" height="64" rx="16" fill="url(#g)"/>
-  <path d="${star(32, 30, 18)}" fill="#fff"/>
+  <g fill="#fff">${bars}</g>
 </svg>`;
 
 await mkdir('public/icons', { recursive: true });

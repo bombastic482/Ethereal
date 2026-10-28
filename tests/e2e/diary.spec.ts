@@ -183,8 +183,12 @@ test.describe('saved meals and sharing', () => {
     await expect(page.getByText(/^1 of \d+ glasses/)).toBeVisible();
     await page.keyboard.press('a');
     await expect(page.getByRole('dialog')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog')).toHaveCount(0);
+    // The sheet attaches its Escape listener in an effect just after it paints; retry rather
+    // than race a key press against that one frame.
+    await expect(async () => {
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 400 });
+    }).toPass();
   });
 
   test('tracker offers a share card once there is a trend', async ({ page }) => {

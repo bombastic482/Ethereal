@@ -40,7 +40,7 @@ export function Ring({ value, size = 180, stroke = 14, label, children, tone = '
               </>
             ) : (
               <>
-                <stop offset="0" stop-color="var(--color-brand-400)" />
+                <stop offset="0" stop-color="var(--color-brand-300)" />
                 <stop offset="1" stop-color="var(--color-brand-600)" />
               </>
             )}

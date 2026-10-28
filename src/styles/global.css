@@ -49,6 +49,7 @@
 
   --animate-rise: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   --animate-fade: fade 0.5s ease-out backwards;
+  --animate-float: float 6s ease-in-out infinite;
 
   @keyframes rise {
     from {
@@ -68,6 +69,15 @@
       opacity: 1;
     }
   }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
 }
 
 /* Semantic tokens: light by default, swapped under [data-theme=dark]. */
@@ -81,6 +91,7 @@
   --border: var(--color-ink-200);
   --border-strong: var(--color-ink-300);
   --ring: var(--color-brand-500);
+  --glow: oklch(94% 0.045 160 / 0.7);
   color-scheme: light;
 }
 [data-theme='dark'] {
@@ -92,18 +103,19 @@
   --fg-subtle: oklch(64% 0.01 250);
   --border: oklch(100% 0 0 / 0.09);
   --border-strong: oklch(100% 0 0 / 0.16);
+  --glow: oklch(63% 0.15 160 / 0.1);
   color-scheme: dark;
 }
 
 @layer base {
   html {
-    overflow-x: clip;
     scroll-behavior: smooth;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
   body {
-    background: var(--bg);
+    /* A faint glow at the top of every page gives the flat surfaces some depth. */
+    background: radial-gradient(70rem 28rem at 50% -14rem, var(--glow), transparent 70%), var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);
     min-height: 100dvh;
@@ -305,6 +317,18 @@
     background: oklch(63% 0.15 160 / 0.12);
     color: var(--color-brand-200);
     border-color: oklch(63% 0.15 160 / 0.25);
+  }
+}
+@utility eyebrow {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand-700);
+  [data-theme='dark'] & {
+    color: var(--color-brand-300);
   }
 }
 @utility tabular {

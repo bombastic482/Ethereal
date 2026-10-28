@@ -39,12 +39,13 @@ export function wrap(text: string, width: number, lines: number): string[] {
   return out;
 }
 
-const star = (cx: number, cy: number, r: number) =>
-  `M${cx} ${cy - r}l${r * 0.29} ${r * 0.71}L${cx + r} ${cy}l-${r * 0.71} ${r * 0.29}L${cx} ${cy + r}l-${r * 0.29}-${r * 0.71}L${cx - r} ${cy}l${r * 0.71}-${r * 0.29}Z`;
+// The mark: three bars that get shorter (see src/components/Logo.astro).
+const BARS =
+  '<rect x="16" y="16" width="32" height="7" rx="3.5"/><rect x="16" y="28.5" width="23" height="7" rx="3.5"/><rect x="16" y="41" width="14" height="7" rx="3.5"/>';
 
 export function ogSvg(card: OgCard): string {
-  const brand = '#22c38a';
-  const accent = '#5eead4';
+  const brand = '#2bd38f';
+  const accent = '#0f8a5f';
   const hasRing = !!card.ring;
   const titleWidth = hasRing ? 26 : 34;
   const title = wrap(card.title, titleWidth, 3);
@@ -64,7 +65,7 @@ export function ogSvg(card: OgCard): string {
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
   <rect x="80" y="80" width="56" height="56" rx="14" fill="url(#g)"/>
-  <path d="${star(108, 108, 17)}" fill="#fff"/>
+  <g fill="#fff" transform="translate(80 80) scale(0.875)">${BARS}</g>
   <text x="152" y="122" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#fff" letter-spacing="-1">Ethereal</text>
   <text x="80" y="212" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="${accent}" letter-spacing="3">${esc(card.kicker.toUpperCase())}</text>
   ${title

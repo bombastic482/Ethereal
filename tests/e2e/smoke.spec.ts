@@ -269,7 +269,9 @@ test('eating-out page picks the highest-protein order that fits a calorie budget
   const budget = page.getByLabel('Calories to spend');
   await expect(budget).toHaveValue('500');
   const chipotle = page.locator('section#chipotle');
-  await chipotle.getByRole('button', { name: /Best order at Chipotle/ }).click();
+  const best = chipotle.getByRole('button', { name: /Best order at Chipotle/ });
+  await best.scrollIntoViewIfNeeded();
+  await best.click();
   const bar = chipotle.getByRole('status');
   await expect(bar).toContainText(/\d+ items? · \d+ kcal/);
   const text = (await bar.textContent()) ?? '';

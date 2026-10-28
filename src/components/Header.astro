@@ -3,6 +3,7 @@ import CommandPalette from '@/components/CommandPalette';
 import HeaderCta from '@/components/HeaderCta';
 import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
+import Logo from '@/components/Logo.astro';
 import { NAV, SITE } from '@/lib/site';
 import ThemeToggle from './ThemeToggle.astro';
 import { getCollection } from 'astro:content';
@@ -27,9 +28,7 @@ const isActive = (href: string) =>
       class="flex items-center gap-2.5 font-bold tracking-tight"
       aria-label={`${SITE.name} home`}
     >
-      <span class="from-brand-500 to-brand-700 shadow-glow grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br text-white">
-        <Icon name="spark" size={18} />
-      </span>
+      <Logo size={32} id="logo-header" />
       <span class="font-display text-xl leading-none">{SITE.name}</span>
     </a>
 

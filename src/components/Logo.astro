@@ -1,0 +1,40 @@
+---
+/**
+ * The Ethereal mark: an "E" of three bars that get shorter, a letter and a downward trend in
+ * one shape. Inline SVG so it inherits nothing and renders crisp at any size.
+ */
+interface Props {
+  size?: number;
+  class?: string;
+  /** Unique per instance when more than one mark is on a page (gradient ids). */
+  id?: string;
+}
+const { size = 32, class: cls, id = 'logo' } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  class={cls}
+  aria-hidden="true"
+  focusable="false"
+>
+  <defs>
+    <linearGradient id={`${id}-g`} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2bd38f"></stop>
+      <stop offset="1" stop-color="#0f8a5f"></stop>
+    </linearGradient>
+    <radialGradient id={`${id}-h`} cx="0.3" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.22"></stop>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill={`url(#${id}-g)`}></rect>
+  <rect width="64" height="64" rx="16" fill={`url(#${id}-h)`}></rect>
+  <g fill="#fff">
+    <rect x="16" y="16" width="32" height="7" rx="3.5"></rect>
+    <rect x="16" y="28.5" width="23" height="7" rx="3.5"></rect>
+    <rect x="16" y="41" width="14" height="7" rx="3.5"></rect>
+  </g>
+</svg>

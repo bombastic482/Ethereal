@@ -101,9 +101,9 @@ const jsonLd = [
       </div>
     </div>
 
-    <div class="mt-12 grid gap-10">
+    <div class="mt-12 grid grid-cols-[minmax(0,1fr)] gap-10">
       {chains.map((c) => (
-        <section id={c.slug} class="scroll-mt-24" aria-labelledby={`${c.slug}-h`}>
+        <section id={c.slug} class="min-w-0 scroll-mt-24" aria-labelledby={`${c.slug}-h`}>
           <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             <h2 id={`${c.slug}-h`} class="font-display text-3xl tracking-tight">
               {c.name}

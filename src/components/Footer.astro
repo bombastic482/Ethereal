@@ -1,6 +1,7 @@
 ---
 import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
+import Logo from '@/components/Logo.astro';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
 
@@ -11,9 +12,7 @@ const year = new Date().getFullYear();
   <div class="container-page grid gap-10 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
     <div class="max-w-sm">
       <a href={withBase('/')} class="flex items-center gap-2.5 font-bold tracking-tight">
-        <span class="from-brand-500 to-accent-500 grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br text-white">
-          <Icon name="spark" size={18} />
-        </span>
+        <Logo size={32} id="logo-footer" />
         <span class="font-display text-xl leading-none">{SITE.name}</span>
       </a>
       <p class="text-muted mt-4 text-sm leading-relaxed">{SITE.description}</p>

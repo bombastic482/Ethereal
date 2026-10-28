@@ -146,6 +146,30 @@ const steps = [
           </p>
         </div>
         <div class="animate-rise relative [animation-delay:150ms]">
+          <div
+            class="surface animate-float absolute top-28 -left-4 z-10 hidden items-center gap-2.5 px-3.5 py-2.5 text-sm sm:flex lg:-left-16"
+            aria-hidden="true"
+          >
+            <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-8 w-8 place-items-center rounded-xl">
+              <Icon name="scale" size={16} />
+            </span>
+            <span>
+              <span class="block font-bold tracking-tight">−0.6 kg this week</span>
+              <span class="text-subtle block text-xs">trend, not the scale</span>
+            </span>
+          </div>
+          <div
+            class="surface animate-float absolute -right-2 bottom-16 z-10 hidden items-center gap-2.5 px-3.5 py-2.5 text-sm [animation-delay:1.4s] sm:flex lg:-right-8"
+            aria-hidden="true"
+          >
+            <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-8 w-8 place-items-center rounded-xl">
+              <Icon name="check" size={16} />
+            </span>
+            <span>
+              <span class="block font-bold tracking-tight">Protein hit, 6 of 7 days</span>
+              <span class="text-subtle block text-xs">two-week check: keep going</span>
+            </span>
+          </div>
           {heroArt && (
             <img
               src={withBase(`/art/${heroArt}`)}
@@ -193,6 +217,7 @@ const steps = [
 
   <section class="container-page mt-24" aria-labelledby="features">
     <div class="max-w-2xl">
+      <p class="eyebrow">Features</p>
       <h2 id="features" class="font-display text-4xl tracking-tight">
         Everything the paid apps charge for
       </h2>
@@ -255,6 +280,7 @@ const steps = [
   <section class="container-page mt-20" aria-labelledby="tools">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
+        <p class="eyebrow">Tools</p>
         <h2 id="tools" class="font-display text-4xl tracking-tight">
           Every tool you need
         </h2>
@@ -297,7 +323,7 @@ const steps = [
         ['0', 'trackers, ads, accounts', 'and nothing you type leaves your device'],
       ].map(([n, label, sub, href]) => (
         <div>
-          <p class="font-display text-4xl leading-none tracking-tight">{n}</p>
+          <p class="font-display text-gradient text-4xl leading-none tracking-tight">{n}</p>
           <p class="mt-2 font-semibold">
             {href ? (
               <a class="hover:text-brand-600 dark:hover:text-brand-300" href={withBase(href)}>
@@ -316,6 +342,7 @@ const steps = [
   <section class="container-page mt-24" aria-labelledby="eat">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
+        <p class="eyebrow">Food</p>
         <h2 id="eat" class="font-display text-4xl tracking-tight">
           Eat well on a deficit
         </h2>
@@ -369,6 +396,7 @@ const steps = [
   <section class="container-page mt-24" aria-labelledby="why">
     <div class="surface-muted grid gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
       <div>
+        <p class="eyebrow">Why Ethereal</p>
         <h2 id="why" class="font-display text-4xl tracking-tight">
           Why people trust it
         </h2>
@@ -417,6 +445,7 @@ const steps = [
   <section class="container-page mt-24" aria-labelledby="learn">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
+        <p class="eyebrow">Guides</p>
         <h2 id="learn" class="font-display text-4xl tracking-tight">
           Understand the why
         </h2>
