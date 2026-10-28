@@ -4,6 +4,8 @@ interface Point {
 }
 interface Props {
   points: Point[];
+  /** Optional raw observations drawn as small dots behind the line (e.g. daily weigh-ins). */
+  dots?: Point[];
   /** Optional horizontal goal line. */
   goal?: number;
   xLabel?: (x: number) => string;
@@ -12,13 +14,27 @@ interface Props {
 }
 
 /** Dependency-free responsive SVG line chart with a filled area and goal line. */
-export function LineChart({ points, goal, xLabel = String, yLabel = String, ariaLabel }: Props) {
+export function LineChart({
+  points,
+  dots = [],
+  goal,
+  xLabel = String,
+  yLabel = String,
+  ariaLabel,
+}: Props) {
   if (points.length < 2) return null;
   const W = 640;
   const H = 260;
   const pad = { l: 48, r: 16, t: 16, b: 32 };
-  const xs = points.map((p) => p.x);
-  const ys = points.map((p) => p.y).concat(goal !== undefined ? [goal] : []);
+  const xs = points.map((p) => p.x).concat(dots.map((p) => p.x));
+  const dataYs = points.map((p) => p.y).concat(dots.map((p) => p.y));
+  const dataSpan = Math.max(1, Math.max(...dataYs) - Math.min(...dataYs));
+  // Draw the goal line only when it is within reach of the visible data, otherwise the trend flattens into a line.
+  const showGoal =
+    goal !== undefined &&
+    goal >= Math.min(...dataYs) - dataSpan * 2.5 &&
+    goal <= Math.max(...dataYs) + dataSpan * 2.5;
+  const ys = showGoal ? dataYs.concat([goal]) : dataYs;
   const xMin = Math.min(...xs);
   const xMax = Math.max(...xs);
   const yMin = Math.min(...ys);
@@ -82,7 +98,7 @@ export function LineChart({ points, goal, xLabel = String, yLabel = String, aria
           </text>
         );
       })}
-      {goal !== undefined && (
+      {showGoal && goal !== undefined && (
         <g>
           <line
             x1={pad.l}
@@ -106,6 +122,9 @@ export function LineChart({ points, goal, xLabel = String, yLabel = String, aria
         </g>
       )}
       <path d={area} fill="url(#area)" />
+      {dots.map((p, i) => (
+        <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r="2.5" fill="var(--fg-subtle)" opacity="0.55" />
+      ))}
       <path
         d={d}
         fill="none"

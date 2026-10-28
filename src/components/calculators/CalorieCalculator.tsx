@@ -151,7 +151,12 @@ export default function CalorieCalculator() {
               </a>{' '}
               for your goal date.
             </Callout>
-            <ResultActions summary={summary} onReset={resetProfile} />
+            <div class="flex flex-wrap items-center gap-3">
+              <ResultActions summary={summary} onReset={resetProfile} />
+              <a href={withBase('/start/')} class="btn btn-primary text-sm">
+                Turn this into a plan →
+              </a>
+            </div>
           </div>
         ) : (
           <Callout tone="warn">{result.error}</Callout>

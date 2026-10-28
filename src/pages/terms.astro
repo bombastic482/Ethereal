@@ -1,0 +1,49 @@
+---
+import Base from '@/layouts/Base.astro';
+import { withBase } from '@/lib/url';
+---
+
+<Base
+  title="Terms of Use"
+  description="The terms under which Ethereal's free calculators, plan and tracker are provided."
+  path="/terms/"
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <article class="prose-ethereal max-w-3xl">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Terms of use</h1>
+      <p>
+        By using Ethereal you agree to these terms. They are short because the service is simple: a
+        free, static website that runs in your browser.
+      </p>
+      <h2>What Ethereal is</h2>
+      <p>
+        Ethereal provides general educational tools and content about nutrition and body weight. It
+        is not a medical device and does not provide medical, nutritional or fitness advice. See the{' '}
+        <a href={withBase('/disclaimer/')}>medical disclaimer</a>.
+      </p>
+      <h2>Your data</h2>
+      <p>
+        Everything you enter is stored only in your browser. We do not receive, store or process it,
+        and we cannot recover it if you clear your browser data. You are responsible for exporting
+        backups. See the <a href={withBase('/privacy/')}>privacy page</a>.
+      </p>
+      <h2>No warranty</h2>
+      <p>
+        The service is provided "as is" without warranty of any kind. Estimates may be inaccurate
+        for you individually. To the fullest extent permitted by law we are not liable for any loss
+        or harm arising from use of the service.
+      </p>
+      <h2>Acceptable use</h2>
+      <p>
+        Do not use the service if you are under 18 without a parent or guardian's involvement, and
+        do not use it to pursue intakes or rates of weight loss that a clinician has advised against
+        for you.
+      </p>
+      <h2>Changes</h2>
+      <p>
+        We may update the service and these terms at any time. Continued use after a change means
+        you accept the updated terms. Last updated: 28 October 2026.
+      </p>
+    </article>
+  </div>
+</Base>

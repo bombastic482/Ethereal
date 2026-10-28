@@ -1,6 +1,13 @@
 # Ethereal — Weight loss, done properly.
 
-Free, science-backed weight-loss calculators and guides. Eight tools (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water), six evidence-based guides, one shared private profile, zero tracking.
+Free, science-backed weight-loss planning that runs entirely in your browser.
+
+- **A personal plan** (`/start/` → `/plan/`): calories, protein, macros and a realistic goal date from your stats, in three steps.
+- **A weight tracker** (`/track/`): daily weigh-ins, an exponentially-smoothed trend line, weekly averages, waist and notes.
+- **A two-week check**: compares your measured trend with the plan and recommends a specific calorie adjustment (capped, never below safe floors), which you can apply with one click.
+- **Eight calculators** (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water) sharing one profile.
+- **Twelve evidence-based guides**, installable as an app, works offline, exports/imports backups, shares a plan between devices via a link.
+- **No account, no server, no tracking.** Nothing you enter ever leaves your device.
 
 **Stack:** [Astro](https://astro.build) (static output) · [Preact](https://preactjs.com) islands · [Tailwind CSS v4](https://tailwindcss.com) · TypeScript strict · Vitest · Playwright · Lighthouse CI.
 
@@ -54,13 +61,19 @@ Add the domain under **Settings → Pages → Custom domain**, set the `SITE_URL
 src/
   lib/calc/          pure calculation engine + tests
   lib/profile.ts     shared localStorage profile (one entry, every tool)
+  lib/store.ts       tiny persistent store factory (subscribe + hook)
+  lib/plan.ts        plan model and derived daily targets
+  lib/log.ts         weigh-in log
+  lib/backup.ts      export / import / share-link
+  lib/calc/trend.ts  smoothed trend, slope, progress assessment and adjustment
   lib/tools.ts       tool registry (nav, cards, sitemap)
   components/ui/     Preact primitives (inputs, gauge, charts, callouts)
-  components/calculators/  one island per tool
+  components/calculators/  one island per tool, plus Onboarding, PlanDashboard, WeightTracker, DataManager
   layouts/           Base (SEO, theme, header/footer) and ToolLayout (breadcrumbs, FAQ, related)
   pages/             routes; tools/*.astro hold the SEO copy for each calculator
   content/guides/    Markdown articles validated by src/content.config.ts
-tests/e2e/           Playwright smoke tests
+tests/e2e/           Playwright smoke, app-flow and axe accessibility tests
+public/sw.js         service worker (offline-first assets, network-first pages)
 scripts/og.mjs       generates OG image + icons with sharp (run once, commit output)
 ```
 

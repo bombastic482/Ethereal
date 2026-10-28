@@ -2,7 +2,7 @@ export const SITE = {
   name: 'Ethereal',
   tagline: 'Weight loss, done properly.',
   description:
-    'Free, science-backed weight-loss calculators and guides. Calories, macros, BMI, body fat, protein and a realistic timeline to your goal. No sign-up, no ads, no nonsense.',
+    'Free, science-backed weight-loss planning. A personal calorie and protein plan, a weight tracker that sees through daily noise, a two-week check that tells you what to change, plus calculators and guides. No sign-up, no ads, runs in your browser.',
   author: 'Ethereal',
   locale: 'en_US',
   twitter: '',
@@ -10,7 +10,8 @@ export const SITE = {
 } as const;
 
 export const NAV = [
+  { href: '/plan/', label: 'My plan' },
+  { href: '/track/', label: 'Track' },
   { href: '/tools/', label: 'Tools' },
   { href: '/guides/', label: 'Guides' },
-  { href: '/about/', label: 'About' },
 ] as const;

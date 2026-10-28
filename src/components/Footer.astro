@@ -63,6 +63,21 @@ const year = new Date().getFullYear();
       <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Site</h2>
       <ul class="grid gap-2 text-sm">
         <li>
+          <a class="text-muted hover:text-fg" href={withBase('/plan/')}>
+            My plan
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href={withBase('/track/')}>
+            Weight tracker
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href={withBase('/settings/')}>
+            Settings &amp; data
+          </a>
+        </li>
+        <li>
           <a class="text-muted hover:text-fg" href={withBase('/about/')}>
             About &amp; methodology
           </a>
@@ -75,6 +90,11 @@ const year = new Date().getFullYear();
         <li>
           <a class="text-muted hover:text-fg" href={withBase('/privacy/')}>
             Privacy
+          </a>
+        </li>
+        <li>
+          <a class="text-muted hover:text-fg" href={withBase('/terms/')}>
+            Terms
           </a>
         </li>
         <li>

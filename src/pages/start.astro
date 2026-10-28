@@ -1,0 +1,15 @@
+---
+import Onboarding from '@/components/calculators/Onboarding';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Build Your Plan"
+  description="Build a personal weight-loss plan in one minute: your calorie target, protein and macros, and a realistic goal date. Private, free, no sign-up."
+  path="/start/"
+  heading="Build your plan"
+  lede="Three quick steps. Everything stays on this device."
+  current="start"
+>
+  <Onboarding client:load />
+</AppLayout>

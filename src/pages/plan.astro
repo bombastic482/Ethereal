@@ -1,0 +1,15 @@
+---
+import PlanDashboard from '@/components/calculators/PlanDashboard';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="My Plan"
+  description="Your daily calorie and protein targets, progress to goal, today's weigh-in and a two-week check that tells you exactly what to change."
+  path="/plan/"
+  heading="My plan"
+  lede="Your numbers for today, your progress so far, and what to change next."
+  current="plan"
+>
+  <PlanDashboard client:load />
+</AppLayout>

@@ -64,5 +64,15 @@ const { class: cls, ...seo } = Astro.props;
       <slot />
     </main>
     <Footer />
+    <script>
+      if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+        const base = import.meta.env.BASE_URL.endsWith('/')
+          ? import.meta.env.BASE_URL
+          : `${import.meta.env.BASE_URL}/`;
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(() => undefined);
+        });
+      }
+    </script>
   </body>
 </html>

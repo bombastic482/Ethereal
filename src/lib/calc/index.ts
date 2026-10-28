@@ -7,3 +7,4 @@ export * from './body-fat';
 export * from './timeline';
 export * from './hydration';
 export * from './protein';
+export * from './trend';

@@ -1,0 +1,15 @@
+---
+import DataManager from '@/components/calculators/DataManager';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Settings & Data"
+  description="Edit your profile and plan, export or import a backup, move your plan to another device, install Ethereal as an app, or delete everything."
+  path="/settings/"
+  heading="Settings & data"
+  lede="Your profile, your plan settings, and full control of your data."
+  current="settings"
+>
+  <DataManager client:load />
+</AppLayout>

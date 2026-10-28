@@ -14,8 +14,8 @@
   --color-brand-300: oklch(80% 0.12 175);
   --color-brand-400: oklch(72% 0.15 172);
   --color-brand-500: oklch(64% 0.15 170);
-  --color-brand-600: oklch(55% 0.135 168);
-  --color-brand-700: oklch(47% 0.115 166);
+  --color-brand-600: oklch(50% 0.13 168);
+  --color-brand-700: oklch(44% 0.115 166);
   --color-brand-800: oklch(39% 0.09 165);
   --color-brand-900: oklch(31% 0.07 165);
   --color-brand-950: oklch(22% 0.05 165);
@@ -30,7 +30,7 @@
   --color-ink-200: oklch(92% 0.008 250);
   --color-ink-300: oklch(86% 0.01 250);
   --color-ink-400: oklch(70% 0.014 250);
-  --color-ink-500: oklch(56% 0.018 250);
+  --color-ink-500: oklch(47% 0.02 250);
   --color-ink-600: oklch(45% 0.02 250);
   --color-ink-700: oklch(36% 0.022 250);
   --color-ink-800: oklch(27% 0.024 250);

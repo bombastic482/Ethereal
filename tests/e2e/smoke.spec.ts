@@ -22,8 +22,8 @@ test.describe('site', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Ethereal/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Weight loss');
-    await page.getByRole('link', { name: /calculate my calories/i }).click();
-    await expect(page).toHaveURL(/\/tools\/calories\/$/);
+    await page.getByRole('link', { name: /build my plan/i }).click();
+    await expect(page).toHaveURL(/\/start\/$/);
   });
 
   test('every tool page has one H1, a canonical and JSON-LD', async ({ page }) => {

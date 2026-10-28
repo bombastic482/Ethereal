@@ -40,22 +40,22 @@ const faq = [
 
 const steps = [
   {
-    icon: 'flame',
-    title: 'Find your calories',
-    text: 'Get maintenance and a safe target in ten seconds.',
-    href: '/tools/calories/',
+    icon: 'target',
+    title: 'Build your plan',
+    text: 'Calories, protein, macros and a realistic goal date from your stats.',
+    href: '/start/',
   },
   {
-    icon: 'calendar',
-    title: 'See your goal date',
-    text: 'A realistic, adaptive projection of when you get there.',
-    href: '/tools/timeline/',
+    icon: 'scale',
+    title: 'Weigh in daily',
+    text: 'A smoothed trend line ignores the water noise and shows the truth.',
+    href: '/track/',
   },
   {
-    icon: 'pie',
-    title: 'Set protein and macros',
-    text: 'Turn calories into a plate you can actually eat.',
-    href: '/tools/macros/',
+    icon: 'bolt',
+    title: 'Adjust every two weeks',
+    text: 'Ethereal compares trend to plan and tells you exactly what to change.',
+    href: '/plan/',
   },
 ] as const;
 ---
@@ -75,19 +75,20 @@ const steps = [
           Weight loss, <span class="text-gradient">done properly.</span>
         </h1>
         <p class="text-muted mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty sm:text-xl">
-          Calories, macros, body fat, protein and a realistic timeline to your goal. The same
-          equations dietitians use, explained in plain English, running privately in your browser.
+          A personal plan, a weight tracker that sees through the noise, and a two-week check that
+          tells you what to change. Built on the equations dietitians use, explained in plain
+          English, running privately in your browser.
         </p>
         <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-          <a href={withBase('/tools/calories/')} class="btn btn-primary h-12 px-6 text-base">
-            Calculate my calories <Icon name="arrow" size={18} />
+          <a href={withBase('/start/')} class="btn btn-primary h-12 px-6 text-base">
+            Build my plan <Icon name="arrow" size={18} />
           </a>
-          <a href={withBase('/tools/')} class="btn btn-secondary h-12 px-6 text-base">
-            See all tools
+          <a href={withBase('/tools/calories/')} class="btn btn-secondary h-12 px-6 text-base">
+            Just the calculators
           </a>
         </div>
         <p class="text-subtle mt-5 text-xs">
-          Takes 10 seconds · Type your stats once, every tool remembers them
+          One minute · No account · Your data never leaves your device
         </p>
       </div>
     </div>

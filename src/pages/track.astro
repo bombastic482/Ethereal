@@ -1,0 +1,15 @@
+---
+import WeightTracker from '@/components/calculators/WeightTracker';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Weight Tracker"
+  description="Free private weight tracker with a smoothed trend line, weekly averages and progress against your goal. Daily weigh-ins, no account, stored on your device."
+  path="/track/"
+  heading="Weight tracker"
+  lede="Daily weigh-ins, a trend line that ignores the noise, and weekly averages you can actually trust."
+  current="track"
+>
+  <WeightTracker client:load />
+</AppLayout>

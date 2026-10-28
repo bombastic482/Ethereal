@@ -1,0 +1,30 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { withBase } from '@/lib/url';
+---
+
+<Base
+  title="You're offline"
+  description="Ethereal works offline once you have visited it. This page shows while the network is unavailable."
+  noindex
+>
+  <div class="container-page py-24 text-center">
+    <p class="chip">
+      <Icon name="bolt" size={14} /> Offline
+    </p>
+    <h1 class="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">No connection right now.</h1>
+    <p class="text-muted mx-auto mt-4 max-w-md">
+      Pages you have already opened still work, and your plan and weigh-ins are saved on this
+      device. Try again when you are back online.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-2">
+      <a href={withBase('/plan/')} class="btn btn-primary">
+        My plan
+      </a>
+      <a href={withBase('/track/')} class="btn btn-secondary">
+        Weight tracker
+      </a>
+    </div>
+  </div>
+</Base>
