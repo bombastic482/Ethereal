@@ -16,9 +16,16 @@ import foodsC from '@/data/foods-c.json';
 import foodsD from '@/data/foods-d.json';
 import foodsE from '@/data/foods-e.json';
 import foodsF from '@/data/foods-f.json';
-import recipes from '@/data/recipes.json';
+import { builtRecipes as recipes } from '@/lib/recipes-build';
 
 const recipeCount = recipes.length;
+const featuredRecipes = [
+  'smoked-salmon-scrambled-eggs-rye',
+  'chicken-shawarma-salad-plate',
+  'tofu-coconut-spinach-curry',
+]
+  .map((id) => recipes.find((r) => r.id === id))
+  .filter((r): r is NonNullable<typeof r> => !!r);
 const foodCount =
   foodsA.length + foodsB.length + foodsC.length + foodsD.length + foodsE.length + foodsF.length;
 const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
@@ -277,6 +284,46 @@ const steps = [
         </div>
       ))}
     </div>
+  </section>
+
+  <section class="container-page mt-24" aria-labelledby="eat">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="eat" class="font-display text-4xl tracking-tight">
+          Eat well on a deficit
+        </h2>
+        <p class="text-muted mt-2">
+          {recipes.length} high-protein recipes built from the food database, so what you cook is
+          exactly what gets logged. Today picks one that fits what you have left.
+        </p>
+      </div>
+      <a
+        href={withBase('/recipes/')}
+        class="text-brand-600 dark:text-brand-300 text-sm font-semibold"
+      >
+        All recipes →
+      </a>
+    </div>
+    <ul class="mt-8 grid gap-4 md:grid-cols-3">
+      {featuredRecipes.map((r) => (
+        <li class="surface flex flex-col gap-2 p-6">
+          <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
+            {r.meal} · {r.minutes} min
+          </span>
+          <a
+            class="text-lg font-bold tracking-tight hover:underline"
+            href={withBase(`/recipes/#${r.id}`)}
+          >
+            {r.name}
+          </a>
+          <span class="text-muted text-sm">
+            <span class="tabular">{Math.round(r.totals.kcal)}</span> kcal ·{' '}
+            <span class="tabular">{Math.round(r.totals.protein)}</span> g protein
+          </span>
+          <span class="text-subtle line-clamp-2 text-sm leading-relaxed">{r.method}</span>
+        </li>
+      ))}
+    </ul>
   </section>
 
   <section class="container-page mt-24" aria-labelledby="why">

@@ -2,39 +2,8 @@
 import { Icon } from '@/components/ui/Icon';
 import Base from '@/layouts/Base.astro';
 import { absoluteUrl, withBase } from '@/lib/url';
-import recipesRaw from '@/data/recipes.json';
-import foodsA from '@/data/foods-a.json';
-import foodsB from '@/data/foods-b.json';
-import foodsC from '@/data/foods-c.json';
-import foodsD from '@/data/foods-d.json';
-import foodsE from '@/data/foods-e.json';
-import foodsF from '@/data/foods-f.json';
+import { builtRecipes as recipes, DIET_LABEL as DIET } from '@/lib/recipes-build';
 import type { Recipe } from '@/lib/recipes';
-import type { Food } from '@/lib/foods';
-
-const foods = new Map<string, Food>(
-  ([...foodsA, ...foodsB, ...foodsC, ...foodsD, ...foodsE, ...foodsF] as Food[]).map((f) => [
-    f.id,
-    f,
-  ]),
-);
-const recipes = (recipesRaw as Recipe[]).map((r) => {
-  const items = r.items.map((it) => {
-    const f = foods.get(it.foodId);
-    if (!f) throw new Error(`recipe ${r.id} references unknown food ${it.foodId}`);
-    return { name: f.name, grams: it.grams, per100g: f.per100g };
-  });
-  const t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 };
-  for (const it of items) {
-    const k = it.grams / 100;
-    t.kcal += it.per100g.kcal * k;
-    t.protein += it.per100g.protein * k;
-    t.carbs += it.per100g.carbs * k;
-    t.fat += it.per100g.fat * k;
-    t.fibre += (it.per100g.fibre ?? 0) * k;
-  }
-  return { ...r, items, totals: t };
-});
 
 const SECTIONS: Array<{ key: Recipe['meal']; title: string; blurb: string }> = [
   {
@@ -50,12 +19,6 @@ const SECTIONS: Array<{ key: Recipe['meal']; title: string; blurb: string }> = [
   },
   { key: 'snack', title: 'Snacks', blurb: 'Ten grams of protein or more, under 250 kcal.' },
 ];
-const DIET: Record<Recipe['diet'], string> = {
-  vegan: 'Vegan',
-  vegetarian: 'Vegetarian',
-  pescatarian: 'Pescatarian',
-  omnivore: '',
-};
 const site = Astro.site;
 const r0 = Math.round;
 const jsonLd = [
@@ -74,7 +37,7 @@ const jsonLd = [
         recipeCategory: r.meal,
         totalTime: `PT${r.minutes}M`,
         recipeYield: '1 serving',
-        recipeIngredient: r.items.map((it) => `${it.grams} g ${it.name}`),
+        recipeIngredient: r.ingredients.map((it) => `${it.grams} g ${it.name}`),
         recipeInstructions: r.method,
         keywords: r.tags.join(', '),
         ...(r.diet === 'vegan' || r.diet === 'vegetarian'
@@ -162,7 +125,7 @@ const quickCount = recipes.filter((r) => r.minutes <= 15).length;
                     {DIET[r.diet] ? ` · ${DIET[r.diet]}` : ''}
                   </p>
                   <ul class="text-muted mt-3 grid gap-1 text-sm">
-                    {r.items.map((it) => (
+                    {r.ingredients.map((it) => (
                       <li class="flex justify-between gap-3">
                         <span>{it.name}</span>
                         <span class="tabular text-subtle shrink-0">{it.grams} g</span>
