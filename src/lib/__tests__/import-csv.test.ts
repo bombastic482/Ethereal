@@ -123,3 +123,43 @@ describe('import preview', () => {
     expect(previewImport('Date,Calories\nnonsense,abc\n')).toBeNull();
   });
 });
+
+describe('import edge cases from review', () => {
+  it('sniffs the delimiter from the header, so commas inside semicolon files survive', () => {
+    const p = previewImport(
+      'Date;Food;Calories;Protein\n2026-10-03;"Chicken, roasted";250;30,5\n',
+    )!;
+    expect(p.food).toHaveLength(1);
+    expect(p.food[0]!.name).toBe('Chicken, roasted');
+    expect(p.food[0]!.per100g.protein).toBe(30.5);
+    const t = parseCsv('a\tb\n1,5\t2\n');
+    expect(t[1]).toEqual(['1,5', '2']);
+  });
+  it('reads dotted dates day-first and keeps one order per file', () => {
+    expect(parseDate('03.10.2026')).toBe('2026-10-03');
+    const p = previewImport('Date,Calories\n13/01/2026,500\n02/01/2026,400\n')!;
+    expect(p.food.map((e) => e.date).sort()).toEqual(['2026-01-02', '2026-01-13']);
+    expect(parseDate('45000')).toBeNull();
+    expect(parseDate('2026/10/03')).toBe('2026-10-03');
+  });
+  it('understands thousands separators and 12-hour times', async () => {
+    const { num, parseTime } = await import('../import-csv');
+    expect(num('"1,500"')).toBe(1500);
+    expect(num('1.250,5')).toBe(1250.5);
+    expect(num('30,5')).toBe(30.5);
+    expect(num('250 kcal')).toBe(250);
+    expect(parseTime('1:30 PM')).toBe(13 * 60 + 30);
+    expect(parseTime('12:05 am')).toBe(5);
+    expect(parseTime('07:30')).toBe(450);
+    expect(mapMeal('', '7:30 PM')).toBe('dinner');
+  });
+  it("round-trips Ethereal's own CSV exports, including waist", () => {
+    const p = previewImport('date,weight_kg,waist_cm,note\n2026-10-01,82.4,86,"felt good"\n')!;
+    expect(p.weightUnit).toBe('kg');
+    expect(p.weighIns[0]).toMatchObject({ date: '2026-10-01', weightKg: 82.4, waistCm: 86 });
+    const f = previewImport(
+      'date,meal,name,grams,kcal,protein_g,carbs_g,fat_g,fibre_g\n2026-10-01,lunch,Oats,50,190,6.5,33,3.5,5\n',
+    )!;
+    expect(f.food[0]!.per100g.fat).toBe(3.5);
+  });
+});

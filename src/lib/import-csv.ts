@@ -9,6 +9,20 @@ import type { WeighIn } from './calc/trend';
 import { diaryStore, uid } from './food-store';
 import { logStore } from './log';
 
+/** Picks the delimiter from the header line: whichever of , ; and tab appears most outside quotes. */
+export function sniffDelimiter(firstLine: string): ',' | ';' | '\t' {
+  const counts: Record<string, number> = { ',': 0, ';': 0, '\t': 0 };
+  let q = false;
+  for (const c of firstLine) {
+    if (c === '"') q = !q;
+    else if (!q && c in counts) counts[c]!++;
+  }
+  const best = (Object.entries(counts) as Array<[',' | ';' | '\t', number]>).sort(
+    (a, b) => b[1] - a[1],
+  )[0]!;
+  return best[1] > 0 ? best[0] : ',';
+}
+
 /** RFC 4180-ish parser: quoted fields, doubled quotes, CRLF, trailing newline. */
 export function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -16,6 +30,7 @@ export function parseCsv(text: string): string[][] {
   let field = '';
   let quoted = false;
   const src = text.replace(/^﻿/, '');
+  const delim = sniffDelimiter(src.split(/\r?\n/, 1)[0] ?? '');
   for (let i = 0; i < src.length; i++) {
     const c = src[i]!;
     if (quoted) {
@@ -27,13 +42,11 @@ export function parseCsv(text: string): string[][] {
       } else field += c;
       continue;
     }
-    if (c === '"') quoted = true;
-    else if (c === ',' || c === ';' || c === '\t') {
-      // Accept comma, semicolon or tab separated files; a file uses one consistently.
-      if (c === ',' || !text.includes(',')) {
-        row.push(field);
-        field = '';
-      } else field += c;
+    if (c === '"' && field === '')
+      quoted = true; // a quote mid-field (6" sub) is literal
+    else if (c === delim) {
+      row.push(field);
+      field = '';
     } else if (c === '\n' || c === '\r') {
       if (c === '\r' && src[i + 1] === '\n') i++;
       row.push(field);
@@ -63,7 +76,8 @@ type Col =
   | 'sugar'
   | 'satFat'
   | 'sodium'
-  | 'weight';
+  | 'weight'
+  | 'waist';
 
 const HEADERS: Array<[Col, RegExp]> = [
   ['date', /^(date|day|logged on|entry date|datetime|timestamp)$/],
@@ -76,12 +90,16 @@ const HEADERS: Array<[Col, RegExp]> = [
   ['kcal', /^(calories|energy|kcal|calories \(kcal\)|energy \(kcal\)|cals|kilocalories)$/],
   ['protein', /^protein/],
   ['carbs', /^(carb|carbs|carbohydrate|carbohydrates|net carbs|total carbohydrate)/],
-  ['fat', /^(fat|total fat|fats|lipids)( \(g\))?$/],
+  ['fat', /^(fat|total fat|fats|lipids)(_g| \(g\))?$/],
   ['fibre', /^(fiber|fibre|dietary fiber|dietary fibre)/],
   ['sugar', /^(sugar|sugars|total sugars)/],
   ['satFat', /^(saturated fat|saturated|sat fat)/],
   ['sodium', /^(sodium|salt)/],
-  ['weight', /^(weight|body weight|bodyweight|weight \(kg\)|weight \(lb\)|weight \(lbs\)|mass)$/],
+  [
+    'weight',
+    /^(weight|body weight|bodyweight|weight[ _]?\((kg|lbs?)\)|weight_(kg|lbs?)|weightkg|mass)$/,
+  ],
+  ['waist', /^(waist|waist_cm|waist \(cm\)|waist \(in\))$/],
 ];
 
 const normHeader = (h: string) => h.toLowerCase().replace(/[ ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -100,35 +118,73 @@ export function detectColumns(header: string[]): Partial<Record<Col, number>> {
   return map;
 }
 
-/** Accepts ISO, US (M/D/YYYY), EU (D/M/YYYY when unambiguous) and "October 3, 2026" forms. */
-export function parseDate(raw: string): string | null {
+/**
+ * Accepts ISO, US (M/D/YYYY), EU (D/M/YYYY, always for dotted dates) and "October 3, 2026".
+ * `dayFirst` is decided once per file (see `fileIsDayFirst`) so one file is read consistently.
+ */
+export function parseDate(raw: string, dayFirst = false): string | null {
   const s = raw.trim();
   if (!s) return null;
-  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/.exec(s);
   if (m) return iso(+m[1]!, +m[2]!, +m[3]!);
-  m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})/.exec(s);
+  m = /^(\d{1,2})([/.-])(\d{1,2})[/.-](\d{2,4})/.exec(s);
   if (m) {
     let a = +m[1]!;
-    let b = +m[2]!;
-    const y = m[3]!.length === 2 ? 2000 + +m[3]! : +m[3]!;
-    // Day > 12 disambiguates; otherwise assume month first (the common export order).
-    if (a > 12 && b <= 12) [a, b] = [b, a];
+    let b = +m[3]!;
+    const y = m[4]!.length === 2 ? 2000 + +m[4]! : +m[4]!;
+    const df = dayFirst || m[2] === '.' || (a > 12 && b <= 12);
+    if (df) [a, b] = [b, a];
     return iso(y, a, b);
   }
+  if (/^\d+$/.test(s)) return null; // Excel serials and bare numbers are not dates
   const d = new Date(s);
   if (!Number.isNaN(d.getTime())) return iso(d.getFullYear(), d.getMonth() + 1, d.getDate());
   return null;
 }
+/** True when any slash/dash date in the column has a first component over 12 (so it is a day). */
+export function fileIsDayFirst(values: string[]): boolean {
+  return values.some((v) => {
+    const m = /^(\d{1,2})[/-](\d{1,2})[/-]\d{2,4}/.exec(v.trim());
+    return !!m && +m[1]! > 12 && +m[2]! <= 12;
+  });
+}
 const iso = (y: number, mo: number, d: number): string | null =>
-  mo >= 1 && mo <= 12 && d >= 1 && d <= 31
+  y >= 1990 && y <= 2100 && mo >= 1 && mo <= 12 && d >= 1 && d <= 31
     ? `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`
     : null;
 
-const num = (v: string | undefined): number | null => {
+/** Reads "1,500", "1.250,5", "30,5", "250 kcal": with both separators the first one is grouping. */
+export const num = (v: string | undefined): number | null => {
   if (v === undefined) return null;
-  const n = parseFloat(v.replace(/[^\d.,-]/g, '').replace(',', '.'));
+  let t = v.replace(/[^\d.,-]/g, '');
+  if (!t) return null;
+  const hasDot = t.includes('.');
+  const hasComma = t.includes(',');
+  if (hasDot && hasComma) {
+    t =
+      t.indexOf('.') < t.indexOf(',')
+        ? t.replace(/\./g, '').replace(',', '.')
+        : t.replace(/,/g, '');
+  } else if (hasComma) {
+    // "1,500" (groups of three) is a thousands separator; "30,5" is a decimal comma.
+    t = /^-?\d{1,3}(,\d{3})+$/.test(t) ? t.replace(/,/g, '') : t.replace(',', '.');
+  }
+  const n = parseFloat(t);
   return Number.isFinite(n) ? n : null;
 };
+
+/** "07:30", "7:30 PM", "12:05 am" → minutes since midnight; null when not a time. */
+export function parseTime(v: string | undefined): number | null {
+  if (!v) return null;
+  const m = /(\d{1,2}):(\d{2})\s*([AaPp][Mm])?/.exec(v);
+  if (!m) return null;
+  let h = +m[1]!;
+  const mins = +m[2]!;
+  const ap = m[3]?.toLowerCase();
+  if (ap) h = (h % 12) + (ap === 'pm' ? 12 : 0);
+  if (h > 23 || mins > 59) return null;
+  return h * 60 + mins;
+}
 
 export function mapMeal(raw: string | undefined, time?: string): Meal {
   const s = (raw ?? '').toLowerCase();
@@ -136,9 +192,11 @@ export function mapMeal(raw: string | undefined, time?: string): Meal {
   if (/lunch|midday|noon/.test(s)) return 'lunch';
   if (/dinner|supper|evening|tea\b/.test(s)) return 'dinner';
   if (/snack|other|uncategor/.test(s)) return 'snack';
-  const h = time ? parseInt(time, 10) : NaN;
-  if (Number.isFinite(h))
+  const t = parseTime(time);
+  if (t !== null) {
+    const h = Math.floor(t / 60);
     return h < 11 ? 'breakfast' : h < 15 ? 'lunch' : h < 21 ? 'dinner' : 'snack';
+  }
   return 'snack';
 }
 
@@ -173,13 +231,17 @@ export function previewImport(text: string): ImportPreview | null {
     : /kg/.test(weightHeader)
       ? 'kg'
       : null;
+  const waistHeader = cols.waist !== undefined ? normHeader(header[cols.waist]!) : '';
+  const waistIn = /\(in\)|_in$/.test(waistHeader);
+  const dayFirst = fileIsDayFirst(rows.slice(1).map((r) => r[cols.date!] ?? ''));
 
   const food: FoodEntry[] = [];
   const weights = new Map<string, number>();
+  const waists = new Map<string, number>();
   let skipped = 0;
   const days = new Set<string>();
   for (const r of rows.slice(1)) {
-    const date = parseDate(r[cols.date] ?? '');
+    const date = parseDate(r[cols.date] ?? '', dayFirst);
     if (!date) {
       skipped++;
       continue;
@@ -189,6 +251,8 @@ export function previewImport(text: string): ImportPreview | null {
     if (weight !== null && weight > 0) {
       weights.set(date, weight);
       days.add(date);
+      const waist = cols.waist !== undefined ? num(r[cols.waist]) : null;
+      if (waist !== null && waist > 0) waists.set(date, waistIn ? waist * 2.54 : waist);
     }
     if (kcal !== null && kcal > 0) {
       const name = (r[cols.name ?? -1] ?? '').trim() || `Imported ${mealLabel(r, cols)}`;
@@ -218,9 +282,7 @@ export function previewImport(text: string): ImportPreview | null {
           ...(satFat !== null ? { satFat: round1(satFat) } : {}),
         },
         source: 'custom',
-        ...(time && /^\d{1,2}:\d{2}/.test(time)
-          ? { time: parseInt(time, 10) * 60 + parseInt(time.split(':')[1]!, 10) }
-          : {}),
+        ...(parseTime(time) !== null ? { time: parseTime(time)! } : {}),
       });
       days.add(date);
     } else if (weight === null) skipped++;
@@ -234,6 +296,7 @@ export function previewImport(text: string): ImportPreview | null {
   const weighIns: WeighIn[] = [...weights.entries()].map(([date, w]) => ({
     date,
     weightKg: round1(weightUnit === 'lb' ? w * 0.45359237 : w),
+    ...(waists.has(date) ? { waistCm: round1(waists.get(date)!) } : {}),
   }));
   if (food.length === 0 && weighIns.length === 0) return null;
   return { food, weighIns, days: days.size, skipped, source, weightUnit };

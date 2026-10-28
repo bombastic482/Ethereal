@@ -124,7 +124,14 @@ function DayPlannerInner() {
     const ex = SLOTS.filter((s) => !locks.has(s))
       .map((s) => day.slots[s]?.id)
       .filter((id): id is string => !!id);
-    const next = compute({ locked: lockedIds(day), exclude: [...excluded, ...ex] }) ?? day;
+    const next = compute({ locked: lockedIds(day), exclude: [...excluded, ...ex] });
+    if (!next) {
+      // Nothing else fits: start the exclusions over rather than trapping every slot.
+      setExcluded([]);
+      setDay(compute({ locked: lockedIds(day), exclude: [] }) ?? day);
+      setStatus('Shuffled from a clean slate; every unlocked recipe is eligible again.');
+      return;
+    }
     setExcluded([...excluded, ...ex]);
     setDay(next);
     setStatus(null);
@@ -133,7 +140,7 @@ function DayPlannerInner() {
     if (key === 'quick') setQuick(value);
     else setNoSnack(value);
     setExcluded([]);
-    setDay(compute({ locked: lockedIds(day), [key]: value }));
+    setDay(compute({ locked: lockedIds(day), [key]: value, exclude: [] }));
   };
   const toggleLock = (slot: RecipeMeal) => {
     const next = new Set(locks);

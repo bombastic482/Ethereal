@@ -1,5 +1,5 @@
 /* Ethereal service worker: offline-first for hashed assets, network-first for pages. */
-const VERSION = 'v2';
+const VERSION = 'v3';
 const ASSET_CACHE = `ethereal-assets-${VERSION}`;
 const PAGE_CACHE = `ethereal-pages-${VERSION}`;
 const scopePath = new URL(self.registration.scope).pathname; // "/" or "/Ethereal/"
@@ -65,7 +65,10 @@ self.addEventListener('fetch', (event) => {
   const wantsHtml =
     request.mode === 'navigate' ||
     request.destination === 'document' ||
-    (request.headers.get('accept') ?? '').includes('text/html');
+    (request.headers.get('accept') ?? '').includes('text/html') ||
+    // The client router sends no Accept header; on this static site a same-origin GET
+    // whose path has no file extension is always a page.
+    !/\.[a-z0-9]+$/i.test(url.pathname);
   if (wantsHtml) {
     event.respondWith(
       fetch(request)
@@ -94,7 +97,7 @@ self.addEventListener('fetch', (event) => {
           if (res.ok) cache.put(request, res.clone());
           return res;
         })
-        .catch(() => hit);
+        .catch(() => hit ?? Response.error());
       return hit ?? network;
     }),
   );

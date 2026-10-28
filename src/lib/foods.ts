@@ -26,23 +26,28 @@ export function loadFoods(): Promise<Food[]> {
     import('@/data/foods-d.json'),
     import('@/data/foods-e.json'),
     import('@/data/foods-f.json'),
-  ]).then(([a, b, c, d, e, f]) => {
-    FOODS = [
-      ...(a.default as Food[]),
-      ...(b.default as Food[]),
-      ...(c.default as Food[]),
-      ...(d.default as Food[]),
-      ...(e.default as Food[]),
-      ...(f.default as Food[]),
-    ];
-    BY_ID = new Map(FOODS.map((f) => [f.id, f]));
-    INDEX = FOODS.map((f) => ({
-      f,
-      text: norm(`${f.name} ${f.category} ${(f.tags ?? []).join(' ')}`),
-      nameTokens: norm(f.name).split(' '),
-    }));
-    return FOODS;
-  });
+  ])
+    .then(([a, b, c, d, e, f]) => {
+      FOODS = [
+        ...(a.default as Food[]),
+        ...(b.default as Food[]),
+        ...(c.default as Food[]),
+        ...(d.default as Food[]),
+        ...(e.default as Food[]),
+        ...(f.default as Food[]),
+      ];
+      BY_ID = new Map(FOODS.map((f) => [f.id, f]));
+      INDEX = FOODS.map((f) => ({
+        f,
+        text: norm(`${f.name} ${f.category} ${(f.tags ?? []).join(' ')}`),
+        nameTokens: norm(f.name).split(' '),
+      }));
+      return FOODS;
+    })
+    .catch((e: unknown) => {
+      loading = null; // allow a retry after a failed chunk download
+      throw e;
+    });
   return loading;
 }
 

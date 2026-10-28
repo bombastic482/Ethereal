@@ -31,10 +31,15 @@ let loading: Promise<Recipe[]> | null = null;
 
 export function loadRecipes(): Promise<Recipe[]> {
   if (RECIPES.length) return Promise.resolve(RECIPES);
-  loading ??= Promise.all([import('@/data/recipes.json'), loadFoods()]).then(([r]) => {
-    RECIPES = r.default as Recipe[];
-    return RECIPES;
-  });
+  loading ??= Promise.all([import('@/data/recipes.json'), loadFoods()])
+    .then(([r]) => {
+      RECIPES = r.default as Recipe[];
+      return RECIPES;
+    })
+    .catch((e: unknown) => {
+      loading = null; // allow a retry after a failed chunk download
+      throw e;
+    });
   return loading;
 }
 

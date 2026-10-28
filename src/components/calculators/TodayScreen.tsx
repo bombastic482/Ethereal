@@ -154,7 +154,7 @@ function TodayScreenInner() {
     if (!m) return;
     setFocusRecipe(m[1]!);
     setAdding(mealForTime(new Date().getHours()));
-    history.replaceState(null, '', location.pathname + location.search);
+    history.replaceState(history.state, '', location.pathname + location.search);
   }, []);
   const [exAdding, setExAdding] = useState(false);
   const [dbReady, setDbReady] = useState(false);
