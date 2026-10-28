@@ -82,11 +82,27 @@ import Base from '@/layouts/Base.astro';
           <tr>
             <td>Food diary</td>
             <td>
-              Built-in database of ~500 generic foods (values aligned with USDA FoodData Central),
-              plus Open Food Facts for packaged products and barcodes, queried directly from your
-              browser
+              Built-in database of 1,500+ foods: generic items aligned with USDA FoodData Central
+              and McCance &amp; Widdowson, world-cuisine dishes, and branded and chain items from
+              published labels; plus Open Food Facts for packaged products and barcodes, queried
+              directly from your browser
             </td>
-            <td>Energy 4/4/9 kcal per gram; per-100 g storage so portions stay editable</td>
+            <td>
+              Energy 4/4/9 kcal per gram; per-100 g storage so portions stay editable; every row
+              checked by a validator (unique ids, plausible values, Atwater energy within 12%)
+            </td>
+          </tr>
+          <tr>
+            <td>Recipes and day planner</td>
+            <td>
+              68 recipes assembled from database rows, so totals are the ingredient sums; the day
+              planner searches every breakfast–lunch–dinner–snack combination for the one closest to
+              your calorie target with protein covered
+            </td>
+            <td>
+              Meals carry 25 g+ protein, snacks 10 g+; over-shooting calories is penalised more than
+              under
+            </td>
           </tr>
           <tr>
             <td>Exercise</td>
@@ -100,8 +116,9 @@ import Base from '@/layouts/Base.astro';
           <tr>
             <td>Two-week check</td>
             <td>
-              Exponentially-smoothed trend (α 0.1), 14-day regression slope, adjustment capped at
-              ±250 kcal, floors respected
+              Exponentially-smoothed trend (α 0.1), 14-day regression slope compared with the
+              planned rate in a toward-the-goal frame, so loss, gain and maintenance all get advice
+              in the right direction; adjustment capped at ±250 kcal, floors respected
             </td>
             <td>Waits for 14 days of data before recommending anything</td>
           </tr>
