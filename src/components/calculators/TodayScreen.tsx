@@ -567,6 +567,15 @@ function TodayScreenInner() {
               </li>
             ))}
           </ul>
+          <p class="text-subtle mt-3 text-xs">
+            Eating out instead?{' '}
+            <a
+              class="text-brand-700 dark:text-brand-300 font-semibold"
+              href={withBase('/eating-out/')}
+            >
+              The leanest orders at the big chains →
+            </a>
+          </p>
         </section>
       )}
 
