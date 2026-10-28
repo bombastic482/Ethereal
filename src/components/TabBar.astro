@@ -8,7 +8,7 @@ const tabs = [
   { href: '/plan/', label: 'Plan', icon: 'target' },
   { href: '/track/', label: 'Track', icon: 'scale' },
   { href: '/tools/', label: 'Tools', icon: 'pie' },
-  { href: '/settings/', label: 'More', icon: 'menu' },
+  { href: '/settings/', label: 'Settings', icon: 'shield' },
 ] as const;
 const active = (href: string) => current === withBase(href) || current.startsWith(withBase(href));
 ---
