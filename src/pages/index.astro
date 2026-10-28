@@ -8,18 +8,13 @@ import Base from '@/layouts/Base.astro';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
 import { getCollection } from 'astro:content';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+import foodsA from '@/data/foods-a.json';
+import foodsB from '@/data/foods-b.json';
+import foodsC from '@/data/foods-c.json';
+import foodsD from '@/data/foods-d.json';
 
-const foodCount = ['a', 'b', 'c', 'd'].reduce(
-  (n, k) =>
-    n +
-    (
-      JSON.parse(
-        readFileSync(new URL(`../data/foods-${k}.json`, import.meta.url), 'utf8'),
-      ) as unknown[]
-    ).length,
-  0,
-);
+const foodCount = foodsA.length + foodsB.length + foodsC.length + foodsD.length;
 const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
 
 const heroArt = ['hero.webp', 'hero.png', 'hero.jpg'].find((f) =>
