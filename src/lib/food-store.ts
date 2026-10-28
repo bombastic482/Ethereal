@@ -61,6 +61,8 @@ export const diaryStore = createStore<Diary>(
       customFoods: Array.isArray(r.customFoods) ? r.customFoods : [],
       recent: Array.isArray(r.recent) ? r.recent : [],
       favourites: Array.isArray(r.favourites) ? r.favourites : [],
+      meals: Array.isArray(r.meals) ? r.meals : [],
+      steps: r.steps && typeof r.steps === 'object' ? r.steps : {},
     };
   },
 );
