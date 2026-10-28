@@ -158,3 +158,24 @@ test('command palette jumps to pages and logs a food', async ({ page }) => {
   await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
   await expect(page.getByText(/^Banana/).first()).toBeVisible();
 });
+
+test('recipes page filters by diet and time without a framework', async ({ page }) => {
+  await page.goto('/recipes/');
+  const filters = page.getByRole('group', { name: 'Filter recipes' });
+  await expect(filters).toContainText(/68 of 68 recipes/);
+  await filters.getByRole('button', { name: 'Vegan' }).click();
+  await expect(filters.locator('[data-count]')).not.toHaveText(/68 of 68/);
+  await expect(filters.locator('[data-count]')).toHaveText(/\d+ of 68 recipes/);
+  const visible = page.locator('li[data-diet]:not([hidden])');
+  expect(await visible.count()).toBeGreaterThan(8);
+  for (const d of await visible.evaluateAll((els) => els.map((e) => e.getAttribute('data-diet'))))
+    expect(d).toBe('vegan');
+  await filters.getByRole('button', { name: '15 minutes or less' }).click();
+  for (const m of await visible.evaluateAll((els) =>
+    els.map((e) => Number(e.getAttribute('data-minutes'))),
+  ))
+    expect(m).toBeLessThanOrEqual(15);
+  await filters.getByRole('button', { name: 'Everything' }).click();
+  await filters.getByRole('button', { name: '15 minutes or less' }).click();
+  await expect(filters).toContainText(/68 of 68 recipes/);
+});
