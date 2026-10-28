@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lateShare, topFoods } from '../breakdown';
+import { eatingWindowHours, lateShare, topFoods } from '../breakdown';
 import type { FoodEntry } from '../nutrition';
 
 const e = (date: string, name: string, kcal: number, time?: number): FoodEntry => ({
@@ -33,5 +33,22 @@ describe('calorie breakdown', () => {
   it('computes the late share only from timed entries', () => {
     expect(lateShare(food, days)).toBeCloseTo(800 / 1400, 3);
     expect(lateShare([e('2026-10-01', 'x', 100)], days)).toBeNull();
+  });
+});
+
+describe('eating window', () => {
+  it('averages first-to-last times over days with two or more timed entries', () => {
+    const days = ['2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04'];
+    const f = [
+      e('2026-10-01', 'a', 100, 8 * 60),
+      e('2026-10-01', 'b', 100, 20 * 60), // 12 h
+      e('2026-10-02', 'a', 100, 9 * 60),
+      e('2026-10-02', 'b', 100, 19 * 60), // 10 h
+      e('2026-10-03', 'a', 100, 7 * 60),
+      e('2026-10-03', 'b', 100, 21 * 60), // 14 h
+      e('2026-10-04', 'only', 100, 12 * 60), // ignored: one entry
+    ];
+    expect(eatingWindowHours(f, days)).toBe(12);
+    expect(eatingWindowHours(f.slice(0, 4), days)).toBeNull();
   });
 });

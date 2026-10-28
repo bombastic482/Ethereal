@@ -1,4 +1,4 @@
-import { lateShare as lateCalorieShare, topFoods } from './breakdown';
+import { eatingWindowHours, lateShare as lateCalorieShare, topFoods } from './breakdown';
 import { MEALS, summariseDay, type ExerciseEntry, type FoodEntry } from './nutrition';
 import { round } from './units';
 
@@ -125,6 +125,22 @@ export function buildInsights(
       title: `${round(late * 100)}% of calories after 9 pm`,
       detail:
         'Late eating is not fattening by itself, but it is where unplanned calories land and it can cost sleep. Try moving one planned snack earlier and see whether the trend changes.',
+      tone: 'neutral',
+    });
+  }
+
+  // 6b. Eating window (first to last logged time)
+  const windowH = eatingWindowHours(food, dates);
+  if (windowH !== null) {
+    out.push({
+      key: 'window',
+      title: `Eating window averages ${windowH} hours`,
+      detail:
+        windowH > 14
+          ? 'A long window means more occasions to eat. Pulling the first or last meal in by an hour is an easy, painless way to trim calories without changing what you eat.'
+          : windowH < 10
+            ? 'That is a naturally time-restricted pattern. The trials show it works through fewer eating occasions, not the clock, so keep protein high within the window.'
+            : 'A normal window. If hunger late in the day is the problem, shift the window earlier rather than shorter.',
       tone: 'neutral',
     });
   }

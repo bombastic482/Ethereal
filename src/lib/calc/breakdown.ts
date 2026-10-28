@@ -58,3 +58,23 @@ export function lateShare(
   }
   return timed > 0 ? late / timed : null;
 }
+
+/**
+ * Average eating window in hours (first to last timed entry per day) over days with at least
+ * two timed entries; null when fewer than three such days exist.
+ */
+export function eatingWindowHours(food: FoodEntry[], dates: string[]): number | null {
+  const set = new Set(dates);
+  const byDay = new Map<string, number[]>();
+  for (const e of food) {
+    if (!set.has(e.date) || e.time === undefined) continue;
+    const arr = byDay.get(e.date) ?? [];
+    arr.push(e.time);
+    byDay.set(e.date, arr);
+  }
+  const spans = [...byDay.values()]
+    .filter((t) => t.length >= 2)
+    .map((t) => (Math.max(...t) - Math.min(...t)) / 60);
+  if (spans.length < 3) return null;
+  return Math.round((spans.reduce((a, b) => a + b, 0) / spans.length) * 10) / 10;
+}
