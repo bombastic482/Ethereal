@@ -11,6 +11,7 @@ Free, science-backed weight-loss planning that runs entirely in your browser. Li
 - **A two-week check**: compares your measured trend with the plan and recommends a specific calorie adjustment (capped, never below safe floors), applied with one click.
 - **Eight calculators** (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water) sharing one profile.
 - **Eighteen evidence-based guides**, a quick launcher (⌘K), a first-run tour, calendar reminders (.ics), installable as an app, works offline, exports/imports full backups (plan, weigh-ins, diary, preferences, reflections), shares a plan between devices via a link.
+- **Switch from another app**: import your history from MyFitnessPal, Lose It!, Cronometer or any CSV with dates and calories, macros or weight; a preview shows what was recognised, duplicates are skipped.
 - **An identity of its own**: warm paper and ink, moss and apricot, serif numerals, paper grain, warm-charcoal dark mode.
 - **No account, no server, no tracking.** Nothing you enter ever leaves your device.
 
@@ -74,7 +75,7 @@ src/
   lib/calc/nutrition.ts, exercise.ts, streaks.ts, expenditure.ts, insights.ts  diary maths
   lib/food-store.ts  food/exercise diary; lib/foods.ts local DB search; lib/off.ts Open Food Facts client
   lib/recipes.ts     starter recipes resolved against the database; lib/day-plan.ts whole-day planner + shopping list
-  lib/quick-parse.ts natural-language entry
+  lib/quick-parse.ts natural-language entry; lib/import-csv.ts CSV importer for other apps' exports
   data/foods-*.json  built-in food database (six lazy chunks); data/recipes.json starter recipes
   scripts/validate-foods.mjs, validate-recipes.mjs  data validators, run in CI
   lib/tools.ts       tool registry (nav, cards, sitemap)

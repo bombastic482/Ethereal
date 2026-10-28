@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { buildShareLink, clearAllData, createBackup, logToCsv, restoreBackup } from '@/lib/backup';
 import { diaryStore, foodCsv, prefsStore } from '@/lib/food-store';
+import { applyImport, previewImport, type ImportPreview } from '@/lib/import-csv';
 import { logStore } from '@/lib/log';
 import { buildReminderIcs } from '@/lib/reminders';
 import { todayIso } from '@/lib/plan';
@@ -78,6 +79,34 @@ function DataManagerInner() {
         );
       })
       .catch(() => say('warn', 'Could not read that file.'));
+  };
+
+  const [csvPreview, setCsvPreview] = useState<ImportPreview | null>(null);
+  const importCsv = (file: File | undefined) => {
+    if (!file) return;
+    file
+      .text()
+      .then((t) => {
+        const p = previewImport(t);
+        if (!p) {
+          say(
+            'warn',
+            'No date column or usable rows found. Export a CSV with dates and either calories or weight.',
+          );
+          return;
+        }
+        setCsvPreview(p);
+      })
+      .catch(() => say('warn', 'Could not read that file.'));
+  };
+  const confirmCsv = () => {
+    if (!csvPreview) return;
+    const n = applyImport(csvPreview);
+    setCsvPreview(null);
+    say(
+      'success',
+      `Imported ${n.food} food entr${n.food === 1 ? 'y' : 'ies'} and ${n.weighIns} weigh-in${n.weighIns === 1 ? '' : 's'}. Rows already present were skipped.`,
+    );
   };
 
   const share = async () => {
@@ -252,6 +281,66 @@ function DataManagerInner() {
           </button>
         </div>
         {msg && <Callout tone={msg.tone}>{msg.text}</Callout>}
+      </section>
+
+      <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Switch from another app">
+        <h2 class="text-lg font-bold tracking-tight">Switching from another app?</h2>
+        <p class="text-muted text-sm">
+          Bring your history with you. Export a CSV from MyFitnessPal, Lose It!, Cronometer or a
+          spreadsheet (any file with a date column plus calories, macros or weight) and import it
+          here. Your trend, streaks and insights pick up where you left off. Nothing is uploaded.
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="btn btn-secondary cursor-pointer text-sm">
+            <Icon name="arrow" size={16} /> Import CSV
+            <input
+              type="file"
+              accept=".csv,text/csv,text/plain"
+              class="sr-only"
+              onChange={(e) => {
+                const el = e.target as HTMLInputElement;
+                importCsv(el.files?.[0]);
+                el.value = '';
+              }}
+            />
+          </label>
+          <span class="text-subtle text-xs">
+            MyFitnessPal: Reports → Export data. Lose It!: Settings → Export data. Cronometer:
+            Account → Export.
+          </span>
+        </div>
+        {csvPreview && (
+          <div
+            class="border-line grid gap-3 rounded-2xl border p-4"
+            role="group"
+            aria-label="Import preview"
+          >
+            <p class="text-sm">
+              Looks like a <strong>{csvPreview.source}</strong> export:{' '}
+              <strong>{csvPreview.food.length}</strong> food entr
+              {csvPreview.food.length === 1 ? 'y' : 'ies'} and{' '}
+              <strong>{csvPreview.weighIns.length}</strong> weigh-in
+              {csvPreview.weighIns.length === 1 ? '' : 's'}
+              {csvPreview.weightUnit ? ` (read as ${csvPreview.weightUnit})` : ''} across{' '}
+              <strong>{csvPreview.days}</strong> day{csvPreview.days === 1 ? '' : 's'}
+              {csvPreview.skipped ? `; ${csvPreview.skipped} rows skipped` : ''}.
+              {csvPreview.food.length > 0 &&
+                ' Imported food keeps its calories and macros exactly; portions show as 100 g.'}
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="btn btn-primary text-sm" onClick={confirmCsv}>
+                Import {csvPreview.food.length + csvPreview.weighIns.length} rows
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost text-sm"
+                onClick={() => setCsvPreview(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Reminders">

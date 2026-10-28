@@ -165,3 +165,25 @@ test.describe('weekly review', () => {
     ).toHaveValue('Walked every day');
   });
 });
+
+test.describe('switching from another app', () => {
+  test('imports a MyFitnessPal-style CSV after a preview', async ({ page }) => {
+    await ready(page, '/settings/');
+    const csv = [
+      'Date,Meal,Calories,Fat (g),Saturated Fat,Polyunsaturated Fat,Carbohydrates (g),Fiber,Sugar,Protein (g)',
+      '2026-01-05,Breakfast,412,9,3,1,48,6,12,30',
+      '2026-01-05,Dinner,640,22,6,2,60,7,6,45',
+      '2026-01-06,Lunch,586,18,5,1,55,8,9,42',
+    ].join('\n');
+    await page
+      .getByRole('region', { name: 'Switch from another app' })
+      .locator('input[type=file]')
+      .setInputFiles({ name: 'mfp.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+    const preview = page.getByRole('group', { name: 'Import preview' });
+    await expect(preview).toContainText(/MyFitnessPal/);
+    await expect(preview).toContainText(/3 food entries/);
+    await preview.getByRole('button', { name: /Import 3 rows/ }).click();
+    await expect(page.getByText(/Imported 3 food entries and 0 weigh-ins/)).toBeVisible();
+    await expect(page.getByText(/3 food entries stored on this device/)).toBeVisible();
+  });
+});
