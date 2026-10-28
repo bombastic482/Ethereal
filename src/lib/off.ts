@@ -12,10 +12,14 @@ export interface OffProduct {
   servingGrams?: number;
   servingLabel?: string;
   image?: string;
+  /** Nutri-Score grade a–e when Open Food Facts has computed one. */
+  nutriscore?: 'a' | 'b' | 'c' | 'd' | 'e';
+  /** NOVA processing group 1–4 (4 = ultra-processed). */
+  nova?: 1 | 2 | 3 | 4;
 }
 
 const FIELDS =
-  'code,product_name,product_name_en,brands,nutriments,serving_size,serving_quantity,image_front_small_url';
+  'code,product_name,product_name_en,brands,nutriments,serving_size,serving_quantity,image_front_small_url,nutriscore_grade,nova_group';
 const BASE = 'https://world.openfoodfacts.org';
 
 function num(v: unknown): number | undefined {
@@ -23,7 +27,7 @@ function num(v: unknown): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function normalise(p: Record<string, unknown>): OffProduct | null {
+export function normalise(p: Record<string, unknown>): OffProduct | null {
   const n = (p.nutriments ?? {}) as Record<string, unknown>;
   const kcal =
     num(n['energy-kcal_100g']) ??
@@ -64,6 +68,12 @@ function normalise(p: Record<string, unknown>): OffProduct | null {
         }
       : {}),
     ...(typeof p.image_front_small_url === 'string' ? { image: p.image_front_small_url } : {}),
+    ...(/^[a-e]$/.test(String(p.nutriscore_grade ?? ''))
+      ? { nutriscore: String(p.nutriscore_grade) as OffProduct['nutriscore'] }
+      : {}),
+    ...([1, 2, 3, 4].includes(Number(p.nova_group))
+      ? { nova: Number(p.nova_group) as OffProduct['nova'] }
+      : {}),
   };
 }
 

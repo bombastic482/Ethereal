@@ -73,7 +73,23 @@ interface Candidate {
   source: FoodEntry['source'];
   foodId?: string;
   barcode?: string;
+  nutriscore?: OffProduct['nutriscore'];
+  nova?: OffProduct['nova'];
 }
+
+const NUTRISCORE_TONE: Record<'a' | 'b' | 'c' | 'd' | 'e', string> = {
+  a: 'bg-brand-100 text-brand-800 dark:bg-brand-400/20 dark:text-brand-100',
+  b: 'bg-brand-100 text-brand-800 dark:bg-brand-400/20 dark:text-brand-100',
+  c: 'bg-amber-100 text-amber-900 dark:bg-amber-400/15 dark:text-amber-100',
+  d: 'bg-orange-100 text-orange-900 dark:bg-orange-400/15 dark:text-orange-100',
+  e: 'bg-rose-100 text-rose-900 dark:bg-rose-400/15 dark:text-rose-100',
+};
+const NOVA_LABEL: Record<1 | 2 | 3 | 4, string> = {
+  1: 'Unprocessed',
+  2: 'Culinary ingredient',
+  3: 'Processed',
+  4: 'Ultra-processed',
+};
 
 /** Appends the 100 g option unless the food already offers it (45 foods and many labels do). */
 const withHundred = (servings: Array<{ label: string; grams: number }>) =>
@@ -97,6 +113,8 @@ const fromOff = (p: OffProduct): Candidate => ({
   ),
   source: 'off',
   barcode: p.barcode,
+  ...(p.nutriscore ? { nutriscore: p.nutriscore } : {}),
+  ...(p.nova ? { nova: p.nova } : {}),
 });
 const fromCustom = (c: CustomFood): Candidate => ({
   name: c.name,
@@ -1240,6 +1258,26 @@ function PortionPicker({
           </div>
         ))}
       </div>
+      {(candidate.nutriscore || candidate.nova) && (
+        <p class="flex flex-wrap items-center gap-2 text-xs">
+          {candidate.nutriscore && (
+            <span
+              class={`rounded-full px-2 py-0.5 font-semibold ${NUTRISCORE_TONE[candidate.nutriscore]}`}
+              title="Nutri-Score, a front-of-pack grade from A (best) to E, computed by Open Food Facts"
+            >
+              Nutri-Score {candidate.nutriscore.toUpperCase()}
+            </span>
+          )}
+          {candidate.nova && (
+            <span
+              class={`rounded-full px-2 py-0.5 font-semibold ${candidate.nova === 4 ? 'bg-rose-100 text-rose-900 dark:bg-rose-400/15 dark:text-rose-100' : 'bg-muted text-muted'}`}
+              title="NOVA processing group: 1 unprocessed, 2 culinary ingredients, 3 processed, 4 ultra-processed"
+            >
+              {NOVA_LABEL[candidate.nova]}
+            </span>
+          )}
+        </p>
+      )}
       {(candidate.per100g.sugar !== undefined ||
         candidate.per100g.satFat !== undefined ||
         candidate.per100g.salt !== undefined) && (
