@@ -4,7 +4,8 @@
  */
 import type { CoreNutrients, Diet, FoodEntry } from './calc/nutrition';
 import { scale, sum } from './calc/nutrition';
-import { diaryStore, uid, type SavedMeal } from './food-store';
+import { recipeIsHalalFriendly } from './calc/halal';
+import { diaryStore, prefsStore, uid, type SavedMeal } from './food-store';
 import { foodById, loadFoods, type Food } from './foods';
 
 export type RecipeMeal = 'breakfast' | 'lunch' | 'dinner' | 'snack';
@@ -44,6 +45,17 @@ export function loadRecipes(): Promise<Recipe[]> {
 }
 
 export const allRecipes = (): Recipe[] => RECIPES;
+
+/** The recipes the current preferences allow: everything, or only halal-friendly ones. */
+export function usableRecipes(): Recipe[] {
+  if (!prefsStore.get().halal) return RECIPES;
+  return RECIPES.filter((r) =>
+    recipeIsHalalFriendly(
+      r.name,
+      r.items.map((it) => foodById(it.foodId)?.name ?? ''),
+    ),
+  );
+}
 
 /** Attaches database foods and per-serving totals; null if any ingredient is missing. */
 export function resolveRecipe(r: Recipe): ResolvedRecipe | null {

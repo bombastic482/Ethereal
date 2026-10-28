@@ -33,7 +33,11 @@ const foodCount =
 const chainPicks = ['Chipotle', "McDonald's", 'KFC', "Nando's", 'Subway']
   .map((n) => chains.find((c) => c.name === n))
   .filter((c): c is NonNullable<typeof c> => !!c)
-  .map((c) => ({ chain: c.name, slug: c.slug, item: c.items[0]! }));
+  .map((c) => ({
+    chain: c.name,
+    slug: c.slug,
+    item: (c.items.find((i) => i.halal) ?? c.items[0])!,
+  }));
 const chainItems = chains.reduce((n, c) => n + c.items.length, 0);
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 // Built as one string so the commas sit flush against the links.

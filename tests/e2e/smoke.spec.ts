@@ -282,3 +282,23 @@ test('eating-out page picks the highest-protein order that fits a calorie budget
   await chipotle.getByRole('button', { name: /Best order at Chipotle/ }).click();
   await expect(bar).toContainText(/Nothing at this chain fits 10 kcal/);
 });
+
+test('halal preference hides pork and alcohol on the eating-out and recipes pages', async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      'ethereal:prefs:v1',
+      JSON.stringify({ diet: 'omnivore', halal: true, eatBack: false, waterGoalGlasses: 8 }),
+    ),
+  );
+  await page.goto('/eating-out/');
+  await expect(page.getByText(/Halal filter on/)).toBeVisible();
+  const mcd = page.locator('section#mcdonalds');
+  await expect(mcd.locator('[data-item-row]', { hasText: /Sausage McMuffin/ })).toBeHidden();
+  await expect(mcd.locator('[data-item-row]', { hasText: /Big Mac/ })).toBeVisible();
+  await page.goto('/recipes/');
+  await expect(page.getByText(/Halal filter on/)).toBeVisible();
+  await expect(page.locator('li[data-halal="no"]').first()).toBeHidden();
+  await expect(page.locator('li[data-halal="yes"]').first()).toBeVisible();
+});

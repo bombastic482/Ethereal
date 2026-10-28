@@ -150,6 +150,20 @@ function OnboardingInner() {
               value={prefs.diet}
               onChange={(diet) => patchPrefs({ diet })}
             />
+            <label class="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                class="accent-brand-600 mt-0.5 h-4 w-4"
+                checked={prefs.halal}
+                onChange={(e) => patchPrefs({ halal: (e.target as HTMLInputElement).checked })}
+              />
+              <span>
+                <span class="font-semibold">Halal</span>
+                <span class="text-muted block text-xs">
+                  No pork, gelatin sweets or alcohol anywhere on the site.
+                </span>
+              </span>
+            </label>
           </div>
         )}
 

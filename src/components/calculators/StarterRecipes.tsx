@@ -10,7 +10,9 @@ import {
   saveRecipeAsMeal,
   type RecipeMeal,
   type ResolvedRecipe,
+  usableRecipes,
 } from '@/lib/recipes';
+import { prefsStore } from '@/lib/food-store';
 import { withBase } from '@/lib/url';
 import { Icon } from '../ui/Icon';
 import { Segmented } from '../ui/Segmented';
@@ -43,6 +45,7 @@ const DIET_LABEL: Record<ResolvedRecipe['diet'], string> = {
 /** Sixty-plus high-protein recipes built from database foods; log one in a tap or save it as your own meal. */
 export function StarterRecipes({ date, slot, diet, remainingKcal, focusId, onLogged }: Props) {
   const [ready, setReady] = useState(allRecipes().length > 0);
+  const [prefs] = prefsStore.use();
   const [meal, setMeal] = useState<RecipeMeal | 'all'>(focusId ? 'all' : slot);
   const [q, setQ] = useState('');
   const [quick, setQuick] = useState(false);
@@ -70,7 +73,7 @@ export function StarterRecipes({ date, slot, diet, remainingKcal, focusId, onLog
 
   const list = useMemo(() => {
     if (!ready) return [];
-    const base = filterRecipes(allRecipes(), {
+    const base = filterRecipes(usableRecipes(), {
       meal,
       diet,
       q,
@@ -84,7 +87,7 @@ export function StarterRecipes({ date, slot, diet, remainingKcal, focusId, onLog
       if (pinned) return [pinned, ...base];
     }
     return base;
-  }, [ready, meal, diet, q, quick, remainingKcal, focusId]);
+  }, [ready, meal, diet, prefs.halal, q, quick, remainingKcal, focusId]);
 
   return (
     <section

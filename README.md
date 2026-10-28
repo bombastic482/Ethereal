@@ -14,6 +14,7 @@ Free, science-backed weight-loss planning that runs entirely in your browser. Li
 - **Eighteen evidence-based guides**, a quick launcher (⌘K), a first-run tour, calendar reminders (.ics), installable as an app, works offline, exports/imports full backups (plan, weigh-ins, diary, preferences, reflections), shares a plan between devices via a link.
 - **Switch from another app**: import your history from MyFitnessPal, Lose It!, Cronometer or any CSV with dates and calories, macros or weight; a preview shows what was recognised, duplicates are skipped.
 - **Clean by design**: one typeface (Manrope), white and near-black surfaces, a single green accent, generous spacing, no visual noise; dark mode follows the system.
+- **Halal option**: one switch hides pork and pork products, gelatin sweets and alcohol from search, suggestions, recipes, the planner and the eating-out page.
 - **No account, no server, no tracking.** Nothing you enter ever leaves your device.
 
 **Stack:** [Astro](https://astro.build) (static output) · [Preact](https://preactjs.com) islands · [Tailwind CSS v4](https://tailwindcss.com) · TypeScript strict · Vitest · Playwright · Lighthouse CI.

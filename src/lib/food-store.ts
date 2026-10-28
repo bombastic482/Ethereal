@@ -1,5 +1,6 @@
 /** Food and exercise diary plus diary preferences, all stored locally. */
 import type { ExerciseEntry, FoodEntry, Nutrients, Diet } from './calc/nutrition';
+import { isHalalFriendly } from './calc/halal';
 import { createStore } from './store';
 
 export interface CustomFood {
@@ -53,6 +54,8 @@ export interface Diary {
 
 export interface DiaryPrefs {
   diet: Diet;
+  /** Hide pork and pork products, gelatin sweets and alcohol everywhere. */
+  halal: boolean;
   /** Add exercise calories to the day's target. Off by default; trackers overestimate burn. */
   eatBack: boolean;
   waterGoalGlasses: number;
@@ -80,9 +83,15 @@ export const diaryStore = createStore<Diary>(
 
 export const prefsStore = createStore<DiaryPrefs>('ethereal:prefs:v1', {
   diet: 'omnivore',
+  halal: false,
   eatBack: false,
   waterGoalGlasses: 8,
 });
+
+/** Whether the current preferences allow a food with this name (halal filter). */
+export function allowsFood(name: string): boolean {
+  return !prefsStore.get().halal || isHalalFriendly(name);
+}
 
 export const uid = (): string => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 

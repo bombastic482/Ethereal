@@ -18,6 +18,7 @@ import {
   logRecipe,
   saveRecipeAsMeal,
   type RecipeMeal,
+  usableRecipes,
 } from '@/lib/recipes';
 import { withBase } from '@/lib/url';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
@@ -78,7 +79,7 @@ function DayPlannerInner() {
     quick?: boolean;
     noSnack?: boolean;
   }) =>
-    planDay(allRecipes(), {
+    planDay(usableRecipes(), {
       kcal: targetKcal,
       protein: targetProtein,
       diet: prefs.diet,
@@ -103,7 +104,7 @@ function DayPlannerInner() {
     if (!ready) return;
     setDay(compute({ locked: lockedIds(day) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, targetKcal, targetProtein, prefs.diet]);
+  }, [ready, targetKcal, targetProtein, prefs.diet, prefs.halal]);
 
   const reroll = (slot: RecipeMeal) => {
     if (!day) return;
@@ -201,7 +202,7 @@ function DayPlannerInner() {
     repeat?: boolean;
     exclude?: string[];
   }) =>
-    planWeek(allRecipes(), {
+    planWeek(usableRecipes(), {
       kcal: targetKcal,
       protein: targetProtein,
       diet: prefs.diet,
@@ -214,7 +215,17 @@ function DayPlannerInner() {
     if (!ready || mode !== 'week') return;
     setWeek(buildWeek({}));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, mode, targetKcal, targetProtein, prefs.diet, quick, noSnack, repeatBreakfast]);
+  }, [
+    ready,
+    mode,
+    targetKcal,
+    targetProtein,
+    prefs.diet,
+    prefs.halal,
+    quick,
+    noSnack,
+    repeatBreakfast,
+  ]);
   const reshuffleWeek = () => {
     // Seed the next week with this week's dinners excluded, so it looks different.
     const seed = week.map((d) => d.slots.dinner?.id).filter((x): x is string => !!x);
