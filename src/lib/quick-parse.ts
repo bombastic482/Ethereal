@@ -32,6 +32,7 @@ const WORD_NUMBERS: Record<string, number> = {
   quarter: 0.25,
   couple: 2,
   few: 3,
+  dozen: 12,
 };
 const UNITS: Record<string, { grams?: number; kind: 'mass' | 'volume' | 'count' }> = {
   g: { grams: 1, kind: 'mass' },
@@ -42,10 +43,16 @@ const UNITS: Record<string, { grams?: number; kind: 'mass' | 'volume' | 'count' 
   ounce: { grams: 28.35, kind: 'mass' },
   ounces: { grams: 28.35, kind: 'mass' },
   lb: { grams: 453.6, kind: 'mass' },
+  lbs: { grams: 453.6, kind: 'mass' },
+  pound: { grams: 453.6, kind: 'mass' },
+  pounds: { grams: 453.6, kind: 'mass' },
+  kgs: { grams: 1000, kind: 'mass' },
   ml: { grams: 1, kind: 'volume' },
   l: { grams: 1000, kind: 'volume' },
   litre: { grams: 1000, kind: 'volume' },
   liter: { grams: 1000, kind: 'volume' },
+  litres: { grams: 1000, kind: 'volume' },
+  liters: { grams: 1000, kind: 'volume' },
   cup: { grams: 240, kind: 'volume' },
   cups: { grams: 240, kind: 'volume' },
   tbsp: { grams: 15, kind: 'volume' },
@@ -53,6 +60,8 @@ const UNITS: Record<string, { grams?: number; kind: 'mass' | 'volume' | 'count' 
   tablespoons: { grams: 15, kind: 'volume' },
   tsp: { grams: 5, kind: 'volume' },
   teaspoon: { grams: 5, kind: 'volume' },
+  teaspoons: { grams: 5, kind: 'volume' },
+  x: { kind: 'count' },
   glass: { grams: 250, kind: 'volume' },
   glasses: { grams: 250, kind: 'volume' },
   slice: { kind: 'count' },
@@ -72,11 +81,12 @@ const UNITS: Record<string, { grams?: number; kind: 'mass' | 'volume' | 'count' 
   eggs: { kind: 'count' },
 };
 const FILLER =
-  /\b(of|the|some|with|and|plus|my|for|breakfast|lunch|dinner|snack|i|had|ate|have)\b/g;
+  /\b(of|the|a|an|some|with|and|plus|my|for|breakfast|lunch|dinner|snack|i|had|ate|have)\b/g;
 
 export function parseQuickEntry(text: string): ParsedItem[] {
   return text
     .toLowerCase()
+    .replace(/(\d),(\d)/g, '$1.$2') // decimal comma: "1,5 cups"
     .replace(/\band\b/g, ',')
     .replace(/\+/g, ',')
     .split(/[,;\n]/)
@@ -86,6 +96,8 @@ export function parseQuickEntry(text: string): ParsedItem[] {
       let rest = raw;
       let quantity = 1;
       let unit = 'serving';
+      // "a couple of eggs": an article alone is not the quantity, so look once more after it.
+      rest = rest.replace(/^(a|an)\s+(?=(couple|few|half|quarter|dozen)\b)/, '');
       const num = rest.match(/^(\d+(?:[.,]\d+)?|\d+\/\d+|½|¼|¾|[a-z]+)\s+/);
       if (num) {
         const tok = num[1]!;
@@ -100,11 +112,11 @@ export function parseQuickEntry(text: string): ParsedItem[] {
         else if (tok in WORD_NUMBERS) q = WORD_NUMBERS[tok]!;
         if (q !== null) {
           quantity = q;
-          rest = rest.slice(num[0].length);
+          rest = rest.slice(num[0].length).replace(/^(a|an|of)\s+/, '');
         }
       }
       // attached unit, e.g. "150g", "2x", "200ml"
-      const attached = rest.match(/^(\d+(?:[.,]\d+)?)(g|kg|ml|l|oz|lb)\b\s*/);
+      const attached = rest.match(/^(\d+(?:[.,]\d+)?)(g|kg|ml|l|oz|lb|x)\b\s*/);
       if (attached) {
         quantity = parseFloat(attached[1]!.replace(',', '.'));
         unit = attached[2]!;
@@ -127,11 +139,30 @@ export function resolveGrams(
   food: Food,
 ): { grams: number; servingLabel: string } {
   const u = UNITS[item.unit];
-  if (u?.grams)
+  if (u?.grams) {
+    // Volume units: the food's own "1 cup" / "1 tbsp" serving beats the water-density table.
+    if (u.kind === 'volume') {
+      const base = item.unit.replace(/s$/, '');
+      const own = food.servings.find((sv) => {
+        const m = /^(\d+(?:\/\d+|\.\d+)?)\s*([a-z]+)/i.exec(sv.label);
+        return m && m[2]!.toLowerCase().replace(/s$/, '') === base;
+      });
+      if (own) {
+        const m = /^(\d+(?:\/\d+|\.\d+)?)/.exec(own.label)!;
+        const n = m[1]!.includes('/')
+          ? Number(m[1]!.split('/')[0]) / Number(m[1]!.split('/')[1])
+          : Number(m[1]);
+        return {
+          grams: Math.round((item.quantity / (n || 1)) * own.grams),
+          servingLabel: `${item.quantity} ${item.unit}`,
+        };
+      }
+    }
     return {
       grams: Math.round(item.quantity * u.grams),
       servingLabel: `${item.quantity} ${item.unit}`,
     };
+  }
   // count-like units: prefer a serving whose label mentions the unit, else the first serving
   const byLabel =
     u && u.kind === 'count'

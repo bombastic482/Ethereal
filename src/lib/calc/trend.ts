@@ -167,59 +167,90 @@ export function assessProgress(input: ProgressInput, today = toDay(new Date())):
   const slope = slopeKgPerDay(series, 14);
   const measuredRate = slope === null ? null : round(-slope * 7, 2); // positive = loss
   const impliedDeficit = measuredRate === null ? null : round((measuredRate * KCAL_PER_KG) / 7);
-  const planned = losing ? plannedRateKgPerWeek : -plannedRateKgPerWeek;
-  const measured = measuredRate ?? 0;
+  // Work in a "toward the goal" frame so the same rules serve losing, gaining and maintaining:
+  // dir = +1 losing, -1 gaining, 0 maintaining. `toward` is positive when moving the right way.
+  const maintaining = goalWeightKg === startWeightKg || Math.abs(plannedRateKgPerWeek) < 0.05;
+  const dir = maintaining ? 0 : losing ? 1 : -1;
+  const planned = maintaining ? 0 : Math.abs(plannedRateKgPerWeek);
+  const measured = measuredRate ?? 0; // positive = loss
+  const toward = dir === 0 ? -Math.abs(measured) : dir * measured;
 
   // Tolerance: ±35% of planned rate or 0.15 kg/week, whichever is larger.
-  const tol = Math.max(0.15, Math.abs(planned) * 0.35);
+  const tol = Math.max(0.15, planned * 0.35);
   let status: ProgressStatus;
-  if (losing && measured < -0.1) status = 'gaining';
-  else if (Math.abs(measured) < 0.1 && Math.abs(planned) >= 0.2) status = 'stalled';
-  else if (Math.abs(measured - planned) <= tol) status = 'on-track';
-  else if (Math.abs(measured) < Math.abs(planned)) status = 'too-slow';
+  if (dir === 0) status = Math.abs(measured) <= tol ? 'on-track' : 'too-fast';
+  else if (toward < -0.1)
+    status = 'gaining'; // moving away from the goal
+  else if (Math.abs(toward) < 0.1 && planned >= 0.2) status = 'stalled';
+  else if (Math.abs(toward - planned) <= tol) status = 'on-track';
+  else if (toward < planned) status = 'too-slow';
   else status = 'too-fast';
 
-  // Adjustment: close the gap between planned and measured deficit, capped at ±250 kcal.
-  const gapKcal = ((planned - measured) * KCAL_PER_KG) / 7; // positive => need bigger deficit
+  // Adjustment: close the gap between planned and measured rate, capped at ±250 kcal/day.
+  // For a loss goal "need more" means eat less; for a gain goal it means eat more.
+  const gapKcal = Math.abs(((planned - toward) * KCAL_PER_KG) / 7);
+  const magnitude = Math.min(250, Math.max(100, round(gapKcal, -1)));
   let adjustment = 0;
-  if (status === 'too-slow' || status === 'stalled' || status === 'gaining')
-    adjustment = -Math.min(250, Math.max(100, round(gapKcal, -1)));
-  else if (status === 'too-fast') adjustment = Math.min(250, Math.max(100, round(-gapKcal, -1)));
+  if (dir === 0) {
+    // Maintaining: losing means eat more, gaining means eat less.
+    if (status === 'too-fast') adjustment = measured > 0 ? magnitude : -magnitude;
+  } else if (status === 'too-slow' || status === 'stalled' || status === 'gaining') {
+    adjustment = -dir * magnitude;
+  } else if (status === 'too-fast') {
+    adjustment = dir * magnitude;
+  }
   let recommended = adjustment
     ? Math.max(floorCalories, round(targetCalories + adjustment, -1))
     : null;
   if (recommended !== null && recommended === targetCalories) recommended = null;
   const finalAdjust = recommended === null ? 0 : recommended - targetCalories;
 
+  const verb = dir === -1 ? 'gaining' : 'losing';
+  const away = dir === -1 ? 'fallen' : 'risen';
+  const eatWord = (n: number) => (n < 0 ? 'Drop intake to' : 'Raise intake to');
   const text: Record<ProgressStatus, [string, string]> = {
     'insufficient-data': ['', ''],
     'on-track': [
       'On track',
-      `Your trend is moving at ${Math.abs(measured)} kg/week against a plan of ${Math.abs(planned)}. Change nothing; keep logging.`,
+      dir === 0
+        ? `Your trend is holding within ${tol} kg/week of flat. Change nothing; keep logging.`
+        : `Your trend is moving at ${Math.abs(measured)} kg/week against a plan of ${planned}. Change nothing; keep logging.`,
     ],
     'too-slow': [
       'Slower than planned',
-      `Your trend is moving ${Math.abs(measured)} kg/week versus ${Math.abs(planned)} planned, which implies a real deficit of about ${impliedDeficit} kcal/day. ${
+      `Your trend is moving ${Math.abs(measured)} kg/week versus ${planned} planned, which implies a real ${dir === -1 ? 'surplus' : 'deficit'} of about ${Math.abs(impliedDeficit ?? 0)} kcal/day. ${
         recommended
-          ? `Drop intake to ${recommended} kcal, or add ~${Math.abs(finalAdjust)} kcal of daily movement, then re-check in two weeks.`
+          ? `${eatWord(finalAdjust)} ${recommended} kcal${dir === 1 ? `, or add ~${Math.abs(finalAdjust)} kcal of daily movement,` : ''} then re-check in two weeks.`
           : 'You are already at the intake floor: add daily steps rather than cutting food.'
       }`,
     ],
     'too-fast': [
-      'Faster than planned',
-      `You are losing ${Math.abs(measured)} kg/week, more than the ${Math.abs(planned)} you planned. Fast early loss is mostly water; if it continues, raise intake to ${recommended ?? targetCalories} kcal to protect muscle and energy.`,
+      dir === 0
+        ? measured > 0
+          ? 'Losing while maintaining'
+          : 'Gaining while maintaining'
+        : 'Faster than planned',
+      dir === 0
+        ? `Your trend is ${measured > 0 ? 'falling' : 'rising'} ${Math.abs(measured)} kg/week while you aim to hold steady. ${eatWord(finalAdjust)} ${recommended ?? targetCalories} kcal and re-check in two weeks.`
+        : `You are ${verb} ${Math.abs(measured)} kg/week, more than the ${planned} you planned. ${
+            dir === 1
+              ? `Fast early loss is mostly water; if it continues, raise intake to ${recommended ?? targetCalories} kcal to protect muscle and energy.`
+              : `Gaining this fast adds more fat than muscle; drop intake to ${recommended ?? targetCalories} kcal.`
+          }`,
     ],
     stalled: [
       'Stalled',
-      `Your trend has been flat for two weeks. That usually means the deficit has shrunk to nothing through adaptation, lower activity or logging drift. ${
-        recommended
-          ? `Reduce intake to ${recommended} kcal or add ~${Math.abs(finalAdjust)} kcal of activity.`
-          : 'You are at the intake floor: add daily movement and review logging accuracy.'
-      } If you have been dieting for 12+ weeks, take a 1–2 week maintenance break first.`,
+      dir === 1
+        ? `Your trend has been flat for two weeks. That usually means the deficit has shrunk to nothing through adaptation, lower activity or logging drift. ${
+            recommended
+              ? `Reduce intake to ${recommended} kcal or add ~${Math.abs(finalAdjust)} kcal of activity.`
+              : 'You are at the intake floor: add daily movement and review logging accuracy.'
+          } If you have been dieting for 12+ weeks, take a 1–2 week maintenance break first.`
+        : `Your trend has been flat for two weeks, so the surplus is not there yet. ${recommended ? `Raise intake to ${recommended} kcal` : 'Add a little more food'} and keep training; re-check in 14 days.`,
     ],
     gaining: [
-      'Trend is rising',
-      `Your trend weight has risen over two weeks. Check logging accuracy and weekend intake, then ${recommended ? `set intake to ${recommended} kcal` : 'add activity'} and reassess in 14 days.`,
+      dir === -1 ? 'Trend is falling' : 'Trend is rising',
+      `Your trend weight has ${away} over two weeks. Check logging accuracy and weekend intake, then ${recommended ? `set intake to ${recommended} kcal` : dir === 1 ? 'add activity' : 'add food'} and reassess in 14 days.`,
     ],
   };
   const [headline, detail] = text[status];

@@ -571,7 +571,7 @@ function PlanDashboardInner() {
                   sub={
                     expenditure.vsFormula === null
                       ? ''
-                      : `${expenditure.vsFormula > 0 ? '+' : ''}${formatNumber(expenditure.vsFormula)} vs measured`
+                      : `measured ${expenditure.vsFormula > 0 ? '+' : ''}${formatNumber(expenditure.vsFormula)}`
                   }
                 />
               </div>

@@ -34,3 +34,29 @@ describe('quick entry parsing', () => {
     expect(r[0]!.food).toBeNull();
   });
 });
+
+describe('quick entry edge cases', () => {
+  it('treats articles as filler so "half an avocado" is an avocado', () => {
+    const r = resolveQuickEntry('half an avocado, a couple of eggs', searchFoods);
+    expect(r[0]!.food!.id).toBe('avocado');
+    expect(r[0]!.grams).toBeLessThan(120);
+    expect(r[1]!.food!.name.toLowerCase()).toMatch(/^egg/);
+    expect(r[1]!.grams).toBeGreaterThanOrEqual(90);
+  });
+  it("uses the food's own cup serving instead of water density", () => {
+    const r = resolveQuickEntry('1 cup oats', searchFoods);
+    expect(r[0]!.food!.id).toBe('oats-rolled');
+    expect(r[0]!.grams).toBeLessThan(120);
+    expect(r[0]!.grams).toBeGreaterThan(60);
+  });
+  it('keeps decimal commas together and understands 2x and plural units', () => {
+    const items = parseQuickEntry('1,5 cups rice; 2x eggs; 2 teaspoons sugar; 2 lbs chicken');
+    expect(items).toHaveLength(4);
+    expect(items[0]).toMatchObject({ quantity: 1.5, unit: 'cups' });
+    expect(items[1]).toMatchObject({ quantity: 2, unit: 'x', query: 'eggs' });
+    expect(items[2]).toMatchObject({ quantity: 2, unit: 'teaspoons' });
+    expect(items[3]).toMatchObject({ quantity: 2, unit: 'lbs' });
+    const r = resolveQuickEntry('2x eggs', searchFoods);
+    expect(r[0]!.grams).toBeGreaterThanOrEqual(90);
+  });
+});

@@ -6,7 +6,8 @@ import type { WeighIn } from './calc/trend';
 import { diaryStore, prefsStore, type Diary, type DiaryPrefs } from './food-store';
 import { logStore, type WeightLog } from './log';
 import { DEFAULT_PLAN, planStore, type Plan } from './plan';
-import { DEFAULT_PROFILE, updateProfile, type Profile } from './profile';
+import { DEFAULT_PROFILE, resetProfile, updateProfile, type Profile } from './profile';
+import { clearPhotos, photosSupported } from './photos';
 import { reflectionStore, type Reflections } from './reflections';
 
 export interface Backup {
@@ -131,15 +132,20 @@ export function readShareLink(
   }
 }
 
-export function clearAllData(): void {
+/** Removes everything Ethereal stores on this device: every store, the profile, photos and flags. */
+export async function clearAllData(): Promise<void> {
   planStore.reset();
   logStore.reset();
   diaryStore.reset();
   prefsStore.reset();
   reflectionStore.reset();
+  resetProfile();
   try {
-    localStorage.removeItem(PROFILE_KEY);
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith('ethereal:') && key !== 'ethereal:theme') localStorage.removeItem(key);
+    }
   } catch {
     /* ignore */
   }
+  if (photosSupported()) await clearPhotos();
 }

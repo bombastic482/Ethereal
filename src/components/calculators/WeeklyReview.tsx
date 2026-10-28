@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { estimateExpenditure } from '@/lib/calc/expenditure';
 import { buildInsights } from '@/lib/calc/insights';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
@@ -120,6 +120,11 @@ function WeeklyReviewInner() {
   const note = refl.notes[end] ?? { wentWell: '', change: '', savedOn: '' };
   const [wentWell, setWentWell] = useState(note.wentWell);
   const [change, setChange] = useState(note.change);
+  // The store hydrates after the first render and the week can change: keep the boxes in sync.
+  useEffect(() => {
+    setWentWell(note.wentWell);
+    setChange(note.change);
+  }, [end, note.wentWell, note.change]);
   const saveNote = () => {
     patchRefl({ notes: { ...refl.notes, [end]: { wentWell, change, savedOn: today } } });
     haptic();

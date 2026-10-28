@@ -71,6 +71,38 @@ describe('assessProgress', () => {
     expect(r.adjustmentKcal).toBeLessThanOrEqual(-100);
     expect(r.adjustmentKcal).toBeGreaterThanOrEqual(-250);
   });
+  it('points the right way for gain and maintenance goals', () => {
+    const gain = { ...base, goalWeightKg: 95, startWeightKg: 90, plannedRateKgPerWeek: 0.25 };
+    const flat = assessProgress({ ...gain, entries: gen(28, 90, 0, 0.2) }, day(28));
+    expect(flat.status).toBe('stalled');
+    expect(flat.adjustmentKcal).toBeGreaterThanOrEqual(100); // eat more, not less
+    expect(flat.detail).toMatch(/Raise intake/);
+    const fast = assessProgress({ ...gain, entries: gen(28, 90, 0.45 / 7, 0.2) }, day(28));
+    expect(fast.status).toBe('too-fast');
+    expect(fast.adjustmentKcal).toBeLessThanOrEqual(-100);
+    expect(fast.detail).toMatch(/gaining/);
+    const slow = assessProgress({ ...gain, entries: gen(28, 90, 0.05 / 7, 0.2) }, day(28));
+    expect(['too-slow', 'stalled']).toContain(slow.status);
+    expect(slow.adjustmentKcal).toBeGreaterThan(0);
+    const losingWhileGaining = assessProgress(
+      { ...gain, entries: gen(28, 90, -0.3 / 7, 0.2) },
+      day(28),
+    );
+    expect(losingWhileGaining.status).toBe('gaining'); // moving away from the goal
+    expect(losingWhileGaining.headline).toMatch(/falling/);
+    expect(losingWhileGaining.adjustmentKcal).toBeGreaterThan(0);
+
+    const keep = { ...base, goalWeightKg: 90, startWeightKg: 90, plannedRateKgPerWeek: 0 };
+    const up = assessProgress({ ...keep, entries: gen(28, 90, 0.3 / 7, 0.2) }, day(28));
+    expect(up.status).toBe('too-fast');
+    expect(up.headline).toMatch(/Gaining while maintaining/);
+    expect(up.adjustmentKcal).toBeLessThan(0);
+    const down = assessProgress({ ...keep, entries: gen(28, 90, -0.3 / 7, 0.2) }, day(28));
+    expect(down.headline).toMatch(/Losing while maintaining/);
+    expect(down.adjustmentKcal).toBeGreaterThan(0);
+    const steady = assessProgress({ ...keep, entries: gen(28, 90, 0, 0.2) }, day(28));
+    expect(steady.status).toBe('on-track');
+  });
   it('flags stalls and respects the floor', () => {
     const r = assessProgress(
       { ...base, targetCalories: 1250, entries: gen(28, 90, 0, 0.3) },

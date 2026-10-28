@@ -357,7 +357,7 @@ function DataManagerInner() {
         <div class="border-line mt-2 border-t pt-4">
           <h3 class="font-semibold">Delete everything</h3>
           <p class="text-muted mt-1 text-sm">
-            Removes your profile, plan and all weigh-ins from this browser.
+            Removes your profile, plan, weigh-ins, diary, photos and reflections from this browser.
           </p>
           {confirmDelete ? (
             <div class="mt-3 flex gap-2">
@@ -365,9 +365,10 @@ function DataManagerInner() {
                 type="button"
                 class="btn bg-rose-600 text-white hover:bg-rose-700"
                 onClick={() => {
-                  clearAllData();
-                  setConfirmDelete(false);
-                  say('success', 'All data deleted.');
+                  void clearAllData().then(() => {
+                    setConfirmDelete(false);
+                    say('success', 'All data deleted, including photos.');
+                  });
                 }}
               >
                 Yes, delete all my data

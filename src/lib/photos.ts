@@ -72,3 +72,14 @@ export function compressImage(file: File, max = 1280): Promise<string> {
 }
 
 export const photosSupported = (): boolean => typeof indexedDB !== 'undefined';
+
+/** Deletes the whole photo database; resolves even if the browser refuses or blocks it. */
+export const clearPhotos = (): Promise<void> =>
+  new Promise((resolve) => {
+    try {
+      const req = indexedDB.deleteDatabase(DB);
+      req.onsuccess = req.onerror = req.onblocked = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
