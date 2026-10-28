@@ -328,6 +328,32 @@ function DataManagerInner() {
             in the address bar.
           </p>
         )}
+
+        <div class="border-line mt-2 border-t pt-4">
+          <h3 class="font-semibold">Tour</h3>
+
+          <p class="text-muted mt-1 text-sm">
+            Three cards that explain how Ethereal works. Shown once on Today.
+          </p>
+
+          <button
+            type="button"
+
+            class="btn btn-ghost mt-3 text-sm"
+
+            onClick={() => {
+              try {
+                localStorage.removeItem('ethereal:tour:v1');
+              } catch {
+                /* ignore */
+              }
+
+              location.assign(withBase('/today/'));
+            }}
+          >
+            Replay the tour
+          </button>
+        </div>
         <div class="border-line mt-2 border-t pt-4">
           <h3 class="font-semibold">Delete everything</h3>
           <p class="text-muted mt-1 text-sm">
