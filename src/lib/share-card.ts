@@ -159,3 +159,115 @@ export async function shareCanvas(
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   return 'downloaded';
 }
+
+export interface WeekCardInput {
+  title: string; // e.g. "Week of 22–28 Oct"
+  subtitle: string; // e.g. "5 of 7 days logged · Ethereal"
+  /** Seven days in order; kcal 0 means not logged. */
+  days: Array<{ label: string; kcal: number; targetKcal: number }>;
+  stats: Array<[label: string, value: string]>;
+  dark?: boolean;
+}
+
+/** Shareable week card (1080×1350): seven calorie bars against the target, plus three stats. */
+export function renderWeekCard(input: WeekCardInput): HTMLCanvasElement {
+  const W = 1080;
+  const H = 1350;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d')!;
+  const dark = input.dark ?? false;
+  const bg = dark ? '#1c1916' : '#f7f4ee';
+  const fg = dark ? '#f3efe7' : '#2a2520';
+  const muted = dark ? '#b7ae9f' : '#6b6259';
+  const moss = '#4f8a62';
+  const apricot = '#e8a06a';
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, bg);
+  grad.addColorStop(1, dark ? '#24201b' : '#efe9df');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // wordmark
+  ctx.fillStyle = moss;
+  ctx.beginPath();
+  ctx.roundRect(80, 80, 56, 56, 16);
+  ctx.fill();
+  ctx.fillStyle = fg;
+  ctx.font = 'italic 400 44px "Instrument Serif", Georgia, serif';
+  ctx.fillText('Ethereal', 156, 124);
+
+  ctx.fillStyle = muted;
+  ctx.font = '600 28px Inter, system-ui, sans-serif';
+  ctx.fillText(input.subtitle.toUpperCase(), 80, 230);
+  ctx.fillStyle = fg;
+  ctx.font = '400 104px "Instrument Serif", Georgia, serif';
+  ctx.fillText(input.title, 80, 340);
+
+  // bars
+  const x0 = 80;
+  const x1 = W - 80;
+  const y0 = 430;
+  const y1 = 900;
+  const n = input.days.length;
+  const gap = 18;
+  const bw = (x1 - x0 - gap * (n - 1)) / n;
+  const max = Math.max(...input.days.map((d) => Math.max(d.kcal, d.targetKcal))) * 1.1 || 1;
+  const sy = (v: number) => y1 - ((y1 - y0) * v) / max;
+  // target line
+  const target = input.days[0]?.targetKcal ?? 0;
+  if (target > 0) {
+    ctx.strokeStyle = dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
+    ctx.setLineDash([12, 12]);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x0, sy(target));
+    ctx.lineTo(x1, sy(target));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = muted;
+    ctx.font = '600 22px Inter, system-ui, sans-serif';
+    ctx.fillText(`TARGET ${Math.round(target).toLocaleString('en-US')}`, x0, sy(target) - 12);
+  }
+  input.days.forEach((d, i) => {
+    const x = x0 + i * (bw + gap);
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    ctx.beginPath();
+    ctx.roundRect(x, y0, bw, y1 - y0, 14);
+    ctx.fill();
+    if (d.kcal > 0) {
+      const over = d.targetKcal > 0 && d.kcal > d.targetKcal * 1.1;
+      ctx.fillStyle = over ? apricot : moss;
+      ctx.beginPath();
+      ctx.roundRect(x, sy(d.kcal), bw, y1 - sy(d.kcal), 14);
+      ctx.fill();
+      ctx.fillStyle = fg;
+      ctx.font = '700 26px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(Math.round(d.kcal).toLocaleString('en-US'), x + bw / 2, sy(d.kcal) - 14);
+    }
+    ctx.fillStyle = muted;
+    ctx.font = '600 24px Inter, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(d.label.toUpperCase(), x + bw / 2, y1 + 40);
+    ctx.textAlign = 'left';
+  });
+
+  // stats
+  const colW = (W - 160) / Math.max(1, input.stats.length);
+  input.stats.forEach(([label, value], i) => {
+    const x = 80 + i * colW;
+    ctx.fillStyle = muted;
+    ctx.font = '600 24px Inter, system-ui, sans-serif';
+    ctx.fillText(label.toUpperCase(), x, 1040);
+    ctx.fillStyle = fg;
+    ctx.font = '400 72px "Instrument Serif", Georgia, serif';
+    ctx.fillText(value, x, 1120);
+  });
+
+  ctx.fillStyle = muted;
+  ctx.font = '500 26px Inter, system-ui, sans-serif';
+  ctx.fillText('Logged with Ethereal · free and private · no account', 80, 1270);
+  return c;
+}

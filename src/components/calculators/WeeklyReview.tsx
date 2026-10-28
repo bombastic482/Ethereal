@@ -20,6 +20,7 @@ import { Heatmap } from '../ui/Heatmap';
 import { WeekBars } from '../ui/WeekBars';
 
 import { reflectionStore } from '@/lib/reflections';
+import { renderWeekCard, shareCanvas } from '@/lib/share-card';
 
 /** Sunday-night review: the week in numbers, the patterns, the decision for next week, and a two-line reflection. */
 function WeeklyReviewInner() {
@@ -154,6 +155,40 @@ function WeeklyReviewInner() {
   };
 
   const [copied, setCopied] = useState(false);
+  const [shareState, setShareState] = useState<'idle' | 'busy' | 'done'>('idle');
+  const shareWeek = async () => {
+    setShareState('busy');
+    try {
+      await document.fonts?.ready;
+      const stats: Array<[string, string]> = [
+        ['Days logged', `${logged.length}/7`],
+        ['Avg kcal', avg((x) => x.s.eaten.kcal)?.toLocaleString('en-US') ?? '—'],
+        [
+          'Trend',
+          weekChange === null
+            ? '—'
+            : `${weekChange > 0 ? '+' : ''}${formatWeight(weekChange, profile.units, 1)}`,
+        ],
+      ];
+      const canvas = renderWeekCard({
+        title: `${fmtShort(start)} – ${fmtShort(end)}`,
+        subtitle: `${adherence === null ? '' : `${adherence}% of days on target · `}My week on Ethereal`,
+        days: per.map((x) => ({
+          label: new Date(x.d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' }),
+          kcal: x.s.eaten.kcal,
+          targetKcal: x.s.target.kcal,
+        })),
+        stats,
+        dark: document.documentElement.dataset.theme === 'dark',
+      });
+      await shareCanvas(canvas, 'ethereal-week.png');
+      haptic();
+      setShareState('done');
+      setTimeout(() => setShareState('idle'), 2500);
+    } catch {
+      setShareState('idle');
+    }
+  };
   const copySummary = async () => {
     const lines = [
       `Ethereal weekly review · ${fmtShort(start)} – ${fmtShort(end)}`,
@@ -224,6 +259,15 @@ function WeeklyReviewInner() {
           <span class="sr-only" role="status">
             {copied ? 'Summary copied to the clipboard' : ''}
           </span>
+          <button
+            type="button"
+            class="btn btn-secondary h-9 px-3 text-sm"
+            onClick={shareWeek}
+            disabled={shareState === 'busy' || per.length === 0}
+          >
+            <Icon name={shareState === 'done' ? 'check' : 'spark'} size={14} />{' '}
+            {shareState === 'done' ? 'Shared' : 'Share this week'}
+          </button>
           <button
             type="button"
             class="btn btn-secondary h-9 px-3 text-sm"
