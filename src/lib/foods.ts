@@ -1,4 +1,4 @@
-/** Built-in food database: ~500 generic foods, searchable offline. */
+/** Built-in food database: 1,200+ generic and world foods in six lazy chunks, searchable offline. */
 import type { Nutrients } from './calc/nutrition';
 
 export interface Food {
@@ -16,7 +16,7 @@ let BY_ID = new Map<string, Food>();
 let INDEX: Array<{ f: Food; text: string; nameTokens: string[] }> = [];
 let loading: Promise<Food[]> | null = null;
 
-/** Loads the database on first use (two JSON chunks, cached by the service worker after that). */
+/** Loads the database on first use (six JSON chunks, cached by the service worker after that). */
 export function loadFoods(): Promise<Food[]> {
   if (FOODS.length) return Promise.resolve(FOODS);
   loading ??= Promise.all([
@@ -32,6 +32,8 @@ export function loadFoods(): Promise<Food[]> {
       ...(b.default as Food[]),
       ...(c.default as Food[]),
       ...(d.default as Food[]),
+      ...(e.default as Food[]),
+      ...(f.default as Food[]),
     ];
     BY_ID = new Map(FOODS.map((f) => [f.id, f]));
     INDEX = FOODS.map((f) => ({

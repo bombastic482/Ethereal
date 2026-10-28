@@ -7,7 +7,7 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   {
     icon: 'flame',
     title: 'Log in seconds',
-    text: 'Type what you ate in plain words, scan a barcode, or search 1,000+ foods that work offline. The ring shows what is left.',
+    text: 'Type what you ate in plain words, scan a barcode, or search 1,500+ foods that work offline. The ring shows what is left.',
   },
   {
     icon: 'scale',

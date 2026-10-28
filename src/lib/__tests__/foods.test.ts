@@ -4,6 +4,14 @@ import { allFoods, foodById, loadFoods, searchFoods } from '../foods';
 beforeAll(() => loadFoods());
 
 describe('food database search', () => {
+  it('indexes every chunk the validator counts', async () => {
+    const chunks = await Promise.all(
+      ['a', 'b', 'c', 'd', 'e', 'f'].map((c) => import(`../../data/foods-${c}.json`)),
+    );
+    const total = chunks.reduce((n, c) => n + (c.default as unknown[]).length, 0);
+    expect(allFoods().length).toBe(total);
+    expect(allFoods().length).toBeGreaterThan(1200);
+  });
   it('has unique ids and a useful size', () => {
     expect(allFoods().length).toBeGreaterThan(200);
     expect(new Set(allFoods().map((f) => f.id)).size).toBe(allFoods().length);

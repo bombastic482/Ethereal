@@ -828,7 +828,7 @@ function AddFoodSheet({
                   <input
                     type="search"
                     class="field"
-                    placeholder="Search 500+ foods and millions of products…"
+                    placeholder="Search 1,500+ foods, chains and brands, or millions of products…"
                     value={q}
                     onInput={(e) => setQ((e.target as HTMLInputElement).value)}
                     autoFocus
