@@ -19,7 +19,7 @@ export function Layer({ children }: { children: ComponentChildren }) {
     const root = box.current;
     if (!root) return;
     const focusables = () => [...root.querySelectorAll<HTMLElement>(FOCUSABLE)];
-    const first = root.querySelector<HTMLElement>('[autofocus]') ?? focusables()[0];
+    const first = root.querySelector<HTMLElement>('[autofocus]') ?? focusables()[0] ?? root;
     // Defer so the opening click does not immediately land on the new element.
     const t = window.setTimeout(() => first?.focus({ preventScroll: true }), 0);
     const onKey = (e: KeyboardEvent) => {
@@ -44,5 +44,10 @@ export function Layer({ children }: { children: ComponentChildren }) {
     };
   }, []);
   if (typeof document === 'undefined') return null;
-  return createPortal(<div ref={box}>{children}</div>, document.body);
+  return createPortal(
+    <div ref={box} tabIndex={-1} class="outline-none">
+      {children}
+    </div>,
+    document.body,
+  );
 }

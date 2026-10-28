@@ -68,19 +68,23 @@ export function StarterRecipes({ date, slot, diet, remainingKcal, focusId, onLog
     else el?.scrollIntoView({ block: 'center' });
   }, [focusId, ready]);
 
-  const list = useMemo(
-    () =>
-      ready
-        ? filterRecipes(allRecipes(), {
-            meal,
-            diet,
-            q,
-            remainingKcal,
-            ...(quick ? { maxMinutes: 15 } : {}),
-          })
-        : [],
-    [ready, meal, diet, q, quick, remainingKcal],
-  );
+  const list = useMemo(() => {
+    if (!ready) return [];
+    const base = filterRecipes(allRecipes(), {
+      meal,
+      diet,
+      q,
+      remainingKcal,
+      ...(quick ? { maxMinutes: 15 } : {}),
+    });
+    // A deep-linked recipe is shown even when the diet or time filter would hide it: the
+    // visitor chose it on the recipes page and should not land on an empty list.
+    if (focusId && !base.some((r) => r.id === focusId)) {
+      const pinned = filterRecipes(allRecipes(), { q: '' }).find((r) => r.id === focusId);
+      if (pinned) return [pinned, ...base];
+    }
+    return base;
+  }, [ready, meal, diet, q, quick, remainingKcal, focusId]);
 
   return (
     <section
