@@ -126,6 +126,19 @@ function TodayScreenInner() {
   const [prefs, patchPrefs] = prefsStore.use();
   const today = todayIso();
   const [date, setDate] = useState(today);
+  // A tab left open past midnight should show the new day when you come back to it.
+  useEffect(() => {
+    const check = () => {
+      const now = todayIso();
+      if (now !== today && date === today) setDate(now);
+    };
+    window.addEventListener('focus', check);
+    document.addEventListener('visibilitychange', check);
+    return () => {
+      window.removeEventListener('focus', check);
+      document.removeEventListener('visibilitychange', check);
+    };
+  }, [date, today]);
   const [adding, setAdding] = useState<Meal | null>(null);
   const [focusRecipe, setFocusRecipe] = useState<string | null>(null);
   // Deep link from the recipes page: /today/#recipe=<id> opens the sheet on that recipe.

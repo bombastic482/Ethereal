@@ -16,6 +16,10 @@ describe('reminder ics', () => {
     expect(ics).toContain('URL:https://example.com/track/');
     expect(ics).toContain('BEGIN:VALARM');
     expect(ics.endsWith('END:VCALENDAR\r\n')).toBe(true);
+    // RFC 5545 TEXT escaping: no bare commas or semicolons inside DESCRIPTION values.
+    for (const line of ics.split('\r\n').filter((l) => l.startsWith('DESCRIPTION:'))) {
+      expect(line.slice('DESCRIPTION:'.length)).not.toMatch(/(^|[^\\])[,;]/);
+    }
   });
   it('omits events that are not requested', () => {
     const ics = buildReminderIcs({

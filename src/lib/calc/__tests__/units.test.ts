@@ -21,6 +21,7 @@ describe('units', () => {
   it('splits cm into feet and inches and carries 12 inches', () => {
     expect(cmToFeetInches(177.8)).toEqual({ feet: 5, inches: 10 });
     expect(cmToFeetInches(182.88)).toEqual({ feet: 6, inches: 0 });
+    expect(cmToFeetInches(179.07)).toEqual({ feet: 5, inches: 10.5 }); // half inches survive
     expect(cmToFeetInches(182.4)).toEqual({ feet: 6, inches: 0 }); // 71.8in rounds to 72
   });
   it('rounds without floating-point surprises', () => {

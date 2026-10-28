@@ -21,6 +21,9 @@ function event(
   description: string,
   url: string,
 ): string {
+  // RFC 5545 TEXT: backslash, semicolon and comma must be escaped; newlines become \\n.
+  const text = (v: string) =>
+    v.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
   const [h, m] = time.split(':').map(Number);
   const dt = `${date.replace(/-/g, '')}T${pad(h!)}${pad(m!)}00`;
   return [
@@ -30,13 +33,13 @@ function event(
     `DTSTART:${dt}`,
     'DURATION:PT5M',
     'RRULE:FREQ=DAILY',
-    `SUMMARY:${summary}`,
-    `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
+    `SUMMARY:${text(summary)}`,
+    `DESCRIPTION:${text(description)}`,
     `URL:${url}`,
     'BEGIN:VALARM',
     'TRIGGER:PT0M',
     'ACTION:DISPLAY',
-    `DESCRIPTION:${summary}`,
+    `DESCRIPTION:${text(summary)}`,
     'END:VALARM',
     'END:VEVENT',
   ].join('\r\n');

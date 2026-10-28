@@ -15,11 +15,11 @@ export const inToCm = (inches: number): number => inches * CM_PER_IN;
 export const cmToIn = (cm: number): number => cm / CM_PER_IN;
 export const feetInchesToCm = (feet: number, inches: number): number => inToCm(feet * 12 + inches);
 
-/** Split centimetres into whole feet and (rounded) inches, carrying 12in over to the next foot. */
+/** Split centimetres into whole feet and inches to the nearest half inch, carrying 12in over. */
 export function cmToFeetInches(cm: number): { feet: number; inches: number } {
   const totalIn = Math.round(cmToIn(cm) * 10) / 10;
   let feet = Math.floor(totalIn / 12);
-  let inches = Math.round(totalIn - feet * 12);
+  let inches = Math.round((totalIn - feet * 12) * 2) / 2;
   if (inches === 12) {
     feet += 1;
     inches = 0;
