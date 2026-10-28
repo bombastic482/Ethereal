@@ -194,4 +194,10 @@ test('each recipe has its own page with structured data and a log link', async (
     page.getByRole('link', { name: /Log it to Today: Shakshuka with feta/ }),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: /More breakfasts like this/ })).toBeVisible();
+  // Serving scaler doubles the ingredient weights.
+  const first = page.locator('[data-grams]').first();
+  const base = Number(await first.textContent());
+  await page.getByRole('group', { name: 'Servings' }).getByRole('button', { name: '2' }).click();
+  await expect(first).toHaveText(String(base * 2));
+  await expect(page.getByText(/Scaled for 2 servings/)).toBeVisible();
 });

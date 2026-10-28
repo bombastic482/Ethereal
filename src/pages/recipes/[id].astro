@@ -117,17 +117,43 @@ const jsonLd = [
         <h2 id="ingredients-h" class="text-xl font-bold tracking-tight">
           Ingredients
         </h2>
-        <p class="text-subtle mt-1 text-xs">One serving. Weights are for the state named.</p>
+        <p class="text-subtle mt-1 text-xs">Weights are for the state named.</p>
+        <div
+          class="mt-3 flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label="Servings"
+          data-servings
+        >
+          <span class="text-subtle text-xs font-semibold tracking-wide uppercase">Servings</span>
+          {['1', '2', '3', '4'].map((n) => (
+            <button
+              type="button"
+              class="chip filter-chip"
+              data-n={n}
+              aria-pressed={n === '1' ? 'true' : 'false'}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
         <ul class="mt-4 grid gap-2">
           {r.ingredients.map((it) => (
             <li class="border-line flex items-baseline justify-between gap-4 border-b pb-2 text-sm last:border-0">
               <span>{it.name}</span>
               <span class="tabular text-subtle shrink-0">
-                {it.grams} g · {r0((it.per100g.kcal * it.grams) / 100)} kcal
+                <span data-grams={it.grams}>{it.grams}</span> g ·{' '}
+                <span data-kcal={r0((it.per100g.kcal * it.grams) / 100)}>
+                  {r0((it.per100g.kcal * it.grams) / 100)}
+                </span>{' '}
+                kcal
               </span>
             </li>
           ))}
         </ul>
+        <p class="text-subtle mt-3 text-xs" data-scaled hidden>
+          Scaled for <span data-scaled-n>1</span> servings; nutrition on the right stays per
+          serving.
+        </p>
         <h2 class="mt-8 text-xl font-bold tracking-tight">Method</h2>
         <p class="mt-2 leading-relaxed">{r.method}</p>
       </section>
@@ -220,3 +246,42 @@ const jsonLd = [
     )}
   </article>
 </Base>
+
+<style>
+  .filter-chip[aria-pressed='false'] {
+    background: var(--bg-muted);
+    color: var(--fg-muted);
+  }
+  .filter-chip:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  // Serving scaler: multiplies ingredient grams and kcal in place. Plain script, rebinds on
+  // view transitions.
+  function bind() {
+    const root = document.querySelector<HTMLElement>('[data-servings]');
+    if (!root || root.dataset.bound) return;
+    root.dataset.bound = '1';
+    const grams = [...document.querySelectorAll<HTMLElement>('[data-grams]')];
+    const kcal = [...document.querySelectorAll<HTMLElement>('[data-kcal]')];
+    const note = document.querySelector<HTMLElement>('[data-scaled]');
+    const noteN = document.querySelector<HTMLElement>('[data-scaled-n]');
+    root.querySelectorAll<HTMLButtonElement>('button[data-n]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const n = Number(b.dataset.n ?? '1');
+        root
+          .querySelectorAll<HTMLButtonElement>('button[data-n]')
+          .forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        for (const el of grams) el.textContent = String(Math.round(Number(el.dataset.grams) * n));
+        for (const el of kcal) el.textContent = String(Math.round(Number(el.dataset.kcal) * n));
+        if (note) note.hidden = n === 1;
+        if (noteN) noteN.textContent = String(n);
+      }),
+    );
+  }
+  bind();
+  document.addEventListener('astro:page-load', bind);
+</script>
