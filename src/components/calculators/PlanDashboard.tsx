@@ -671,6 +671,14 @@ function PlanDashboardInner() {
                     <span class="block text-sm font-semibold">{i.title}</span>
 
                     <span class="text-muted block text-sm leading-relaxed">{i.detail}</span>
+                    {i.link && (
+                      <a
+                        class="text-brand-700 dark:text-brand-300 mt-1 inline-block text-sm font-semibold"
+                        href={withBase(i.link.href)}
+                      >
+                        {i.link.label} →
+                      </a>
+                    )}
                   </span>
                 </li>
               ))}

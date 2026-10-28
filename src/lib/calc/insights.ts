@@ -8,6 +8,8 @@ export interface Insight {
   title: string;
   detail: string;
   tone: 'good' | 'neutral' | 'warn';
+  /** Optional place to act on it, as a site-relative path (components apply the base). */
+  link?: { href: string; label: string };
 }
 
 interface Targets {
@@ -77,6 +79,10 @@ export function buildInsights(
       title: `${lowest.m.label} is your low-protein meal`,
       detail: `Averaging ${round(lowest.g)} g. Adding 20–30 g there (eggs, yogurt, a scoop of whey, tofu) is the easiest way to hit your daily target.`,
       tone: 'neutral',
+      link: {
+        href: `/recipes/#${lowest.m.key}`,
+        label: `High-protein ${lowest.m.label.toLowerCase()} ideas`,
+      },
     });
   }
 
@@ -101,6 +107,7 @@ export function buildInsights(
       title: `Fibre averages ${round(fibre)} g`,
       detail: `Your target is ${targets.fibre} g. Beans, oats, berries and vegetables fill you up for very few calories; most people feel a hunger difference within a week.`,
       tone: 'warn',
+      link: { href: '/recipes/', label: 'High-fibre recipes' },
     });
   }
 
@@ -167,6 +174,7 @@ export function buildInsights(
       title: `Chains were ${round(chain.share * 100)}% of your calories`,
       detail: `${chain.count} items from ${where}, about ${chain.kcal.toLocaleString('en-US')} kcal. Nothing wrong with that. The eating-out page ranks every menu by protein per calorie, so the same habit can cost a few hundred calories less.`,
       tone: chain.share >= 0.3 ? 'warn' : 'neutral',
+      link: { href: '/eating-out/', label: 'See the leanest orders' },
     });
   }
 

@@ -412,6 +412,17 @@ function WeeklyReviewInner() {
                     <li key={i.key} class="text-sm">
                       <span class="font-semibold">{i.title}.</span>{' '}
                       <span class="text-muted">{i.detail}</span>
+                      {i.link && (
+                        <>
+                          {' '}
+                          <a
+                            class="text-brand-700 dark:text-brand-300 font-semibold whitespace-nowrap"
+                            href={withBase(i.link.href)}
+                          >
+                            {i.link.label} →
+                          </a>
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>
