@@ -166,10 +166,10 @@ test('command palette jumps to pages and logs a food', async ({ page }) => {
 test('recipes page filters by diet and time without a framework', async ({ page }) => {
   await page.goto('/recipes/');
   const filters = page.getByRole('group', { name: 'Filter recipes' });
-  await expect(filters).toContainText(/68 of 68 recipes/);
+  await expect(filters).toContainText(/66 of 66 recipes/);
   await filters.getByRole('button', { name: 'Vegan' }).click();
-  await expect(filters.locator('[data-count]')).not.toHaveText(/68 of 68/);
-  await expect(filters.locator('[data-count]')).toHaveText(/\d+ of 68 recipes/);
+  await expect(filters.locator('[data-count]')).not.toHaveText(/66 of 66/);
+  await expect(filters.locator('[data-count]')).toHaveText(/\d+ of 66 recipes/);
   const visible = page.locator('li[data-diet]:not([hidden])');
   expect(await visible.count()).toBeGreaterThan(8);
   for (const d of await visible.evaluateAll((els) => els.map((e) => e.getAttribute('data-diet'))))
@@ -181,7 +181,7 @@ test('recipes page filters by diet and time without a framework', async ({ page 
     expect(m).toBeLessThanOrEqual(15);
   await filters.getByRole('button', { name: 'Everything' }).click();
   await filters.getByRole('button', { name: '15 minutes or less' }).click();
-  await expect(filters).toContainText(/68 of 68 recipes/);
+  await expect(filters).toContainText(/66 of 66 recipes/);
 });
 
 test('each recipe has its own page with structured data and a log link', async ({ page }) => {
@@ -283,24 +283,4 @@ test('eating-out page picks the highest-protein order that fits a calorie budget
   await budget.fill('10');
   await chipotle.getByRole('button', { name: /Best order at Chipotle/ }).click();
   await expect(bar).toContainText(/Nothing at this chain fits 10 kcal/);
-});
-
-test('halal preference hides pork and alcohol on the eating-out and recipes pages', async ({
-  page,
-}) => {
-  await page.addInitScript(() =>
-    localStorage.setItem(
-      'ethereal:prefs:v1',
-      JSON.stringify({ diet: 'omnivore', halal: true, eatBack: false, waterGoalGlasses: 8 }),
-    ),
-  );
-  await page.goto('/eating-out/');
-  await expect(page.getByText(/Halal filter on/)).toBeVisible();
-  const mcd = page.locator('section#mcdonalds');
-  await expect(mcd.locator('[data-item-row]', { hasText: /Sausage McMuffin/ })).toBeHidden();
-  await expect(mcd.locator('[data-item-row]', { hasText: /Big Mac/ })).toBeVisible();
-  await page.goto('/recipes/');
-  await expect(page.getByText(/Halal filter on/)).toBeVisible();
-  await expect(page.locator('li[data-halal="no"]').first()).toBeHidden();
-  await expect(page.locator('li[data-halal="yes"]').first()).toBeVisible();
 });

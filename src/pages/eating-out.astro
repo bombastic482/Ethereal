@@ -2,6 +2,7 @@
 import { Icon } from '@/components/ui/Icon';
 import Base from '@/layouts/Base.astro';
 import { chains } from '@/lib/chains-build';
+import { builtRecipes } from '@/lib/recipes-build';
 import { absoluteUrl, withBase } from '@/lib/url';
 
 const total = chains.reduce((s, c) => s + c.items.length, 0);
@@ -70,12 +71,6 @@ const jsonLd = [
           enterkeyhint="search"
         />
         <p class="text-subtle mt-1.5 text-xs" data-filter-status role="status" aria-live="polite" />
-        <p class="text-subtle mt-1.5 hidden text-xs" data-halal-note>
-          Halal filter on: items with pork or alcohol are hidden.{' '}
-          <a class="underline" href={withBase('/settings/')}>
-            Change in Settings
-          </a>
-        </p>
       </div>
       <div data-budget-box>
         <label
@@ -154,7 +149,6 @@ const jsonLd = [
                     class="border-line border-t"
                     data-item-row
                     data-search={`${it.name} ${c.name}`.toLowerCase()}
-                    data-halal={it.halal ? 'yes' : 'no'}
                   >
                     <td class="px-3 py-2.5 align-middle">
                       <input
@@ -240,15 +234,15 @@ const jsonLd = [
         bank 100 to 150 kcal on the surrounding days rather than skipping meals, and read{' '}
         <a
           class="text-brand-700 dark:text-brand-300 font-semibold"
-          href={withBase('/guides/eating-out-and-alcohol/')}
+          href={withBase('/guides/eating-out-and-weekends/')}
         >
-          the guide to eating out and alcohol.
+          the guide to eating out and weekends.
         </a>
       </p>
     </section>
     <p class="mt-6">
       <a class="btn btn-secondary" href={withBase('/recipes/')}>
-        <Icon name="egg" size={16} /> Prefer to cook? 68 recipes
+        <Icon name="egg" size={16} /> Prefer to cook? {builtRecipes.length} recipes
       </a>
     </p>
   </div>
@@ -298,19 +292,11 @@ const jsonLd = [
     const status = box.querySelector<HTMLElement>('[data-filter-status]')!;
     const rows = [...document.querySelectorAll<HTMLElement>('[data-item-row]')];
     const sections = [...document.querySelectorAll<HTMLElement>('section[id][aria-labelledby]')];
-    let halal = false;
-    try {
-      halal = JSON.parse(localStorage.getItem('ethereal:prefs:v1') ?? '{}').halal === true;
-    } catch {
-      /* ignore */
-    }
-    box.querySelector<HTMLElement>('[data-halal-note]')?.classList.toggle('hidden', !halal);
     const apply = () => {
       const q = input.value.trim().toLowerCase();
       let shown = 0;
       for (const r of rows) {
-        const hit =
-          (!q || (r.dataset.search ?? '').includes(q)) && !(halal && r.dataset.halal === 'no');
+        const hit = !q || (r.dataset.search ?? '').includes(q);
         r.hidden = !hit;
         if (hit) shown += 1;
       }

@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import type { Diet } from '@/lib/calc/nutrition';
 import { mealForTime } from '@/lib/calc/nutrition';
 import { haptic } from '@/lib/fx';
-import { prefsStore } from '@/lib/food-store';
-import { allRecipes, loadRecipes, logRecipe, suggestRecipe, usableRecipes } from '@/lib/recipes';
+import { allRecipes, loadRecipes, logRecipe, suggestRecipe } from '@/lib/recipes';
 import { withBase } from '@/lib/url';
 import { Icon } from '../ui/Icon';
 
@@ -21,7 +20,6 @@ const SLOT_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', s
 /** One recipe for the coming meal that fits what is left today, with a shuffle and one-tap logging. */
 export function RecipeIdea({ date, diet, remainingKcal, remainingProtein, loggedIds }: Props) {
   const [ready, setReady] = useState(allRecipes().length > 0);
-  const [prefs] = prefsStore.use();
   const [skipped, setSkipped] = useState<string[]>([]);
   const [done, setDone] = useState<string | null>(null);
   const slot = mealForTime(new Date().getHours());
@@ -38,17 +36,17 @@ export function RecipeIdea({ date, diet, remainingKcal, remainingProtein, logged
   const idea = useMemo(() => {
     if (!ready) return null;
     const logged = new Set(loggedIds);
-    const eaten = usableRecipes()
+    const eaten = allRecipes()
       .filter((r) => r.items.every((it) => logged.has(it.foodId)))
       .map((r) => r.id);
-    return suggestRecipe(usableRecipes(), {
+    return suggestRecipe(allRecipes(), {
       slot,
       diet,
       remainingKcal,
       remainingProtein,
       exclude: [...skipped, ...eaten],
     });
-  }, [ready, slot, diet, prefs.halal, remainingKcal, remainingProtein, skipped, loggedIds.join()]);
+  }, [ready, slot, diet, remainingKcal, remainingProtein, skipped, loggedIds.join()]);
 
   if (!ready || remainingKcal < 120) return null;
   if (!idea) {

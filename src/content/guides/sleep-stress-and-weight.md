@@ -51,7 +51,7 @@ Sleep hygiene advice is boring because it works. In order of leverage:
 2. **Seven to nine hours in bed, every night.** Count backward from your wake time to set a bedtime, and protect it.
 3. **Light.** Bright in the morning, dim in the evening. Screens are a problem mostly because they are bright and engaging.
 4. **Caffeine cutoff.** Caffeine has a half-life of five to six hours. A 3 p.m. coffee is still a quarter-strength coffee at 1 a.m. Most people do better stopping by early afternoon.
-5. **Alcohol.** It helps you fall asleep and then wrecks the second half of the night. Fewer, earlier drinks make a measurable difference.
+5. **Late, heavy meals.** A large dinner within two hours of bed fragments the second half of the night. Eat earlier, or keep the late meal light.
 6. **Cool, dark, quiet room.** Around 18 degrees Celsius suits most people.
 7. **A wind-down.** Twenty to thirty minutes of something low-stimulation and predictable before bed tells your nervous system what is coming.
 

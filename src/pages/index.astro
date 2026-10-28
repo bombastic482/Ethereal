@@ -36,7 +36,7 @@ const chainPicks = ['Chipotle', "McDonald's", 'KFC', "Nando's", 'Subway']
   .map((c) => ({
     chain: c.name,
     slug: c.slug,
-    item: (c.items.find((i) => i.halal) ?? c.items[0])!,
+    item: c.items[0]!,
   }));
 const chainItems = chains.reduce((n, c) => n + c.items.length, 0);
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');

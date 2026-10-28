@@ -1,6 +1,6 @@
 ---
 title: 'Losing Weight After 40: What Actually Changes'
-description: 'Why fat loss feels harder after 40, what the metabolism research really says, how muscle loss, sleep, alcohol, and hormones shift things, and a realistic pace.'
+description: 'Why fat loss feels harder after 40, what the metabolism research really says, how muscle loss, sleep, drinks, and hormones shift things, and a realistic pace.'
 pubDate: 2026-10-28
 updatedDate: 2026-10-28
 category: 'Fundamentals'
@@ -39,13 +39,13 @@ If you have time for only one kind of exercise, lift. Cardio burns calories whil
 
 Walking still matters, and a daily step target is the easiest way to restore the incidental movement midlife quietly removed. But do not let the walk replace the weights.
 
-## Sleep, alcohol, and the forties lifestyle
+## Sleep, drinks, and the forties lifestyle
 
 Two lifestyle factors undermine fat loss after 40 more than any metabolic change.
 
 **Sleep** gets shorter and shallower for many people after 40, from hormonal shifts, stress, children, and screens. Short sleep raises hunger hormones, lowers fullness hormones, and shifts cravings toward high-calorie food. In controlled trials, sleep-restricted dieters lost the same weight but more of it came from muscle. Seven hours is the floor, not the goal.
 
-**Alcohol** has roughly 7 calories per gram, suppresses fat oxidation while your body processes it, loosens food decisions, and wrecks sleep quality. Two glasses of wine most nights is around 1,500 calories a week, roughly the deficit many people are trying to create. You do not need to quit, but you do need to count it.
+**Drinks** are the calories nobody counts. A large sweetened coffee-shop drink most mornings, or a couple of fizzy drinks and a juice through the day, is around 1,500 to 2,500 calories a week, roughly the deficit many people are trying to create, and none of it touches hunger. You do not need to give up coffee; you need to count what goes in it.
 
 ## Hormones in men
 
@@ -73,6 +73,6 @@ Slower than at 25, perhaps, but at 25 you probably regained it. Done this way, y
 - Resting metabolism barely changes between 20 and 60. Lower expenditure after 40 comes from lost muscle and reduced movement, both of which you can reverse.
 - Untrained adults lose 3 to 8 percent of muscle per decade. Resistance training two to three times a week is the priority, not an optional extra.
 - Eat at least 1.6 g/kg of protein, spread across meals, with a real serving at breakfast.
-- Sleep and alcohol undermine fat loss more than any hormonal change. Seven hours is the floor; count every drink.
+- Sleep and sweetened drinks undermine fat loss more than any hormonal change. Seven hours is the floor; count every drink.
 - Perimenopause shifts fat to the abdomen and makes daily weight noisy. Use weekly averages and keep lifting.
 - Aim for 0.25 to 0.75 percent of bodyweight per week and judge success over months, not weeks.

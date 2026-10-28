@@ -218,22 +218,3 @@ test.describe('quick entry', () => {
     await expect(page.getByText(/yogurt/i).first()).toBeVisible();
   });
 });
-
-test('halal preference filters diary search and the settings toggle controls it', async ({
-  page,
-}) => {
-  await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
-  await page.goto('/settings/');
-  const halal = page.getByRole('checkbox', { name: /^Halal/ });
-  await halal.check();
-  await expect(halal).toBeChecked();
-  await page.goto('/today/');
-  await page
-    .getByRole('region', { name: 'Breakfast' })
-    .getByRole('button', { name: 'Add' })
-    .click();
-  const dialog = page.getByRole('dialog');
-  await dialog.getByPlaceholder(/Search/).fill('bacon');
-  await expect(dialog.getByText(/Turkey bacon/)).toBeVisible();
-  await expect(dialog.getByText(/^Bacon, back, grilled/)).toHaveCount(0);
-});

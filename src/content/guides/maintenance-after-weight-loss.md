@@ -64,7 +64,7 @@ None of these require dieting forever. They require keeping the measurement and 
 
 The single most protective decision you can make is to decide, before you need to, at what point you will act. A good rule is a threshold of 2 to 3 percent of your bodyweight above your maintenance weight, measured as a weekly average, not a single reading. For an 80-kilogram person that is around 82 kilograms.
 
-When you cross it, you do not launch a new diet. You return to the structure that worked for two to four weeks: tracking, a modest 10 to 15 percent deficit, steps back up, alcohol down. Then you return to maintenance. Write the threshold and the response into [your plan](/plan/) so the decision is made calmly now rather than emotionally later.
+When you cross it, you do not launch a new diet. You return to the structure that worked for two to four weeks: tracking, a modest 10 to 15 percent deficit, steps back up, sweetened drinks down. Then you return to maintenance. Write the threshold and the response into [your plan](/plan/) so the decision is made calmly now rather than emotionally later.
 
 The [BMI calculator](/tools/bmi/) can give you a general reference range, but anchor your threshold to the weight you actually maintained, not to a chart.
 

@@ -3,7 +3,6 @@
  * the "(Brand)" suffix, with per-serving numbers and a protein-per-100-kcal score.
  */
 import foodsE from '@/data/foods-e.json';
-import { isHalalFriendly } from './calc/halal';
 import type { Food } from './foods';
 
 export interface ChainItem {
@@ -20,8 +19,6 @@ export interface ChainItem {
   proteinPer100: number;
   /** For drinks: kcal per 100 ml, so sizes compare fairly. */
   kcalPer100ml: number;
-  /** No pork, gelatin or alcohol in the name. */
-  halal: boolean;
 }
 
 export interface Chain {
@@ -57,14 +54,13 @@ export const chains: Chain[] = (() => {
       fat: Math.round(f.per100g.fat * k),
       proteinPer100: kcal > 0 ? Math.round(((f.per100g.protein * k) / kcal) * 1000) / 10 : 0,
       kcalPer100ml: Math.round(f.per100g.kcal),
-      halal: isHalalFriendly(f.name),
     };
     const list = by.get(m[2]!) ?? [];
     list.push(item);
     by.set(m[2]!, list);
   }
   return [...by.entries()]
-    .filter(([, items]) => items.length >= 4)
+    .filter(([, items]) => items.length >= 3)
     .map(([name, items]) => {
       const kind: Chain['kind'] = COFFEE_CHAINS.has(name) ? 'drinks' : 'food';
       return {

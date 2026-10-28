@@ -219,21 +219,6 @@ function DataManagerInner() {
           <input
             type="checkbox"
             class="accent-brand-600 mt-0.5 h-4 w-4"
-            checked={prefs.halal}
-            onChange={(e) => patchPrefs({ halal: (e.target as HTMLInputElement).checked })}
-          />
-          <span>
-            <span class="font-semibold">Halal</span>
-            <span class="text-muted block text-xs">
-              Hides pork and pork products, gelatin sweets and alcohol from search, suggestions,
-              recipes, the planner and the eating-out page.
-            </span>
-          </span>
-        </label>
-        <label class="flex items-start gap-3 text-sm">
-          <input
-            type="checkbox"
-            class="accent-brand-600 mt-0.5 h-4 w-4"
             checked={prefs.eatBack}
             onChange={(e) => patchPrefs({ eatBack: (e.target as HTMLInputElement).checked })}
           />

@@ -12,13 +12,10 @@ import foodsF from '@/data/foods-f.json';
 import type { CoreNutrients, Nutrients } from './calc/nutrition';
 import type { Food } from './foods';
 import type { Recipe } from './recipes';
-import { recipeIsHalalFriendly } from './calc/halal';
 
 export interface BuiltRecipe extends Recipe {
   ingredients: Array<{ name: string; grams: number; per100g: Nutrients }>;
   totals: CoreNutrients;
-  /** No pork, gelatin or alcohol in the name or ingredients. */
-  halal: boolean;
 }
 
 const foods = new Map<string, Food>(
@@ -47,10 +44,6 @@ export const builtRecipes: BuiltRecipe[] = (recipesRaw as Recipe[]).map((r) => {
     ...r,
     ingredients,
     totals: t,
-    halal: recipeIsHalalFriendly(
-      r.name,
-      ingredients.map((i) => i.name),
-    ),
   };
 });
 

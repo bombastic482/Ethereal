@@ -38,8 +38,8 @@ Plan, diary, tracker, recipes, eating out, weekly review. No account, no server,
 
 <table align="center">
   <tr>
-    <td align="center"><b>1,537</b><br/><sub>validated foods, offline</sub></td>
-    <td align="center"><b>68</b><br/><sub>high-protein recipes</sub></td>
+    <td align="center"><b>1,444</b><br/><sub>halal-friendly foods, offline</sub></td>
+    <td align="center"><b>66</b><br/><sub>high-protein recipes</sub></td>
     <td align="center"><b>20</b><br/><sub>chains ranked</sub></td>
     <td align="center"><b>18</b><br/><sub>evidence-based guides</sub></td>
     <td align="center"><b>8</b><br/><sub>calculators, one profile</sub></td>
@@ -70,7 +70,7 @@ Three steps to a personal plan: calories, protein, macros and a realistic goal d
 
 ### Diary
 
-Calorie ring, macro and fibre bars, four meals, water and steps. Type what you ate in a sentence ("2 eggs, a slice of toast and 150g greek yogurt"), search 1,537 foods that work offline, or scan a barcode and get Open Food Facts data with Nutri-Score and NOVA. Quick add, custom foods, saved meals, copy yesterday, favourites and "what to eat next" suggestions.
+Calorie ring, macro and fibre bars, four meals, water and steps. Type what you ate in a sentence ("2 eggs, a slice of toast and 150g greek yogurt"), search 1,444 foods that work offline, or scan a barcode and get Open Food Facts data with Nutri-Score and NOVA. Quick add, custom foods, saved meals, copy yesterday, favourites and "what to eat next" suggestions.
 
 ### Track
 
@@ -85,11 +85,11 @@ Sunday night, five minutes: the week in numbers, next week's decision applied in
 
 ### Recipes and planning
 
-68 high-protein starter recipes built from the same database rows as the diary, each with its own page, nutrition table, serving scaler and social card. Plan a day or a whole week that lands on your targets, swap or lock slots, log it in one tap, share the shopping list.
+66 high-protein starter recipes built from the same database rows as the diary, each with its own page, nutrition table, serving scaler and social card. Plan a day or a whole week that lands on your targets, swap or lock slots, log it in one tap, share the shopping list.
 
 ### Eating out
 
-The leanest order at 20 chains (Chipotle, McDonald's, KFC, Nando's, Subway, Pret, Greggs, Starbucks, Costa and more): 171 menu items ranked by protein per calorie, coffee-shop drinks by calories. Tick items to build an order, or enter the calories you have left and let **Best order** pick the highest-protein combination that fits. One tap logs the lot.
+The leanest order at 20 chains (Chipotle, McDonald's, KFC, Nando's, Subway, Pret, Greggs, Starbucks, Costa and more): 155 menu items ranked by protein per calorie, coffee-shop drinks by calories. Tick items to build an order, or enter the calories you have left and let **Best order** pick the highest-protein combination that fits. One tap logs the lot.
 
 ### Switch from another app
 
@@ -97,7 +97,7 @@ Import your history from MyFitnessPal, Lose It!, Cronometer or any CSV with date
 
 ### Everything else
 
-Eight calculators sharing one profile. Eighteen guides. A halal option that hides pork, gelatin sweets and alcohol everywhere. Quick launcher (⌘K), keyboard shortcuts, calendar reminders, installable as an app, works offline, dark mode.
+Eight calculators sharing one profile. Eighteen guides. Halal-friendly throughout: no pork, gelatin sweets or alcohol anywhere in the database, recipes or chains. Quick launcher (⌘K), keyboard shortcuts, calendar reminders, installable as an app, works offline, dark mode.
 
 </td>
 </tr>
@@ -161,7 +161,7 @@ All data lives in `localStorage` (plan, diary, weigh-ins, preferences) and Index
 
 | Check                                                      | Covers                                                                                                                                                        |
 | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **144 unit tests** (Vitest)                                | Every calculation, the trend and adjustment engine, insights, CSV import, recipe planner, food search, halal filter, data stores and backup.                  |
+| **144 unit tests** (Vitest)                                | Every calculation, the trend and adjustment engine, insights, CSV import, recipe planner, food search, the halal data guard, data stores and backup.          |
 | **120 end-to-end tests** (Playwright, desktop and Pixel 7) | Onboarding, diary, planner, review, import, eating out, deep links, keyboard shortcuts, and an axe accessibility sweep of 25 pages in light and dark mode.    |
 | **Lighthouse CI**                                          | Desktop budgets at 0.95 and above; a simulated-phone performance budget of 0.9 and above on the key pages.                                                    |
 | **Data validators**                                        | Every food and recipe checked for shape, plausibility and energy consistency on each build. Nutrition audited against USDA SR Legacy and manufacturer labels. |
@@ -223,7 +223,7 @@ src/
   lib/quick-parse.ts   natural-language entry · lib/import-csv.ts importer for other apps
   lib/*-build.ts       build-time views of recipes and chains for the static pages
   lib/og.ts            social card renderer (SVG → PNG at build time)
-  data/                foods-a…f.json (six lazy chunks, 1,537 foods) and recipes.json
+  data/                foods-a…f.json (six lazy chunks, 1,444 foods) and recipes.json
   components/          Preact islands (calculators, diary, planner, review) and Astro UI
   pages/               routes, og/ image endpoints, the web manifest
   content/guides/      eighteen Markdown guides, validated by content.config.ts

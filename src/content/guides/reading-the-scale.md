@@ -17,16 +17,16 @@ Body weight is fat plus muscle plus bone plus organs plus water plus whatever is
 
 The main sources of that noise:
 
-| Source                                             | Typical swing    | Timescale      |
-| -------------------------------------------------- | ---------------- | -------------- |
-| Sodium (salty meal, restaurant food)               | +0.5 to 2 kg     | 1–3 days       |
-| Carbohydrates (glycogen holds ~3 g water per gram) | ±1 to 2 kg       | 1–3 days       |
-| Bowel movements and gut contents                   | ±0.5 to 1.5 kg   | Hours to a day |
-| Menstrual cycle (luteal phase, pre-period)         | +1 to 3 kg       | 1–2 weeks      |
-| Hard or new training (muscle inflammation)         | +0.5 to 1.5 kg   | 2–7 days       |
-| Poor sleep and stress (cortisol, fluid retention)  | +0.5 to 1 kg     | 1–3 days       |
-| Alcohol (dehydration then rebound)                 | −1 kg then +1 kg | 1–2 days       |
-| Time of day and hydration                          | ±1 kg            | Same day       |
+| Source                                             | Typical swing  | Timescale      |
+| -------------------------------------------------- | -------------- | -------------- |
+| Sodium (salty meal, restaurant food)               | +0.5 to 2 kg   | 1–3 days       |
+| Carbohydrates (glycogen holds ~3 g water per gram) | ±1 to 2 kg     | 1–3 days       |
+| Bowel movements and gut contents                   | ±0.5 to 1.5 kg | Hours to a day |
+| Menstrual cycle (luteal phase, pre-period)         | +1 to 3 kg     | 1–2 weeks      |
+| Hard or new training (muscle inflammation)         | +0.5 to 1.5 kg | 2–7 days       |
+| Poor sleep and stress (cortisol, fluid retention)  | +0.5 to 1 kg   | 1–3 days       |
+| Travel day (long sitting, irregular meals)         | +0.5 to 1.5 kg | 1–2 days       |
+| Time of day and hydration                          | ±1 kg          | Same day       |
 
 A "gain" of two kilograms after a big dinner out is sodium, carbohydrate, and food volume. Actually gaining two kilograms of fat would require roughly 15,000 calories above maintenance, which no dinner has ever delivered.
 

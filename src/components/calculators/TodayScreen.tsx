@@ -27,7 +27,6 @@ const oz = (g: number) => round(g / OZ, 1);
 import {
   addExercise,
   addFood,
-  allowsFood,
   copyMeal,
   deleteSavedMeal,
   diaryStore,
@@ -313,16 +312,8 @@ function TodayScreenInner() {
     [diary.food, today],
   );
   const suggestions = useMemo(
-    () =>
-      date === today && dbReady
-        ? suggestFoods(
-            day.remaining,
-            allFoods().filter((f) => allowsFood(f.name)),
-            prefs.diet,
-            4,
-          )
-        : [],
-    [day.remaining, prefs.diet, prefs.halal, date, today, dbReady],
+    () => (date === today && dbReady ? suggestFoods(day.remaining, allFoods(), prefs.diet, 4) : []),
+    [day.remaining, prefs.diet, date, today, dbReady],
   );
 
   const remainingTone = day.remaining.kcal < 0 ? 'warn' : 'brand';
@@ -960,7 +951,7 @@ function AddFoodSheet({
 
   // Local search is instant; Open Food Facts search is debounced and only for 3+ chars.
   useEffect(() => {
-    setLocal(q.trim() ? searchFoods(q, 20).filter((f) => allowsFood(f.name)) : []);
+    setLocal(q.trim() ? searchFoods(q, 20) : []);
     setRemote(null);
     if (q.trim().length < 3) {
       setRemoteState('idle');
@@ -975,7 +966,7 @@ function AddFoodSheet({
       setRemoteState('loading');
       searchProducts(q, ctrl.signal)
         .then((r) => {
-          setRemote(r.filter((p) => allowsFood(p.name)));
+          setRemote(r);
           setRemoteState('idle');
         })
         .catch((e) => {
@@ -1095,7 +1086,7 @@ function AddFoodSheet({
                     <input
                       type="search"
                       class="field"
-                      placeholder="Search 1,500+ foods, chains and brands, or millions of products…"
+                      placeholder="Search 1,400+ foods, chains and brands, or millions of products…"
                       value={q}
                       onInput={(e) => setQ((e.target as HTMLInputElement).value)}
                       autoFocus

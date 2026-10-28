@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { chains } from '../chains-build';
 
 describe('chains for the eating-out page', () => {
-  it('groups brand items into chains with at least four items each', () => {
+  it('groups brand items into chains with at least three items each', () => {
     expect(chains.length).toBeGreaterThanOrEqual(18);
     for (const c of chains) {
-      expect(c.items.length).toBeGreaterThanOrEqual(4);
+      expect(c.items.length).toBeGreaterThanOrEqual(3);
       expect(c.slug).toMatch(/^[a-z0-9-]+$/);
       for (const it of c.items) {
         expect(it.name).not.toMatch(/\(/);
