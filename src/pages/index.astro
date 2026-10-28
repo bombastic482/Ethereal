@@ -8,7 +8,19 @@ import Base from '@/layouts/Base.astro';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
 import { getCollection } from 'astro:content';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+
+const foodCount = ['a', 'b', 'c', 'd'].reduce(
+  (n, k) =>
+    n +
+    (
+      JSON.parse(
+        readFileSync(new URL(`../data/foods-${k}.json`, import.meta.url), 'utf8'),
+      ) as unknown[]
+    ).length,
+  0,
+);
+const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
 
 const heroArt = ['hero.webp', 'hero.png', 'hero.jpg'].find((f) =>
   existsSync(new URL(`../../public/art/${f}`, import.meta.url)),
@@ -226,6 +238,27 @@ const steps = [
     <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
       {rest.map((t) => (
         <ToolCard tool={t} />
+      ))}
+    </div>
+  </section>
+
+  <section class="container-page mt-24" aria-label="By the numbers">
+    <div class="border-line grid gap-8 border-y py-10 sm:grid-cols-4">
+      {[
+        [
+          foodCount.toLocaleString('en-US'),
+          'curated foods, offline',
+          'plus millions of packaged products via Open Food Facts',
+        ],
+        [String(guideCount), 'evidence-based guides', 'written to be read, not to rank'],
+        ['8', 'calculators', 'every formula documented'],
+        ['0', 'trackers, ads, accounts', 'and nothing you type leaves your device'],
+      ].map(([n, label, sub]) => (
+        <div>
+          <p class="font-display text-5xl leading-none tracking-tight">{n}</p>
+          <p class="mt-2 font-semibold">{label}</p>
+          <p class="text-subtle mt-1 text-sm">{sub}</p>
+        </div>
       ))}
     </div>
   </section>

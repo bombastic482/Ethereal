@@ -47,6 +47,15 @@ function normalise(p: Record<string, unknown>): OffProduct | null {
       carbs: +carbs.toFixed(1),
       fat: +fat.toFixed(1),
       fibre: +(num(n.fiber_100g) ?? 0).toFixed(1),
+      ...(num(n.sugars_100g) !== undefined ? { sugar: +num(n.sugars_100g)!.toFixed(1) } : {}),
+      ...(num(n['saturated-fat_100g']) !== undefined
+        ? { satFat: +num(n['saturated-fat_100g'])!.toFixed(1) }
+        : {}),
+      ...(num(n.salt_100g) !== undefined
+        ? { salt: +num(n.salt_100g)!.toFixed(2) }
+        : num(n.sodium_100g) !== undefined
+          ? { salt: +(num(n.sodium_100g)! * 2.5).toFixed(2) }
+          : {}),
     },
     ...(servingGrams
       ? {

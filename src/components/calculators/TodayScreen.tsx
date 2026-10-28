@@ -1049,6 +1049,26 @@ function PortionPicker({
           </div>
         ))}
       </div>
+      {(candidate.per100g.sugar !== undefined ||
+        candidate.per100g.satFat !== undefined ||
+        candidate.per100g.salt !== undefined) && (
+        <p class="text-subtle text-xs">
+          Per portion:{' '}
+          {[
+            candidate.per100g.sugar !== undefined
+              ? `sugar ${round((candidate.per100g.sugar * total) / 100, 1)} g`
+              : null,
+            candidate.per100g.satFat !== undefined
+              ? `saturated fat ${round((candidate.per100g.satFat * total) / 100, 1)} g`
+              : null,
+            candidate.per100g.salt !== undefined
+              ? `salt ${round((candidate.per100g.salt * total) / 100, 2)} g`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+      )}
       <button type="button" class="btn btn-primary h-12 text-base" onClick={() => onAdd(total)}>
         <Icon name="check" size={18} /> Add {total} g{imperial ? ` (${oz(total)} oz)` : ''}
       </button>

@@ -6,7 +6,17 @@ export interface Nutrients {
   carbs: number;
   fat: number;
   fibre?: number;
+  /** Optional label extras, mostly from packaged products. */
+  sugar?: number;
+  satFat?: number;
+  /** Salt in grams (sodium × 2.5). */
+  salt?: number;
 }
+
+/** The five values every summary carries; label extras stay optional. */
+export type CoreNutrients = Required<
+  Pick<Nutrients, 'kcal' | 'protein' | 'carbs' | 'fat' | 'fibre'>
+>;
 
 export type Meal = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export const MEALS: ReadonlyArray<{
@@ -46,9 +56,9 @@ export interface ExerciseEntry {
   kcal: number;
 }
 
-export const EMPTY: Required<Nutrients> = { kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 };
+export const EMPTY: CoreNutrients = { kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 };
 
-export function scale(per100g: Nutrients, grams: number): Required<Nutrients> {
+export function scale(per100g: Nutrients, grams: number): CoreNutrients {
   const f = grams / 100;
   return {
     kcal: round(per100g.kcal * f),
@@ -59,7 +69,7 @@ export function scale(per100g: Nutrients, grams: number): Required<Nutrients> {
   };
 }
 
-export function sum(items: Nutrients[]): Required<Nutrients> {
+export function sum(items: Nutrients[]): CoreNutrients {
   const t = { ...EMPTY };
   for (const n of items) {
     t.kcal += n.kcal;
@@ -77,7 +87,7 @@ export function sum(items: Nutrients[]): Required<Nutrients> {
   };
 }
 
-export function entryNutrients(e: FoodEntry): Required<Nutrients> {
+export function entryNutrients(e: FoodEntry): CoreNutrients {
   return scale(e.per100g, e.grams);
 }
 
@@ -90,14 +100,14 @@ export interface DayTargets {
 }
 
 export interface DaySummary {
-  eaten: Required<Nutrients>;
+  eaten: CoreNutrients;
   burned: number;
   /** Target adjusted for exercise if `eatBack` is on. */
   target: DayTargets;
-  remaining: Required<Nutrients>;
+  remaining: CoreNutrients;
   /** 0–1 of the calorie target consumed (can exceed 1). */
   progress: number;
-  byMeal: Record<Meal, Required<Nutrients>>;
+  byMeal: Record<Meal, CoreNutrients>;
   status: 'under' | 'on-target' | 'over';
 }
 
@@ -119,7 +129,7 @@ export function summariseDay(
   };
   const byMeal = Object.fromEntries(
     MEALS.map((m) => [m.key, sum(food.filter((e) => e.meal === m.key).map(entryNutrients))]),
-  ) as Record<Meal, Required<Nutrients>>;
+  ) as Record<Meal, CoreNutrients>;
   const progress = target.kcal > 0 ? eaten.kcal / target.kcal : 0;
   const status: DaySummary['status'] =
     progress > 1.1 ? 'over' : progress >= 0.9 ? 'on-target' : 'under';
@@ -163,11 +173,11 @@ export type Diet = 'omnivore' | 'vegetarian' | 'vegan';
  * blowing the remaining calories. Only runs when there is meaningful room left.
  */
 export function suggestFoods(
-  remaining: Required<Nutrients>,
+  remaining: CoreNutrients,
   foods: SuggestFood[],
   diet: Diet = 'omnivore',
   limit = 4,
-): Array<{ food: SuggestFood; grams: number; n: Required<Nutrients>; reason: string }> {
+): Array<{ food: SuggestFood; grams: number; n: CoreNutrients; reason: string }> {
   if (remaining.kcal < 120) return [];
   const dietOk = (f: SuggestFood) =>
     diet === 'vegan' ? f.veg === 'vegan' : diet === 'vegetarian' ? f.veg !== 'no' : true;
