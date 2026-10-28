@@ -215,6 +215,24 @@ function PlanDashboardInner() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
+  // Goal reached when the smoothed trend has crossed the goal weight (loss or gain).
+  const goalReached =
+    plan.goal !== 'maintain' &&
+    trend.length >= 7 &&
+    (plan.goal === 'lose' ? latestTrend <= plan.goalWeightKg : latestTrend >= plan.goalWeightKg);
+  const switchToMaintenance = () => {
+    const now = round(latestTrend, 1);
+    patchPlan({
+      goal: 'maintain',
+      goalWeightKg: now,
+      startWeightKg: now,
+      startedOn: today,
+      calorieOverride: null,
+      lastAdjustedOn: null,
+    });
+    confetti({ x: 0.5, y: 0.3 }, 180);
+    haptic([15, 40, 15]);
+  };
   const applyRecommendation = () => {
     if (!report?.recommendedCalories) return;
     patchPlan({ calorieOverride: report.recommendedCalories, lastAdjustedOn: today });
@@ -243,7 +261,9 @@ function PlanDashboardInner() {
           <h2 class="font-display mt-3 text-4xl tracking-tight">
             {plan.goal === 'maintain'
               ? 'Holding steady'
-              : `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}, ${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`}
+              : goalReached
+                ? `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}. Goal reached.`
+                : `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}, ${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`}
           </h2>
         </div>
         <div class="flex gap-2">
@@ -255,6 +275,39 @@ function PlanDashboardInner() {
           </a>
         </div>
       </div>
+
+      {goalReached && (
+        <section
+          class="border-brand-300 dark:border-brand-500/40 surface grid gap-4 border p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-6"
+          aria-label="Goal reached"
+        >
+          <div>
+            <p class="text-brand-700 dark:text-brand-300 text-xs font-semibold tracking-wide uppercase">
+              Goal reached
+            </p>
+            <h2 class="font-display mt-1 text-3xl tracking-tight">
+              Your trend is at {w(plan.goalWeightKg)}. Time to keep it.
+            </h2>
+            <p class="text-muted mt-2 text-sm leading-relaxed">
+              The hardest part is next: most people regain within two years, and the ones who do not
+              keep weighing in and eat close to maintenance. Switch the plan and Ethereal will set
+              your intake to maintenance, keep the two-week check running in both directions, and
+              tell you if the trend drifts.
+            </p>
+          </div>
+          <div class="grid gap-2">
+            <button type="button" class="btn btn-primary" onClick={switchToMaintenance}>
+              Switch to maintenance
+            </button>
+            <a
+              class="btn btn-ghost border-line border text-sm"
+              href={withBase('/guides/maintenance-after-weight-loss/')}
+            >
+              Read the maintenance guide
+            </a>
+          </div>
+        </section>
+      )}
 
       {plan.goal !== 'maintain' && (
         <div class="surface p-5">

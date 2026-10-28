@@ -187,3 +187,46 @@ test.describe('switching from another app', () => {
     await expect(page.getByText(/3 food entries stored on this device/)).toBeVisible();
   });
 });
+
+test.describe('goal reached', () => {
+  test('offers a one-tap switch to maintenance once the trend crosses the goal', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('ethereal:tour:v1', '1');
+      const today = new Date();
+      const iso = (d: Date) =>
+        new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      const entries = [];
+      for (let i = 20; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        entries.push({ date: iso(d), weightKg: 80.5 - (20 - i) * 0.1 }); // ends ~78.5
+      }
+      localStorage.setItem('ethereal:log:v1', JSON.stringify({ entries }));
+      localStorage.setItem(
+        'ethereal:plan:v1',
+        JSON.stringify({
+          active: true,
+          goal: 'lose',
+          goalWeightKg: 80,
+          rateKgPerWeek: 0.5,
+          formula: 'mifflin',
+          macroPreset: 'high-protein',
+          startedOn: iso(new Date(today.getTime() - 20 * 86400000)),
+          startWeightKg: 85,
+          calorieOverride: null,
+          lastAdjustedOn: null,
+        }),
+      );
+    });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/plan/');
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+    const card = page.getByRole('region', { name: 'Goal reached' });
+    await expect(card).toBeVisible();
+    await card.getByRole('button', { name: 'Switch to maintenance' }).click();
+    await expect(card).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Holding steady' })).toBeVisible();
+  });
+});
