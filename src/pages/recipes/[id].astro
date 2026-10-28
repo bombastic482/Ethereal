@@ -106,6 +106,9 @@ const jsonLd = [
         <a class="btn btn-secondary" href={withBase('/plan/#dayplan-h')}>
           Plan a day around it
         </a>
+        <button type="button" class="btn btn-ghost border-line border" data-share hidden>
+          Share
+        </button>
         {r.tags.map((t) => (
           <span class="chip">{t}</span>
         ))}
@@ -282,6 +285,21 @@ const jsonLd = [
       }),
     );
   }
+  // Share button appears only where the Web Share API exists (phones, mostly).
+  function bindShare() {
+    const b = document.querySelector<HTMLButtonElement>('[data-share]');
+    if (!b || b.dataset.bound) return;
+    b.dataset.bound = '1';
+    if (typeof navigator.share !== 'function') return;
+    b.hidden = false;
+    b.addEventListener('click', () => {
+      navigator.share({ title: document.title, url: location.href }).catch(() => undefined);
+    });
+  }
   bind();
-  document.addEventListener('astro:page-load', bind);
+  bindShare();
+  document.addEventListener('astro:page-load', () => {
+    bind();
+    bindShare();
+  });
 </script>
