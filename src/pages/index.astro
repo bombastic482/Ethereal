@@ -8,6 +8,11 @@ import Base from '@/layouts/Base.astro';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
 import { getCollection } from 'astro:content';
+import { existsSync } from 'node:fs';
+
+const heroArt = ['hero.webp', 'hero.png', 'hero.jpg'].find((f) =>
+  existsSync(new URL(`../../public/art/${f}`, import.meta.url)),
+);
 
 const tools = [...TOOLS].sort((a, b) => a.order - b.order);
 const featured = tools.filter((t) => t.featured);
@@ -93,7 +98,18 @@ const steps = [
             One minute · No account · Your data never leaves your device
           </p>
         </div>
-        <div class="animate-rise [animation-delay:150ms]">
+        <div class="animate-rise relative [animation-delay:150ms]">
+          {heroArt && (
+            <img
+              src={withBase(`/art/${heroArt}`)}
+              alt=""
+              width="1600"
+              height="900"
+              class="pointer-events-none absolute inset-0 -z-10 h-full w-full scale-125 object-cover opacity-70 blur-[1px]"
+              loading="eager"
+              fetchpriority="high"
+            />
+          )}
           <HeroPreview client:visible />
         </div>
       </div>
@@ -124,6 +140,67 @@ const steps = [
         </a>
       ))}
     </div>
+  </section>
+
+  <section class="container-page mt-24" aria-labelledby="features">
+    <div class="max-w-2xl">
+      <h2 id="features" class="text-3xl font-bold tracking-tight">
+        Everything the paid apps charge for
+      </h2>
+      <p class="text-muted mt-2">Free here, with the maths shown.</p>
+    </div>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {[
+        [
+          'flame',
+          'Food diary with barcode scanning',
+          'Built-in food database that works offline, Open Food Facts for packaged products, camera scanning, quick add and custom foods.',
+        ],
+        [
+          'target',
+          'Adaptive calorie targets',
+          'Every two weeks Ethereal compares your real trend with the plan and tells you the exact change, capped and safe.',
+        ],
+        [
+          'scale',
+          'A trend that sees through water',
+          'Daily weigh-ins are smoothed so a salty dinner never looks like failure.',
+        ],
+        [
+          'calendar',
+          'Realistic goal dates',
+          'Projections recalculate your maintenance as you get lighter, so the date is one you can plan around.',
+        ],
+        [
+          'spark',
+          'Streaks, milestones, weekly report',
+          'Small wins made visible: logging streaks, 5% and 5 kg milestones, and a weekly card that tells the truth.',
+        ],
+        [
+          'lock',
+          'Private, offline, installable',
+          'No account, no cloud. Install it on your phone, use it on a plane, export everything whenever you like.',
+        ],
+      ].map(([icon, title, text]) => (
+        <article class="surface reveal p-6">
+          <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 place-items-center rounded-2xl">
+            <Icon name={icon as never} size={22} />
+          </span>
+          <h3 class="mt-4 font-bold tracking-tight">{title}</h3>
+          <p class="text-muted mt-1 text-sm leading-relaxed">{text}</p>
+        </article>
+      ))}
+    </div>
+    <p class="text-muted mt-6 text-sm">
+      Curious how that stacks up against MyFitnessPal, Lose It! or MacroFactor?{' '}
+      <a
+        class="text-brand-700 dark:text-brand-300 font-semibold underline"
+        href={withBase('/compare/')}
+      >
+        See the comparison
+      </a>
+      .
+    </p>
   </section>
 
   <section class="container-page mt-20" aria-labelledby="tools">
@@ -235,4 +312,28 @@ const steps = [
   <div class="container-page">
     <Faq items={faq} />
   </div>
+  <script>
+    // Reveal cards as they scroll into view; no-op when motion is reduced.
+    function reveal() {
+      const els = document.querySelectorAll<HTMLElement>('.reveal');
+      if (
+        !('IntersectionObserver' in window) ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
+        els.forEach((el) => el.classList.add('is-visible'));
+        return;
+      }
+      const io = new IntersectionObserver(
+        (entries) =>
+          entries.forEach(
+            (e) =>
+              e.isIntersecting && (e.target.classList.add('is-visible'), io.unobserve(e.target)),
+          ),
+        { rootMargin: '0px 0px -10% 0px' },
+      );
+      els.forEach((el) => io.observe(el));
+    }
+    reveal();
+    document.addEventListener('astro:page-load', reveal);
+  </script>
 </Base>

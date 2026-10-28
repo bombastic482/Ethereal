@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 /** Astro removes the `ssr` attribute from an island once it has hydrated. */
 async function ready(page: Page, path: string) {
   await page.goto(path);
-  await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 }
 
 const TOOLS = [

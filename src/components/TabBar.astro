@@ -39,6 +39,11 @@ const active = (href: string) => current === withBase(href) || current.startsWit
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--border);
   }
+  @media (min-width: 768px) {
+    .tabbar {
+      display: none;
+    }
+  }
   .tab {
     display: flex;
     flex-direction: column;

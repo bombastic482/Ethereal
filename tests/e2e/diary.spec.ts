@@ -1,20 +1,23 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function ready(page: Page, path: string) {
+  // Count-up animations settle instantly under reduced motion, so numbers can be compared.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(path);
-  await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 }
 
 test.describe('food diary', () => {
   test('logs a built-in food, edits the portion, and the ring updates', async ({ page }) => {
     await ready(page, '/today/');
     await expect(page.getByText('kcal left')).toBeVisible();
-    const before = await page
-      .getByText(/kcal left/)
-      .locator('..')
-      .locator('p')
-      .first()
-      .textContent();
+    const eaten = async () =>
+      Number(
+        (await page.getByRole('img', { name: /of [\d,]+ kcal$/ }).getAttribute('aria-label'))!
+          .split(' of ')[0]!
+          .replace(/,/g, ''),
+      );
+    const before = await eaten();
 
     await page
       .getByRole('region', { name: 'Breakfast' })
@@ -35,13 +38,7 @@ test.describe('food diary', () => {
       .getByText(/^Banana/)
       .first();
     await expect(row).toBeVisible();
-    const after = await page
-      .getByText(/kcal left/)
-      .locator('..')
-      .locator('p')
-      .first()
-      .textContent();
-    expect(Number(after!.replace(/,/g, ''))).toBeLessThan(Number(before!.replace(/,/g, '')));
+    expect(await eaten()).toBeGreaterThan(before);
 
     // Edit portion inline
     await row.click();
@@ -50,7 +47,7 @@ test.describe('food diary', () => {
 
     // Persisted across reload
     await page.reload();
-    await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     await expect(
       page.getByRole('region', { name: 'Breakfast' }).getByText(/^Banana/),
     ).toBeVisible();
@@ -91,6 +88,8 @@ test.describe('food diary', () => {
     await expect(dialog.getByRole('heading', { name: 'Lasagne' })).toBeVisible();
     await dialog.getByRole('button', { name: /^Add 350 g$/ }).click();
     await expect(page.getByRole('region', { name: 'Dinner' }).getByText('Lasagne')).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Dinner' }).getByText('520')).toBeVisible();
+    await expect(
+      page.getByRole('region', { name: 'Dinner' }).getByText('520').first(),
+    ).toBeVisible();
   });
 });

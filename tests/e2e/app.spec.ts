@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function ready(page: Page, path: string) {
   await page.goto(path);
-  await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 }
 
 test.describe('plan and tracker', () => {
@@ -11,7 +11,7 @@ test.describe('plan and tracker', () => {
     await expect(page.getByText(/don't have a plan yet/i)).toBeVisible();
     await page.getByRole('link', { name: /build my plan/i }).click();
     await expect(page).toHaveURL(/\/start\/$/);
-    await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 
     // Step 1: about you
     await page.getByRole('radio', { name: 'Male', exact: true }).check();
@@ -32,7 +32,7 @@ test.describe('plan and tracker', () => {
 
     // Dashboard
     await expect(page).toHaveURL(/\/plan\/$/);
-    await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     await expect(page.getByText(/to go/)).toBeVisible();
     await expect(page.getByRole('progressbar')).toBeVisible();
     await expect(page.getByText(/Logged .* today/)).toBeVisible();
@@ -72,7 +72,7 @@ test.describe('plan and tracker', () => {
     await context.clearCookies();
     await page.evaluate(() => localStorage.clear());
     await page.goto(link);
-    await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     await expect(page.getByText(/Plan imported from your link/)).toBeVisible();
     await expect(page.getByLabel('Weight', { exact: true })).toHaveValue('70');
   });

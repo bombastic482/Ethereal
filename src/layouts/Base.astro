@@ -5,6 +5,7 @@ import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import TabBar from '@/components/TabBar.astro';
+import { ClientRouter } from 'astro:transitions';
 import { SITE } from '@/lib/site';
 
 interface Props {
@@ -38,6 +39,7 @@ const { class: cls, ...seo } = Astro.props;
     <link rel="manifest" href={withBase('/manifest.webmanifest')} />
     <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
     <Seo {...seo} />
+    <ClientRouter fallback="swap" />
     <script is:inline>
       // Theme is resolved before first paint to avoid a flash. Explicit choice wins, then system preference.
       (function () {
@@ -61,12 +63,18 @@ const { class: cls, ...seo } = Astro.props;
       Skip to content
     </a>
     <Header />
-    <main id="main" class:list={['flex-1', cls]}>
+    <main id="main" class:list={['flex-1', cls]} transition:animate="fade">
       <slot />
     </main>
     <Footer />
     <TabBar />
     <script>
+      // Keep the chosen theme when the ClientRouter swaps <html> attributes during navigation.
+      document.addEventListener('astro:before-swap', (e) => {
+        const ev = e as Event & { newDocument: Document };
+        ev.newDocument.documentElement.dataset.theme =
+          document.documentElement.dataset.theme ?? 'light';
+      });
       if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
         const base = import.meta.env.BASE_URL.endsWith('/')
           ? import.meta.env.BASE_URL

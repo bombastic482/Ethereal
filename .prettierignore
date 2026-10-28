@@ -4,3 +4,4 @@ node_modules
 .astro
 public/og.png
 package-lock.json
+src/data/

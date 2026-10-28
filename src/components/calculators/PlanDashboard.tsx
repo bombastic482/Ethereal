@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
 import { currentStreak, longestStreak, shift, weightMilestones } from '@/lib/calc/streaks';
 import { assessProgress, daysBetween, trendSeries } from '@/lib/calc/trend';
@@ -8,6 +8,7 @@ import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/un
 import { logStore, upsertEntry } from '@/lib/log';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
+import { confetti, haptic } from '@/lib/fx';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { DonutChart } from '../ui/DonutChart';
@@ -15,6 +16,7 @@ import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
 import { NumberField } from '../ui/NumberField';
 import { Stat } from '../ui/Stat';
+import { WeekBars } from '../ui/WeekBars';
 
 const STATUS_STYLE: Record<string, string> = {
   'on-track': 'bg-brand-100 text-brand-800 dark:bg-brand-400/15 dark:text-brand-100',
@@ -97,7 +99,14 @@ export default function PlanDashboard() {
       per.map((d) => ({ eatenKcal: d.eaten.kcal, targetKcal: d.target.kcal })),
     );
     const weighIns = log.entries.filter((e) => days.includes(e.date)).length;
-    return { loggedDays: logged.length, avgKcal, avgProtein, adherence, weighIns, target: t };
+    const bars = days
+      .map((d, i) => ({
+        label: new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'narrow' }),
+        value: per[i]!.eaten.kcal,
+        target: per[i]!.target.kcal,
+      }))
+      .reverse();
+    return { loggedDays: logged.length, avgKcal, avgProtein, adherence, weighIns, target: t, bars };
   }, [summary, diary.food, diary.exercise, prefs.eatBack, log.entries, today]);
   const streak = useMemo(
     () =>
@@ -120,6 +129,23 @@ export default function PlanDashboard() {
           ),
     [plan, trend, imperial],
   );
+
+  useEffect(() => {
+    const reached = milestones.filter((m) => m.reached).map((m) => m.key);
+    if (reached.length === 0) return;
+    try {
+      const seen = new Set<string>(
+        JSON.parse(localStorage.getItem('ethereal:milestones-seen') ?? '[]') as string[],
+      );
+      const fresh = reached.filter((k) => !seen.has(k));
+      if (fresh.length === 0) return;
+      localStorage.setItem('ethereal:milestones-seen', JSON.stringify([...seen, ...fresh]));
+      confetti({ x: 0.5, y: 0.4 }, 160);
+      haptic([20, 50, 20]);
+    } catch {
+      /* ignore */
+    }
+  }, [milestones]);
 
   if (!plan.active) {
     return (
@@ -332,29 +358,37 @@ export default function PlanDashboard() {
             )}
           </div>
           {week && week.loggedDays > 0 ? (
-            <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Stat label="Days logged" value={`${week.loggedDays}/7`} />
-              <Stat
-                label="Avg calories"
-                value={week.avgKcal === null ? '—' : formatNumber(week.avgKcal)}
-                sub={`target ${formatNumber(week.target.kcal)}`}
-              />
-              <Stat
-                label="Avg protein"
-                value={week.avgProtein === null ? '—' : `${week.avgProtein} g`}
-                sub={`target ${week.target.protein} g`}
-                tone={
-                  week.avgProtein !== null && week.avgProtein >= week.target.protein * 0.9
-                    ? 'brand'
-                    : 'default'
-                }
-              />
-              <Stat
-                label="On target"
-                value={week.adherence === null ? '—' : `${week.adherence}%`}
-                sub="days within ±10%"
-              />
-            </div>
+            <>
+              <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <Stat label="Days logged" value={`${week.loggedDays}/7`} />
+                <Stat
+                  label="Avg calories"
+                  value={week.avgKcal === null ? '—' : formatNumber(week.avgKcal)}
+                  sub={`target ${formatNumber(week.target.kcal)}`}
+                />
+                <Stat
+                  label="Avg protein"
+                  value={week.avgProtein === null ? '—' : `${week.avgProtein} g`}
+                  sub={`target ${week.target.protein} g`}
+                  tone={
+                    week.avgProtein !== null && week.avgProtein >= week.target.protein * 0.9
+                      ? 'brand'
+                      : 'default'
+                  }
+                />
+                <Stat
+                  label="On target"
+                  value={week.adherence === null ? '—' : `${week.adherence}%`}
+                  sub="days within ±10%"
+                />
+              </div>
+              <div class="mt-5">
+                <WeekBars
+                  days={week.bars}
+                  ariaLabel="Calories eaten per day this week against target"
+                />
+              </div>
+            </>
           ) : (
             <p class="text-muted mt-3 text-sm">
               No meals logged this week.{' '}

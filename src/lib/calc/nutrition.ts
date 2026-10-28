@@ -149,6 +149,7 @@ export function adherencePercent(
 export interface SuggestFood {
   id: string;
   name: string;
+  category?: string;
   per100g: Nutrients;
   servings: Array<{ label: string; grams: number }>;
   veg: 'vegan' | 'vegetarian' | 'no';
@@ -168,9 +169,14 @@ export function suggestFoods(
   limit = 4,
 ): Array<{ food: SuggestFood; grams: number; n: Required<Nutrients>; reason: string }> {
   if (remaining.kcal < 120) return [];
-  const allowed = foods.filter((f) =>
-    diet === 'vegan' ? f.veg === 'vegan' : diet === 'vegetarian' ? f.veg !== 'no' : true,
-  );
+  const dietOk = (f: SuggestFood) =>
+    diet === 'vegan' ? f.veg === 'vegan' : diet === 'vegetarian' ? f.veg !== 'no' : true;
+  // Whole foods people actually snack on: skip raw/uncooked items, dry goods and supplements.
+  const edible = (f: SuggestFood) =>
+    !/\b(raw|uncooked|dry|powder|flour|oil)\b/i.test(f.name) &&
+    !/supplement/i.test(f.category ?? '');
+  let allowed = foods.filter((f) => dietOk(f) && edible(f));
+  if (allowed.length < 5) allowed = foods.filter(dietOk);
   const proteinShort = remaining.protein > 15;
   const scored = allowed
     .map((f) => {
@@ -185,9 +191,18 @@ export function suggestFoods(
       return { food: f, grams, n, score };
     })
     .filter((x): x is NonNullable<typeof x> => x !== null)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit);
-  return scored.map(({ food, grams, n }) => ({
+    .sort((a, b) => b.score - a.score);
+  const seen = new Set<string>();
+  const picked: typeof scored = [];
+  for (const x of scored) {
+    const cat = x.food.category ?? x.food.id;
+    if (seen.has(cat)) continue;
+    seen.add(cat);
+    picked.push(x);
+    if (picked.length >= limit) break;
+  }
+  const chosen = picked.length >= Math.min(limit, 2) ? picked : scored.slice(0, limit);
+  return chosen.map(({ food, grams, n }) => ({
     food,
     grams,
     n,

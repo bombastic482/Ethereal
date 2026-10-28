@@ -1,0 +1,110 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { withBase } from '@/lib/url';
+
+const rows: Array<[string, string, string, string, string]> = [
+  [
+    'Price',
+    'Free, forever',
+    'Free with ads; Premium for barcode scanning and macros',
+    'Free tier; Premium for most tracking features',
+    'Subscription only, no free tier',
+  ],
+  ['Account required', 'No', 'Yes', 'Yes', 'Yes'],
+  ['Where your data lives', 'Your device only', 'Their servers', 'Their servers', 'Their servers'],
+  ['Ads and trackers', 'None', 'Ads on free tier', 'Ads on free tier', 'None'],
+  ['Barcode scanning', 'Yes, free', 'Paid', 'Limited free', 'Yes'],
+  [
+    'Adaptive calorie adjustments',
+    'Yes, every two weeks from your trend',
+    'No',
+    'No',
+    'Yes, weekly',
+  ],
+  ['Weight trend smoothing', 'Yes', 'No', 'No', 'Yes'],
+  ['Works offline', 'Yes, installable', 'Partly', 'Partly', 'Partly'],
+  ['Export your data', 'JSON and CSV, any time', 'Premium', 'Premium', 'Yes'],
+  ['Open methodology', 'Every formula documented', 'No', 'No', 'Partly'],
+];
+---
+
+<Base
+  title="Ethereal vs the Big Apps"
+  description="How Ethereal compares with MyFitnessPal, Lose It! and MacroFactor on price, privacy, barcode scanning, adaptive calorie adjustments and data export."
+  path="/compare/"
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <header class="max-w-2xl">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">How it compares</h1>
+      <p class="text-muted mt-4 text-lg">
+        The big apps are good software funded by subscriptions and ads. Ethereal is funded by
+        nothing, so it can be free, private and honest about the maths. Here is where that lands, as
+        of late 2026.
+      </p>
+    </header>
+    <div class="surface mt-10 overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-subtle text-left text-xs">
+            <th class="p-4 font-semibold"></th>
+            <th class="p-4 font-semibold text-brand-700 dark:text-brand-300">Ethereal</th>
+            <th class="p-4 font-semibold">MyFitnessPal</th>
+            <th class="p-4 font-semibold">Lose It!</th>
+            <th class="p-4 font-semibold">MacroFactor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([k, ...v]) => (
+            <tr class="border-line border-t align-top">
+              <th scope="row" class="p-4 text-left font-semibold">
+                {k}
+              </th>
+              {v.map((cell, i) => (
+                <td class:list={['p-4', i === 0 && 'font-semibold']}>
+                  {i === 0 && (
+                    <Icon
+                      name="check"
+                      size={14}
+                      class="text-brand-600 dark:text-brand-300 mr-1 inline"
+                    />
+                  )}
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-subtle mt-4 text-xs">
+      Competitor details reflect publicly listed features and plans at the time of writing and may
+      change. Product names belong to their owners.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href={withBase('/start/')} class="btn btn-primary">
+        Build my plan <Icon name="arrow" size={16} />
+      </a>
+      <a href={withBase('/about/')} class="btn btn-secondary">
+        Read the methodology
+      </a>
+    </div>
+    <section class="mt-16 max-w-3xl">
+      <h2 class="text-2xl font-bold tracking-tight">What the big apps do better</h2>
+      <ul class="prose-ethereal mt-4">
+        <li>
+          <strong>Food database depth.</strong> Decades of user-submitted entries. Ethereal ships
+          ~500 curated generic foods and uses Open Food Facts for packaged products, which is
+          smaller but far cleaner.
+        </li>
+        <li>
+          <strong>Sync across devices.</strong> They hold your data on their servers. Ethereal keeps
+          it on your device and gives you backups and share links instead.
+        </li>
+        <li>
+          <strong>Recipes and restaurant menus.</strong> Not yet in Ethereal.
+        </li>
+      </ul>
+    </section>
+  </div>
+</Base>

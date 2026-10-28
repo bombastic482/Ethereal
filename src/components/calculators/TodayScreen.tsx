@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { ACTIVITIES, exerciseKcal } from '@/lib/calc/exercise';
 import {
   MEALS,
@@ -30,10 +30,12 @@ import { FOODS, foodById, searchFoods, type Food } from '@/lib/foods';
 import { lookupBarcode, searchProducts, type OffProduct } from '@/lib/off';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
+import { confetti, haptic, onSwipe } from '@/lib/fx';
 import { withBase } from '@/lib/url';
 import { Bar } from '../ui/Bar';
 import { BarcodeScanner } from '../ui/BarcodeScanner';
 import { Callout } from '../ui/Callout';
+import { CountUp } from '../ui/CountUp';
 import { Icon } from '../ui/Icon';
 import { NumberField } from '../ui/NumberField';
 import { Ring } from '../ui/Ring';
@@ -149,9 +151,38 @@ export default function TodayScreen() {
 
   const remainingTone = day.remaining.kcal < 0 ? 'warn' : 'brand';
   const yesterday = shift(date, -1);
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!root.current) return;
+    return onSwipe(root.current, {
+      left: () => setDate((d) => (d < today ? shift(d, 1) : d)),
+      right: () => setDate((d) => shift(d, -1)),
+    });
+  }, [today]);
+  // Celebrate finishing today on target (once per day).
+  const celebrated = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      date !== today ||
+      day.status !== 'on-target' ||
+      dayFood.length < 3 ||
+      celebrated.current === today
+    )
+      return;
+    const key = `ethereal:celebrated:${today}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, '1');
+    } catch {
+      /* ignore */
+    }
+    celebrated.current = today;
+    confetti({ x: 0.5, y: 0.3 }, 140);
+    haptic([15, 40, 15]);
+  }, [day.status, dayFood.length, date, today]);
 
   return (
-    <div class="grid gap-6">
+    <div class="grid gap-6" ref={root}>
       {/* Day navigation */}
       <div class="flex items-center justify-between gap-3">
         <button
@@ -196,7 +227,7 @@ export default function TodayScreen() {
             <p
               class={`tabular text-4xl font-bold tracking-tight ${day.remaining.kcal < 0 ? 'text-rose-600 dark:text-rose-300' : ''}`}
             >
-              {formatNumber(Math.abs(day.remaining.kcal))}
+              <CountUp value={Math.abs(day.remaining.kcal)} />
             </p>
             <p class="text-subtle text-xs font-semibold tracking-wide uppercase">
               {day.remaining.kcal < 0 ? 'kcal over' : 'kcal left'}
@@ -406,7 +437,10 @@ export default function TodayScreen() {
               <button
                 type="button"
                 class="btn btn-primary h-9 w-9 p-0"
-                onClick={() => setWater(date, water + 1)}
+                onClick={() => {
+                  haptic(8);
+                  setWater(date, water + 1);
+                }}
                 aria-label="Add a glass"
               >
                 +
@@ -1057,10 +1091,10 @@ function CustomFoods({ foods, onPick }: { foods: CustomFood[]; onPick: (c: Custo
       servingGrams,
       servingLabel: `1 serving (${servingGrams} g)`,
       per100g: {
-        kcal: round(kcal * k),
-        protein: round(p * k, 1),
-        carbs: round(c * k, 1),
-        fat: round(f * k, 1),
+        kcal: round(kcal * k, 2),
+        protein: round(p * k, 2),
+        carbs: round(c * k, 2),
+        fat: round(f * k, 2),
         fibre: 0,
       },
     });

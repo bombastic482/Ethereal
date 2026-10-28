@@ -16,7 +16,8 @@
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "og": "node scripts/og.mjs",
-    "verify": "npm run check && npm run test && npm run build"
+    "validate:foods": "node scripts/validate-foods.mjs",
+    "verify": "npm run validate:foods && npm run check && npm run test && npm run build"
   },
   "engines": {
     "node": ">=20"
