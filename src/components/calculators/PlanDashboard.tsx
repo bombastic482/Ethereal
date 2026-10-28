@@ -153,7 +153,7 @@ export default function PlanDashboard() {
         <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 mx-auto grid h-14 w-14 place-items-center rounded-2xl">
           <Icon name="target" size={28} />
         </span>
-        <h2 class="mt-5 text-2xl font-bold tracking-tight">You don't have a plan yet</h2>
+        <h2 class="font-display mt-5 text-3xl tracking-tight">You don't have a plan yet</h2>
         <p class="text-muted mt-2">
           Three quick steps: your stats, your goal, your numbers. Takes about a minute and lives
           only on this device.
@@ -203,7 +203,7 @@ export default function PlanDashboard() {
               month: 'short',
             })}
           </p>
-          <h2 class="mt-3 text-3xl font-bold tracking-tight">
+          <h2 class="font-display mt-3 text-4xl tracking-tight">
             {plan.goal === 'maintain'
               ? 'Holding steady'
               : `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}, ${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`}

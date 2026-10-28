@@ -87,7 +87,12 @@ const fromCustom = (c: CustomFood): Candidate => ({
 });
 
 const fmtDay = (iso: string, today: string) => {
-  if (iso === today) return 'Today';
+  if (iso === today)
+    return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
   if (iso === shift(today, -1)) return 'Yesterday';
   return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
     weekday: 'long',
@@ -229,7 +234,7 @@ export default function TodayScreen() {
         >
           <div>
             <p
-              class={`tabular text-4xl font-bold tracking-tight ${day.remaining.kcal < 0 ? 'text-rose-600 dark:text-rose-300' : ''}`}
+              class={`font-display tabular text-5xl tracking-tight ${day.remaining.kcal < 0 ? 'text-rose-600 dark:text-rose-300' : ''}`}
             >
               <CountUp value={Math.abs(day.remaining.kcal)} />
             </p>
@@ -455,7 +460,7 @@ export default function TodayScreen() {
             {Array.from({ length: Math.max(prefs.waterGoalGlasses, water) }, (_, i) => (
               <span
                 key={i}
-                class={`h-7 w-5 rounded-t-sm rounded-b-lg border ${i < water ? 'border-sky-400 bg-sky-400/70' : 'border-line bg-muted'}`}
+                class={`h-7 w-5 rounded-t-sm rounded-b-lg border ${i < water ? 'border-[oklch(62%_0.09_235)] bg-[oklch(72%_0.09_235)]' : 'border-line bg-muted'}`}
               />
             ))}
           </div>
@@ -942,7 +947,7 @@ function PortionPicker({
         ‹ Back to results
       </button>
       <div>
-        <h3 class="text-xl font-bold tracking-tight">{candidate.name}</h3>
+        <h3 class="font-display text-2xl tracking-tight">{candidate.name}</h3>
         {candidate.brand && <p class="text-subtle text-sm">{candidate.brand}</p>}
       </div>
       <div class="flex flex-wrap gap-2">

@@ -11,7 +11,7 @@ export const GET: APIRoute = () =>
       start_url: withBase('/'),
       scope: withBase('/'),
       display: 'standalone',
-      background_color: '#f8fafc',
+      background_color: '#f7f4ee',
       theme_color: SITE.themeColor,
       icons: [
         { src: withBase('/icons/icon-192.png'), sizes: '192x192', type: 'image/png' },

@@ -3,8 +3,8 @@
 import sharp from 'sharp';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const brand = '#14b8a6';
-const accent = '#a78bfa';
+const brand = '#5aa072';
+const accent = '#e8a06a';
 
 const star = (cx, cy, r) =>
   `M${cx} ${cy - r}l${r * 0.29} ${r * 0.71}L${cx + r} ${cy}l-${r * 0.71} ${r * 0.29}L${cx} ${cy + r}l-${r * 0.29}-${r * 0.71}L${cx - r} ${cy}l${r * 0.71}-${r * 0.29}Z`;
@@ -12,7 +12,7 @@ const star = (cx, cy, r) =>
 const og = `
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1220"/><stop offset="1" stop-color="#111a2e"/></linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d1a16"/><stop offset="1" stop-color="#2a251f"/></linearGradient>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${brand}"/><stop offset="1" stop-color="${accent}"/></linearGradient>
     <radialGradient id="glow1" cx="0.2" cy="0.1" r="0.6"><stop offset="0" stop-color="${brand}" stop-opacity="0.45"/><stop offset="1" stop-color="${brand}" stop-opacity="0"/></radialGradient>
     <radialGradient id="glow2" cx="0.9" cy="0.9" r="0.6"><stop offset="0" stop-color="${accent}" stop-opacity="0.4"/><stop offset="1" stop-color="${accent}" stop-opacity="0"/></radialGradient>
@@ -23,14 +23,14 @@ const og = `
   <rect x="80" y="80" width="72" height="72" rx="18" fill="url(#g)"/>
   <path d="${star(116, 116, 22)}" fill="#fff"/>
   <text x="172" y="134" font-family="Inter, Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff" letter-spacing="-1">Ethereal</text>
-  <text x="80" y="330" font-family="Inter, Helvetica, Arial, sans-serif" font-size="84" font-weight="800" fill="#fff" letter-spacing="-3">Weight loss,</text>
-  <text x="80" y="420" font-family="Inter, Helvetica, Arial, sans-serif" font-size="84" font-weight="800" fill="url(#g)" letter-spacing="-3">done properly.</text>
-  <text x="80" y="500" font-family="Inter, Helvetica, Arial, sans-serif" font-size="30" fill="#c7d2e0">Food diary, barcode scanning, adaptive calorie targets. Free and private.</text>
+  <text x="80" y="330" font-family="Georgia, Times New Roman, serif" font-size="92" font-weight="400" fill="#fff" letter-spacing="-2">Weight loss,</text>
+  <text x="80" y="420" font-family="Georgia, Times New Roman, serif" font-style="italic" font-size="92" font-weight="400" fill="url(#g)" letter-spacing="-2">done properly.</text>
+  <text x="80" y="500" font-family="Inter, Helvetica, Arial, sans-serif" font-size="30" fill="#d9d2c7">Food diary, barcode scanning, adaptive calorie targets. Free and private.</text>
   <g transform="translate(900 150)">
     <circle cx="120" cy="120" r="96" fill="none" stroke="#ffffff14" stroke-width="22"/>
     <circle cx="120" cy="120" r="96" fill="none" stroke="url(#g)" stroke-width="22" stroke-linecap="round" stroke-dasharray="${(2 * Math.PI * 96 * 0.68).toFixed(1)} 999" transform="rotate(-90 120 120)"/>
     <text x="120" y="112" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-size="46" font-weight="800" fill="#fff" letter-spacing="-2">612</text>
-    <text x="120" y="142" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#9fb0c4" letter-spacing="1.5">KCAL LEFT</text>
+    <text x="120" y="142" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#b8ae9f" letter-spacing="1.5">KCAL LEFT</text>
     <g transform="translate(20 260)">
       <rect width="200" height="10" rx="5" fill="#ffffff14"/><rect width="150" height="10" rx="5" fill="${brand}"/>
       <rect y="24" width="200" height="10" rx="5" fill="#ffffff14"/><rect y="24" width="118" height="10" rx="5" fill="${accent}"/>

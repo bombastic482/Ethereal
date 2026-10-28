@@ -107,7 +107,7 @@ export default function Onboarding() {
         {step === 0 && (
           <div class="grid gap-6">
             <header>
-              <h2 class="text-2xl font-bold tracking-tight">About you</h2>
+              <h2 class="font-display text-3xl tracking-tight">About you</h2>
               <p class="text-muted mt-1 text-sm">
                 Used only to estimate your energy needs. Saved on this device, never sent anywhere.
               </p>
@@ -136,7 +136,7 @@ export default function Onboarding() {
         {step === 1 && (
           <div class="grid gap-6">
             <header>
-              <h2 class="text-2xl font-bold tracking-tight">Your goal</h2>
+              <h2 class="font-display text-3xl tracking-tight">Your goal</h2>
               <p class="text-muted mt-1 text-sm">
                 Pick a pace you can hold for months, not weeks. Slower almost always wins.
               </p>
@@ -208,7 +208,7 @@ export default function Onboarding() {
         {step === 2 && summary && (
           <div class="grid gap-6">
             <header>
-              <h2 class="text-2xl font-bold tracking-tight">Your plan</h2>
+              <h2 class="font-display text-3xl tracking-tight">Your plan</h2>
               <p class="text-muted mt-1 text-sm">
                 Here is what the numbers say. You can change the macro style now or any time in
                 settings.

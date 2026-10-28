@@ -29,7 +29,7 @@ export function Stat({
     <div class={`flex flex-col ${cls ?? ''}`}>
       <span class="text-subtle text-xs font-semibold tracking-wide uppercase">{label}</span>
       <span
-        class={`tabular mt-1 leading-none font-bold tracking-tight ${size === 'lg' ? 'text-4xl sm:text-5xl' : 'text-2xl'} ${color}`}
+        class={`font-display tabular mt-1 leading-none tracking-tight ${size === 'lg' ? 'text-5xl sm:text-6xl' : 'text-3xl'} ${color}`}
       >
         {value}
         {unit && <span class="text-muted ml-1 text-base font-medium">{unit}</span>}

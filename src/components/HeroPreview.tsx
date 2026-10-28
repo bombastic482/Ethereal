@@ -35,7 +35,7 @@ export default function HeroPreview() {
           <div class="surface grid place-items-center p-3">
             <Ring value={t} size={150} stroke={13}>
               <div>
-                <p class="tabular text-3xl font-bold tracking-tight">{left.toLocaleString()}</p>
+                <p class="tabular font-display text-4xl tracking-tight">{left.toLocaleString()}</p>
                 <p class="text-subtle text-[10px] font-semibold tracking-wide uppercase">
                   kcal left
                 </p>
