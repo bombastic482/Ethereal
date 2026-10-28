@@ -11,8 +11,25 @@ export interface CustomFood {
   servingLabel: string;
 }
 
+export interface SavedMealItem {
+  name: string;
+  brand?: string;
+  grams: number;
+  per100g: Nutrients;
+  foodId?: string;
+  barcode?: string;
+}
+
+export interface SavedMeal {
+  id: string;
+  name: string;
+  items: SavedMealItem[];
+}
+
 export interface Diary {
   food: FoodEntry[];
+  /** Saved meals and recipes, logged as a group. */
+  meals?: SavedMeal[];
   exercise: ExerciseEntry[];
   /** Glasses of water per day: { 'YYYY-MM-DD': n }. */
   water: Record<string, number>;
@@ -138,4 +155,55 @@ export function foodCsv(food: FoodEntry[]): string {
   return rows
     .map((r) => r.map((c) => (/[",\n]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c)).join(','))
     .join('\n');
+}
+
+/** Saves the entries of one meal on one day as a reusable meal. */
+export function saveMealFromEntries(name: string, entries: FoodEntry[]): SavedMeal | null {
+  if (entries.length === 0 || !name.trim()) return null;
+  const d = diaryStore.get();
+  const meal: SavedMeal = {
+    id: `meal-${uid()}`,
+    name: name.trim(),
+    items: entries.map((e) => ({
+      name: e.name,
+      ...(e.brand ? { brand: e.brand } : {}),
+      grams: e.grams,
+      per100g: e.per100g,
+      ...(e.foodId ? { foodId: e.foodId } : {}),
+      ...(e.barcode ? { barcode: e.barcode } : {}),
+    })),
+  };
+  diaryStore.set({ ...d, meals: [meal, ...(d.meals ?? [])] });
+  return meal;
+}
+
+/** Logs every item of a saved meal, scaled by `portion` (1 = as saved, 0.5 = half). */
+export function logSavedMeal(
+  meal: SavedMeal,
+  date: string,
+  slot: FoodEntry['meal'],
+  portion = 1,
+  time?: number,
+): number {
+  const d = diaryStore.get();
+  const entries: FoodEntry[] = meal.items.map((it) => ({
+    id: uid(),
+    date,
+    meal: slot,
+    name: it.name,
+    ...(it.brand ? { brand: it.brand } : {}),
+    grams: Math.round(it.grams * portion),
+    per100g: it.per100g,
+    source: it.barcode ? 'off' : it.foodId ? 'local' : 'custom',
+    ...(it.foodId ? { foodId: it.foodId } : {}),
+    ...(it.barcode ? { barcode: it.barcode } : {}),
+    ...(time !== undefined ? { time } : {}),
+  }));
+  diaryStore.set({ ...d, food: [...d.food, ...entries] });
+  return entries.length;
+}
+
+export function deleteSavedMeal(id: string): void {
+  const d = diaryStore.get();
+  diaryStore.set({ ...d, meals: (d.meals ?? []).filter((m) => m.id !== id) });
 }

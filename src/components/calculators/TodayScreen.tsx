@@ -5,6 +5,7 @@ import {
   mealForTime,
   scale,
   suggestFoods,
+  sum,
   summariseDay,
   type FoodEntry,
   type Meal,
@@ -16,15 +17,19 @@ import {
   addExercise,
   addFood,
   copyMeal,
+  deleteSavedMeal,
   diaryStore,
+  logSavedMeal,
   prefsStore,
   removeExercise,
   removeFood,
+  saveCustomFood,
+  saveMealFromEntries,
   setWater,
   toggleFavourite,
   updateFood,
-  saveCustomFood,
   type CustomFood,
+  type SavedMeal,
 } from '@/lib/food-store';
 import { allFoods, foodById, loadFoods, searchFoods, type Food } from '@/lib/foods';
 import { lookupBarcode, searchProducts, type OffProduct } from '@/lib/off';
@@ -42,7 +47,7 @@ import { Ring } from '../ui/Ring';
 import { Segmented } from '../ui/Segmented';
 import { SelectField } from '../ui/SelectField';
 
-type Tab = 'search' | 'scan' | 'quick' | 'custom';
+type Tab = 'search' | 'scan' | 'quick' | 'custom' | 'meals';
 
 interface Candidate {
   name: string;
@@ -308,13 +313,35 @@ export default function TodayScreen() {
                     · guide {formatNumber(budget)} kcal
                   </p>
                 </div>
-                <button
-                  type="button"
-                  class="btn btn-primary h-9 px-3 text-sm"
-                  onClick={() => setAdding(m.key)}
-                >
-                  <Icon name="spark" size={14} /> Add
-                </button>
+                <div class="flex items-center gap-1">
+                  {items.length > 0 && (
+                    <button
+                      type="button"
+                      class="btn btn-ghost h-9 px-2 text-xs"
+                      onClick={() => {
+                        const name = prompt(
+                          `Name this ${m.label.toLowerCase()} so you can log it again in one tap:`,
+                          `${m.label} · ${new Date(date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
+                        );
+                        if (name && saveMealFromEntries(name, items)) {
+                          haptic();
+                          alert(`Saved "${name}". Find it under Add → Meals.`);
+                        }
+                      }}
+                      aria-label={`Save ${m.label.toLowerCase()} as a meal`}
+                      title="Save as meal"
+                    >
+                      <Icon name="copy" size={14} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    class="btn btn-primary h-9 px-3 text-sm"
+                    onClick={() => setAdding(m.key)}
+                  >
+                    <Icon name="spark" size={14} /> Add
+                  </button>
+                </div>
               </header>
               {items.length > 0 ? (
                 <ul class="mt-3 grid gap-1">
@@ -740,6 +767,7 @@ function AddFoodSheet({
                 options={[
                   { value: 'search', label: 'Search' },
                   { value: 'scan', label: 'Scan' },
+                  { value: 'meals', label: 'Meals' },
                   { value: 'quick', label: 'Quick add' },
                   { value: 'custom', label: 'My foods' },
                 ]}
@@ -857,6 +885,16 @@ function AddFoodSheet({
                       source: 'quick',
                       time: minutesNow(),
                     });
+                    onClose();
+                  }}
+                />
+              )}
+              {tab === 'meals' && (
+                <SavedMeals
+                  meals={diary.meals ?? []}
+                  onLog={(saved, portion) => {
+                    haptic();
+                    logSavedMeal(saved, date, meal, portion, minutesNow());
                     onClose();
                   }}
                 />
@@ -1316,6 +1354,80 @@ function AddExerciseSheet({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SavedMeals({
+  meals,
+  onLog,
+}: {
+  meals: SavedMeal[];
+  onLog: (meal: SavedMeal, portion: number) => void;
+}) {
+  const [portion, setPortion] = useState(1);
+  if (meals.length === 0) {
+    return (
+      <div class="grid gap-3 pt-4">
+        <p class="text-fg text-lg font-bold tracking-tight">No saved meals yet</p>
+        <p class="text-muted text-sm">
+          Log a meal once, then tap the save icon next to its Add button. The whole meal comes back
+          with one tap, here.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div class="grid gap-4 pt-4">
+      <Segmented
+        name="meal-portion"
+        label="Portion"
+        options={[
+          { value: '0.5', label: 'Half' },
+          { value: '1', label: 'As saved' },
+          { value: '1.5', label: '1.5×' },
+          { value: '2', label: 'Double' },
+        ]}
+        value={String(portion)}
+        onChange={(v) => setPortion(Number(v))}
+      />
+      <ul class="grid gap-2">
+        {meals.map((saved) => {
+          const n = sum(saved.items.map((it) => scale(it.per100g, it.grams * portion)));
+          return (
+            <li
+              key={saved.id}
+              class="border-line flex items-center gap-3 rounded-xl border p-3 text-sm"
+            >
+              <div class="min-w-0 flex-1">
+                <p class="truncate font-semibold">{saved.name}</p>
+                <p class="text-subtle truncate text-xs">
+                  {saved.items.length} items · {n.kcal} kcal · P {n.protein} · C {n.carbs} · F{' '}
+                  {n.fat}
+                </p>
+                <p class="text-subtle truncate text-xs">
+                  {saved.items.map((it) => it.name).join(', ')}
+                </p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost h-8 px-2 text-xs"
+                onClick={() => deleteSavedMeal(saved.id)}
+                aria-label={`Delete saved meal ${saved.name}`}
+              >
+                <Icon name="close" size={14} />
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary h-9 px-3 text-sm"
+                onClick={() => onLog(saved, portion)}
+              >
+                Log
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 ---
 import ProgressPhotos from '@/components/calculators/ProgressPhotos';
+import ShareProgress from '@/components/calculators/ShareProgress';
 import WeightTracker from '@/components/calculators/WeightTracker';
 import AppLayout from '@/layouts/AppLayout.astro';
 ---
@@ -15,5 +16,8 @@ import AppLayout from '@/layouts/AppLayout.astro';
   <WeightTracker client:load />
   <div class="mt-6">
     <ProgressPhotos client:visible />
+  </div>
+  <div class="mt-6">
+    <ShareProgress client:idle />
   </div>
 </AppLayout>

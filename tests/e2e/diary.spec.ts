@@ -93,3 +93,38 @@ test.describe('food diary', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('saved meals and sharing', () => {
+  test('a logged meal can be saved and re-logged from the Meals tab', async ({ page }) => {
+    await ready(page, '/today/');
+    page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept('My usual breakfast') : d.accept()));
+    await page
+      .getByRole('region', { name: 'Breakfast' })
+      .getByRole('button', { name: 'Add' })
+      .click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('searchbox').fill('oats');
+    await dialog.getByRole('button', { name: /^Oats/ }).first().click();
+    await dialog.getByRole('button', { name: /^Add \d+ g$/ }).click();
+    await page.getByRole('button', { name: /save breakfast as a meal/i }).click();
+
+    await page.getByRole('region', { name: 'Lunch' }).getByRole('button', { name: 'Add' }).click();
+    await dialog.getByRole('radio', { name: 'Meals' }).check();
+    await expect(dialog.getByText('My usual breakfast')).toBeVisible();
+    await dialog.getByRole('radio', { name: 'Double' }).check();
+    await dialog.getByRole('button', { name: 'Log' }).click();
+    await expect(page.getByRole('region', { name: 'Lunch' }).getByText(/^Oats/)).toBeVisible();
+  });
+
+  test('tracker offers a share card once there is a trend', async ({ page }) => {
+    await ready(page, '/track/');
+    await page.locator('#tr-date').fill('2026-01-01');
+    await page.getByLabel('Weight', { exact: true }).fill('90');
+    await page.getByRole('button', { name: /save entry/i }).click();
+    await page.locator('#tr-date').fill('2026-01-02');
+    await page.getByLabel('Weight', { exact: true }).fill('89.6');
+    await page.getByRole('button', { name: /save entry/i }).click();
+    await page.getByRole('region', { name: 'Share progress' }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole('button', { name: /create card/i })).toBeVisible();
+  });
+});
