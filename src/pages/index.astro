@@ -17,6 +17,7 @@ import foodsD from '@/data/foods-d.json';
 import foodsE from '@/data/foods-e.json';
 import foodsF from '@/data/foods-f.json';
 import { builtRecipes as recipes } from '@/lib/recipes-build';
+import { chains } from '@/lib/chains-build';
 
 const recipeCount = recipes.length;
 const featuredRecipes = [
@@ -28,6 +29,20 @@ const featuredRecipes = [
   .filter((r): r is NonNullable<typeof r> => !!r);
 const foodCount =
   foodsA.length + foodsB.length + foodsC.length + foodsD.length + foodsE.length + foodsF.length;
+// Home page strip: the best pick at five well-known food chains.
+const chainPicks = ['Chipotle', "McDonald's", 'KFC', "Nando's", 'Subway']
+  .map((n) => chains.find((c) => c.name === n))
+  .filter((c): c is NonNullable<typeof c> => !!c)
+  .map((c) => ({ chain: c.name, slug: c.slug, item: c.items[0]! }));
+const chainItems = chains.reduce((n, c) => n + c.items.length, 0);
+const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+// Built as one string so the commas sit flush against the links.
+const picksHtml = chainPicks
+  .map(
+    (p, i) =>
+      `<a class="text-fg font-semibold hover:underline" href="${withBase(`/eating-out/#${p.slug}`)}">${esc(p.item.name)}</a> at ${esc(p.chain)} (${p.item.kcal} kcal, ${p.item.protein} g protein)${i < chainPicks.length - 1 ? ', ' : '.'}`,
+  )
+  .join('');
 const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
 
 const heroArt = ['hero.webp', 'hero.png', 'hero.jpg'].find((f) =>
@@ -332,6 +347,19 @@ const steps = [
         </li>
       ))}
     </ul>
+    <div class="surface-muted mt-6 grid gap-4 p-5 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:p-6">
+      <Icon name="pie" size={28} class="text-brand-600 dark:text-brand-300 hidden sm:block" />
+      <div>
+        <h3 class="font-bold tracking-tight">Eating out? Order the lean one.</h3>
+        <p class="text-muted mt-1 text-sm">
+          {chainItems} menu items at {chains.length} chains ranked by protein per calorie. Best
+          picks: <Fragment set:html={picksHtml} />
+        </p>
+      </div>
+      <a href={withBase('/eating-out/')} class="btn btn-secondary text-sm">
+        All chains <Icon name="arrow" size={16} />
+      </a>
+    </div>
   </section>
 
   <section class="container-page mt-24" aria-labelledby="why">
