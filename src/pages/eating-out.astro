@@ -74,6 +74,9 @@ const jsonLd = [
             <table class="w-full text-sm">
               <thead>
                 <tr class="text-subtle text-left text-xs">
+                  <th class="w-10 px-3 py-3">
+                    <span class="sr-only">Add to order</span>
+                  </th>
                   <th class="px-4 py-3 font-semibold">Item</th>
                   <th class="px-4 py-3 text-right font-semibold">kcal</th>
                   <th class="px-4 py-3 text-right font-semibold">Protein</th>
@@ -88,6 +91,19 @@ const jsonLd = [
               <tbody class="tabular">
                 {c.items.map((it, i) => (
                   <tr class="border-line border-t">
+                    <td class="px-3 py-2.5 align-middle">
+                      <input
+                        type="checkbox"
+                        class="accent-brand-600 h-5 w-5 cursor-pointer rounded"
+                        data-order-item
+                        data-id={it.id}
+                        data-kcal={it.kcal}
+                        data-protein={it.protein}
+                        data-carbs={it.carbs}
+                        data-fat={it.fat}
+                        aria-label={`Add ${it.name} to your ${c.name} order`}
+                      />
+                    </td>
                     <td class="px-4 py-2.5">
                       <span class="font-semibold">{it.name}</span>
                       <span class="text-subtle block text-xs">{it.servingLabel}</span>
@@ -99,12 +115,12 @@ const jsonLd = [
                         Log →
                       </a>
                     </td>
-                    <td class="px-4 py-2.5 text-right">{it.kcal}</td>
-                    <td class="px-4 py-2.5 text-right">{it.protein} g</td>
-                    <td class="px-4 py-2.5 text-right">{it.carbs} g</td>
-                    <td class="px-4 py-2.5 text-right">{it.fat} g</td>
+                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.kcal}</td>
+                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.protein} g</td>
+                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.carbs} g</td>
+                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.fat} g</td>
                     <td
-                      class={`px-4 py-2.5 text-right font-semibold ${i === 0 ? 'text-brand-700 dark:text-brand-300' : ''}`}
+                      class={`px-4 py-2.5 text-right font-semibold whitespace-nowrap ${i === 0 ? 'text-brand-700 dark:text-brand-300' : ''}`}
                     >
                       {c.kind === 'drinks' ? it.kcalPer100ml : it.proteinPer100}
                     </td>
@@ -121,6 +137,26 @@ const jsonLd = [
                 ))}
               </tbody>
             </table>
+          </div>
+          <div
+            class="bg-brand-100 text-brand-900 dark:bg-brand-800 dark:text-brand-50 shadow-soft sticky bottom-[4.5rem] z-10 mt-3 hidden flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm sm:bottom-4"
+            data-order-bar
+            data-today-href={withBase('/today/')}
+            role="status"
+          >
+            <span data-order-total class="font-semibold tabular" />
+            <span class="flex gap-2">
+              <button type="button" class="btn btn-ghost h-9 px-3 text-xs" data-order-clear>
+                Clear
+              </button>
+              <a
+                class="btn btn-primary h-9 px-4 text-xs"
+                data-order-link
+                href={withBase('/today/')}
+              >
+                Log this order <Icon name="arrow" size={14} />
+              </a>
+            </span>
           </div>
         </section>
       ))}
@@ -152,3 +188,41 @@ const jsonLd = [
     </p>
   </div>
 </Base>
+
+<script>
+  // Build an order: tick items in a chain's table, see the running total, log the lot to Today
+  // via /today/#order=<ids>. Progressive enhancement, no framework.
+  function bind() {
+    for (const section of document.querySelectorAll<HTMLElement>('section[id] [data-order-bar]')) {
+      const root = section.closest('section');
+      if (!root || root.dataset.orderBound) continue;
+      root.dataset.orderBound = '1';
+      const bar = section;
+      const total = bar.querySelector<HTMLElement>('[data-order-total]')!;
+      const link = bar.querySelector<HTMLAnchorElement>('[data-order-link]')!;
+      const boxes = () => [...root.querySelectorAll<HTMLInputElement>('[data-order-item]')];
+      const render = () => {
+        const on = boxes().filter((b) => b.checked);
+        if (on.length === 0) {
+          bar.classList.add('hidden');
+          bar.classList.remove('flex');
+          return;
+        }
+        const sum = (k: string) => on.reduce((s, b) => s + Number(b.dataset[k] ?? 0), 0);
+        total.textContent = `${on.length} item${on.length === 1 ? '' : 's'} · ${sum('kcal').toLocaleString('en-US')} kcal · P ${sum('protein')} g · C ${sum('carbs')} g · F ${sum('fat')} g`;
+        link.href = `${bar.dataset.todayHref}#order=${on.map((b) => b.dataset.id).join(',')}`;
+        bar.classList.remove('hidden');
+        bar.classList.add('flex');
+      };
+      root.addEventListener('change', (e) => {
+        if ((e.target as HTMLElement).matches('[data-order-item]')) render();
+      });
+      bar.querySelector('[data-order-clear]')?.addEventListener('click', () => {
+        for (const b of boxes()) b.checked = false;
+        render();
+      });
+    }
+  }
+  bind();
+  document.addEventListener('astro:page-load', bind);
+</script>

@@ -215,8 +215,35 @@ test('eating-out page ranks chain items and deep-links a food into Today', async
   await firstLog.click();
   await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByRole('heading', { name: new RegExp(name.slice(0, 12)) })).toBeVisible();
+  const heading = dialog.getByRole('heading', { name: new RegExp(name.slice(0, 12)) });
+  await expect(heading).toBeVisible();
+  // Focus follows the deep link into the picker so keyboard users are not left behind the sheet.
+  await expect(heading).toBeFocused();
   await dialog.getByRole('button', { name: /^Add \d+ g$/ }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByText(new RegExp(name.slice(0, 12))).first()).toBeVisible();
+});
+
+test('eating-out page builds an order from ticked items and logs it to Today', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
+  await page.goto('/eating-out/');
+  const chipotle = page.locator('section#chipotle');
+  const boxes = chipotle.getByRole('checkbox');
+  await boxes.nth(0).check();
+  await boxes.nth(1).check();
+  const bar = chipotle.getByRole('status');
+  await expect(bar).toContainText(/2 items · \d+ kcal · P \d+ g/);
+  const names = await Promise.all(
+    [0, 1].map(async (i) =>
+      (await boxes.nth(i).getAttribute('aria-label'))!.replace(/^Add (.*) to your .*$/, '$1'),
+    ),
+  );
+  await chipotle.getByRole('link', { name: /Log this order/ }).click();
+  await expect(page).toHaveURL(/\/today\/$/);
+  await expect(
+    page.getByRole('status').filter({ hasText: /Logged your order: 2 items/ }),
+  ).toBeVisible();
+  for (const n of names) {
+    await expect(page.getByText(new RegExp(n.slice(0, 10))).first()).toBeVisible();
+  }
 });

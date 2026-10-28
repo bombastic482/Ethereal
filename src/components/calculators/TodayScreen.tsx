@@ -169,14 +169,59 @@ function TodayScreenInner() {
   const [focusFood, setFocusFood] = useState<string | null>(null);
   // Deep links: /today/#recipe=<id> opens the sheet on that recipe; /today/#food=<id> opens the
   // portion picker for that database food (used by the eating-out page).
+  const [notice, setNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => setNotice(null), 8000);
+    return () => clearTimeout(t);
+  }, [notice]);
   useEffect(() => {
     const r = /#recipe=([a-z0-9-]+)/.exec(location.hash);
     const f = /#food=([a-z0-9-]+)/.exec(location.hash);
-    if (!r && !f) return;
+    const o = /#order=([a-z0-9,-]+)/.exec(location.hash);
+    if (!r && !f && !o) return;
+    history.replaceState(history.state, '', location.pathname + location.search);
+    if (o) {
+      // /today/#order=<id,id,…> from the eating-out page: log every item at its menu portion.
+      const ids = o[1]!.split(',').filter(Boolean);
+      void loadFoods()
+        .then(() => {
+          const meal = mealForTime(new Date().getHours());
+          let n = 0;
+          let kcal = 0;
+          for (const id of ids) {
+            const food = foodById(id);
+            const serving = food?.servings[0];
+            if (!food || !serving) continue;
+            addFood({
+              date: today,
+              meal,
+              name: food.name,
+              grams: serving.grams,
+              per100g: food.per100g,
+              source: 'local',
+              foodId: food.id,
+              time: minutesNow(),
+            });
+            n += 1;
+            kcal += (food.per100g.kcal * serving.grams) / 100;
+          }
+          if (n > 0) {
+            setDate(today);
+            setNotice(
+              `Logged your order: ${n} item${n === 1 ? '' : 's'}, ${Math.round(kcal).toLocaleString('en-US')} kcal, to ${MEALS.find((m) => m.key === meal)?.label.toLowerCase() ?? meal}.`,
+            );
+            haptic([15, 40, 15]);
+          } else {
+            setNotice('Could not log that order: the food database did not load.');
+          }
+        })
+        .catch(() => setNotice('Could not log that order: the food database did not load.'));
+      return;
+    }
     if (r) setFocusRecipe(r[1]!);
     if (f) setFocusFood(f[1]!);
     setAdding(mealForTime(new Date().getHours()));
-    history.replaceState(history.state, '', location.pathname + location.search);
   }, []);
   const [exAdding, setExAdding] = useState(false);
   const [dbReady, setDbReady] = useState(false);
@@ -333,6 +378,23 @@ function TodayScreenInner() {
           ›
         </button>
       </div>
+
+      {notice && (
+        <div
+          class="bg-brand-100 text-brand-800 dark:bg-brand-400/15 dark:text-brand-100 flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm"
+          role="status"
+        >
+          <span>{notice}</span>
+          <button
+            type="button"
+            class="btn btn-ghost h-7 px-2 text-xs"
+            onClick={() => setNotice(null)}
+            aria-label="Dismiss"
+          >
+            <Icon name="close" size={14} />
+          </button>
+        </div>
+      )}
 
       {showKeys && (
         <div
@@ -862,10 +924,14 @@ function AddFoodSheet({
   useEffect(() => {
     if (!focusFood) return;
     let live = true;
-    loadFoods().then(() => {
-      const f = foodById(focusFood);
-      if (live && f) setPicked(fromFood(f));
-    });
+    loadFoods()
+      .then(() => {
+        const f = foodById(focusFood);
+        if (live && f) setPicked(fromFood(f));
+      })
+      .catch(() => {
+        /* offline without the database: the search tab stays usable */
+      });
     return () => {
       live = false;
     };
@@ -1226,6 +1292,13 @@ function PortionPicker({
   const [count, setCount] = useState(1);
   const total = round(grams * count);
   const n = scale(candidate.per100g, total);
+  // The picker replaces the search field that held focus (deep links, barcode hits), so move
+  // focus to its heading or keyboard and screen-reader users are left on the page behind.
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (heading.current && !heading.current.contains(document.activeElement))
+      heading.current.focus({ preventScroll: true });
+  }, []);
   return (
     <div class="grid gap-5 px-5 py-5">
       <button
@@ -1236,7 +1309,9 @@ function PortionPicker({
         ‹ Back to results
       </button>
       <div>
-        <h3 class="font-display text-2xl tracking-tight">{candidate.name}</h3>
+        <h3 class="font-display text-2xl tracking-tight outline-none" tabIndex={-1} ref={heading}>
+          {candidate.name}
+        </h3>
         {candidate.brand && <p class="text-subtle text-sm">{candidate.brand}</p>}
       </div>
       <div class="flex flex-wrap gap-2">
