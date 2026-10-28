@@ -43,3 +43,27 @@ for (const path of PAGES) {
     ).toEqual([]);
   });
 }
+
+// Dark mode uses a different palette, so contrast has to be checked there too.
+for (const path of ['/', '/today/', '/plan/', '/review/', '/recipes/', '/settings/']) {
+  test(`no serious accessibility violations on ${path} in dark mode`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
+    await page.addInitScript(() => {
+      localStorage.setItem('ethereal:tour:v1', '1');
+      localStorage.setItem('ethereal:theme', 'dark');
+    });
+    await page.goto(path);
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    const serious = results.violations.filter(
+      (v) => v.impact === 'serious' || v.impact === 'critical',
+    );
+    expect(
+      serious,
+      serious.map((v) => `${v.id}: ${v.help} (${v.nodes.length} nodes)`).join('\n'),
+    ).toEqual([]);
+  });
+}
