@@ -7,6 +7,7 @@ import { diaryStore, prefsStore, type Diary, type DiaryPrefs } from './food-stor
 import { logStore, type WeightLog } from './log';
 import { DEFAULT_PLAN, planStore, type Plan } from './plan';
 import { DEFAULT_PROFILE, updateProfile, type Profile } from './profile';
+import { reflectionStore, type Reflections } from './reflections';
 
 export interface Backup {
   app: 'ethereal';
@@ -17,6 +18,7 @@ export interface Backup {
   log: WeightLog;
   diary?: Diary;
   prefs?: DiaryPrefs;
+  reflections?: Reflections;
 }
 
 const PROFILE_KEY = 'ethereal:profile:v1';
@@ -38,6 +40,9 @@ export function createBackup(): Backup {
     profile: readProfile(),
     plan: planStore.get(),
     log: logStore.get(),
+    diary: diaryStore.get(),
+    prefs: prefsStore.get(),
+    reflections: reflectionStore.get(),
   };
 }
 
@@ -60,6 +65,7 @@ export function validateBackup(raw: unknown): Backup | null {
     log: { entries },
     ...(b.diary && typeof b.diary === 'object' ? { diary: b.diary } : {}),
     ...(b.prefs && typeof b.prefs === 'object' ? { prefs: b.prefs } : {}),
+    ...(b.reflections && typeof b.reflections === 'object' ? { reflections: b.reflections } : {}),
   };
 }
 
@@ -72,6 +78,7 @@ export function restoreBackup(raw: unknown): boolean {
   logStore.set(b.log);
   if (b.diary) diaryStore.set({ ...diaryStore.get(), ...b.diary });
   if (b.prefs) prefsStore.set({ ...prefsStore.get(), ...b.prefs });
+  if (b.reflections) reflectionStore.set({ ...reflectionStore.get(), ...b.reflections });
   return true;
 }
 
@@ -129,6 +136,7 @@ export function clearAllData(): void {
   logStore.reset();
   diaryStore.reset();
   prefsStore.reset();
+  reflectionStore.reset();
   try {
     localStorage.removeItem(PROFILE_KEY);
   } catch {

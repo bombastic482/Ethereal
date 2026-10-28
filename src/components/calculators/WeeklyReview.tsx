@@ -10,7 +10,6 @@ import { haptic } from '@/lib/fx';
 import { logStore } from '@/lib/log';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
-import { createStore } from '@/lib/store';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
@@ -18,11 +17,7 @@ import { Icon } from '../ui/Icon';
 import { Stat } from '../ui/Stat';
 import { WeekBars } from '../ui/WeekBars';
 
-interface Reflections {
-  /** Keyed by the week's end date (YYYY-MM-DD). */
-  notes: Record<string, { wentWell: string; change: string; savedOn: string }>;
-}
-const reflectionStore = createStore<Reflections>('ethereal:reflections:v1', { notes: {} });
+import { reflectionStore } from '@/lib/reflections';
 
 /** Sunday-night review: the week in numbers, the patterns, the decision for next week, and a two-line reflection. */
 function WeeklyReviewInner() {
