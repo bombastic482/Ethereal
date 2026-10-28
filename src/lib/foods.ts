@@ -19,18 +19,26 @@ let loading: Promise<Food[]> | null = null;
 /** Loads the database on first use (two JSON chunks, cached by the service worker after that). */
 export function loadFoods(): Promise<Food[]> {
   if (FOODS.length) return Promise.resolve(FOODS);
-  loading ??= Promise.all([import('@/data/foods-a.json'), import('@/data/foods-b.json')]).then(
-    ([a, b]) => {
-      FOODS = [...(a.default as Food[]), ...(b.default as Food[])];
-      BY_ID = new Map(FOODS.map((f) => [f.id, f]));
-      INDEX = FOODS.map((f) => ({
-        f,
-        text: norm(`${f.name} ${f.category} ${(f.tags ?? []).join(' ')}`),
-        nameTokens: norm(f.name).split(' '),
-      }));
-      return FOODS;
-    },
-  );
+  loading ??= Promise.all([
+    import('@/data/foods-a.json'),
+    import('@/data/foods-b.json'),
+    import('@/data/foods-c.json'),
+    import('@/data/foods-d.json'),
+  ]).then(([a, b, c, d]) => {
+    FOODS = [
+      ...(a.default as Food[]),
+      ...(b.default as Food[]),
+      ...(c.default as Food[]),
+      ...(d.default as Food[]),
+    ];
+    BY_ID = new Map(FOODS.map((f) => [f.id, f]));
+    INDEX = FOODS.map((f) => ({
+      f,
+      text: norm(`${f.name} ${f.category} ${(f.tags ?? []).join(' ')}`),
+      nameTokens: norm(f.name).split(' '),
+    }));
+    return FOODS;
+  });
   return loading;
 }
 

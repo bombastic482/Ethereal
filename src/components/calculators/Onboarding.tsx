@@ -4,6 +4,7 @@ import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { humaniseWeeks } from '@/lib/calc/timeline';
 import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { readShareLink } from '@/lib/backup';
+import { prefsStore } from '@/lib/food-store';
 import { upsertEntry } from '@/lib/log';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { updateProfile, useProfile } from '@/lib/profile';
@@ -22,6 +23,7 @@ const STEPS = ['About you', 'Your goal', 'Your plan'] as const;
 export default function Onboarding() {
   const [profile, update] = useProfile();
   const [plan, patchPlan] = planStore.use();
+  const [prefs, patchPrefs] = prefsStore.use();
   const [step, setStep] = useState(0);
   const [imported, setImported] = useState(false);
   const imperial = profile.units === 'imperial';
@@ -129,6 +131,17 @@ export default function Onboarding() {
               }))}
               onChange={(activity) => update({ activity })}
               hint="Be honest: most people overestimate. Desk job plus three gym sessions is 'Lightly active'."
+            />
+            <Segmented
+              name="ob-diet"
+              label="How do you eat?"
+              options={[
+                { value: 'omnivore', label: 'Everything' },
+                { value: 'vegetarian', label: 'Vegetarian' },
+                { value: 'vegan', label: 'Vegan' },
+              ]}
+              value={prefs.diet}
+              onChange={(diet) => patchPrefs({ diet })}
             />
           </div>
         )}

@@ -13,6 +13,12 @@ import {
 } from '@/lib/calc/nutrition';
 import { currentStreak, shift } from '@/lib/calc/streaks';
 import { formatNumber, round } from '@/lib/calc/units';
+
+const OZ = 28.3495;
+/** "170 g" or "170 g (6 oz)" depending on the unit system. */
+const fmtGrams = (g: number, imperial: boolean) =>
+  imperial ? `${g} g (${round(g / OZ, 1)} oz)` : `${g} g`;
+const oz = (g: number) => round(g / OZ, 1);
 import {
   addExercise,
   addFood,
@@ -535,6 +541,8 @@ const minutesNow = () => {
 
 function FoodRow({ entry }: { entry: FoodEntry }) {
   const [editing, setEditing] = useState(false);
+  const [profile] = useProfile();
+  const imperial = profile.units === 'imperial';
   const n = scale(entry.per100g, entry.grams);
   const key = entry.barcode ?? entry.foodId;
   const [diary] = diaryStore.use();
@@ -553,7 +561,7 @@ function FoodRow({ entry }: { entry: FoodEntry }) {
             {entry.brand && <span class="text-subtle font-normal"> · {entry.brand}</span>}
           </span>
           <span class="text-subtle block text-xs">
-            {entry.grams} g · P {n.protein} · C {n.carbs} · F {n.fat}
+            {fmtGrams(entry.grams, imperial)} · P {n.protein} · C {n.carbs} · F {n.fat}
           </span>
         </button>
         <span class="tabular font-semibold">{formatNumber(n.kcal)}</span>
@@ -970,6 +978,8 @@ function PortionPicker({
   onBack: () => void;
   onAdd: (grams: number) => void;
 }) {
+  const [profile] = useProfile();
+  const imperial = profile.units === 'imperial';
   const first = candidate.servings[0] ?? { label: '100 g', grams: 100 };
   const [grams, setGrams] = useState(first.grams);
   const [count, setCount] = useState(1);
@@ -1037,7 +1047,7 @@ function PortionPicker({
         ))}
       </div>
       <button type="button" class="btn btn-primary h-12 text-base" onClick={() => onAdd(total)}>
-        <Icon name="check" size={18} /> Add {total} g
+        <Icon name="check" size={18} /> Add {total} g{imperial ? ` (${oz(total)} oz)` : ''}
       </button>
     </div>
   );
