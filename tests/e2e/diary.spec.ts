@@ -128,3 +128,18 @@ test.describe('saved meals and sharing', () => {
     await expect(page.getByRole('button', { name: /create card/i })).toBeVisible();
   });
 });
+
+test.describe('quick entry', () => {
+  test('free text is parsed and logged in one tap', async ({ page }) => {
+    await ready(page, '/today/');
+    const box = page.getByLabel('Type what you ate');
+    await expect(box).toBeVisible();
+    await box.fill('2 eggs and 150g greek yogurt');
+    await page.getByRole('button', { name: /parse/i }).click();
+    await expect(page.getByRole('button', { name: /log all/i })).toBeVisible();
+    await expect(page.getByText(/2 item/)).toBeVisible();
+    await page.getByRole('button', { name: /log all/i }).click();
+    await expect(page.getByText(/egg/i).first()).toBeVisible();
+    await expect(page.getByText(/yogurt/i).first()).toBeVisible();
+  });
+});

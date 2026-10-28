@@ -11,3 +11,5 @@ export * from './trend';
 export * from './nutrition';
 export * from './exercise';
 export * from './streaks';
+export * from './expenditure';
+export * from './insights';

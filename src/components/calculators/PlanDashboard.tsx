@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { estimateExpenditure } from '@/lib/calc/expenditure';
+import { buildInsights } from '@/lib/calc/insights';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
 import { currentStreak, longestStreak, shift, weightMilestones } from '@/lib/calc/streaks';
 import { assessProgress, daysBetween, trendSeries } from '@/lib/calc/trend';
@@ -117,6 +119,32 @@ export default function PlanDashboard() {
     () => longestStreak([...diary.food.map((e) => e.date), ...log.entries.map((e) => e.date)]),
     [diary.food, log.entries],
   );
+  const expenditure = useMemo(() => {
+    if (!summary) return null;
+    const byDay = new Map<string, number>();
+    for (const e of diary.food) {
+      const f = e.grams / 100;
+      byDay.set(e.date, (byDay.get(e.date) ?? 0) + e.per100g.kcal * f);
+    }
+    const intake = [...byDay.entries()].map(([date, kcal]) => ({ date, kcal: Math.round(kcal) }));
+    return estimateExpenditure(intake, log.entries, summary.tdee);
+  }, [summary, diary.food, log.entries]);
+  const insights = useMemo(() => {
+    if (!summary) return [];
+    const days = Array.from({ length: 14 }, (_, i) => shift(today, -i));
+    return buildInsights(
+      diary.food,
+      diary.exercise,
+      {
+        kcal: summary.target,
+        protein: summary.macros.grams.protein,
+        carbs: summary.macros.grams.carbs,
+        fat: summary.macros.grams.fat,
+        fibre: summary.macros.grams.fibre,
+      },
+      days,
+    );
+  }, [summary, diary.food, diary.exercise, today]);
   const milestones = useMemo(
     () =>
       plan.goal === 'maintain'
@@ -503,6 +531,90 @@ export default function PlanDashboard() {
           )}
         </section>
       )}
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <section class="surface p-5 sm:p-6" aria-label="Real expenditure">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h3 class="text-lg font-bold tracking-tight">Your real expenditure</h3>
+
+              <p class="text-subtle text-xs">
+                Estimated from what you logged and what the scale did, not a formula.
+              </p>
+            </div>
+
+            {expenditure && <span class="chip">{expenditure.confidence} confidence</span>}
+          </div>
+
+          {expenditure ? (
+            <div class="mt-4 grid gap-4">
+              <div class="flex flex-wrap items-end gap-6">
+                <Stat
+                  label="Measured"
+                  value={formatNumber(expenditure.tdee)}
+                  unit="kcal"
+                  size="lg"
+                  tone="brand"
+                  sub={`Range ${formatNumber(expenditure.low)}–${formatNumber(expenditure.high)}`}
+                />
+
+                <Stat
+                  label="Formula"
+                  value={formatNumber(summary?.tdee ?? 0)}
+                  unit="kcal"
+                  sub={
+                    expenditure.vsFormula === null
+                      ? ''
+                      : `${expenditure.vsFormula > 0 ? '+' : ''}${formatNumber(expenditure.vsFormula)} vs measured`
+                  }
+                />
+              </div>
+
+              <p class="text-muted text-sm leading-relaxed">{expenditure.note}</p>
+
+              <p class="text-subtle text-xs">
+                {expenditure.days} logged days · average intake{' '}
+                {formatNumber(expenditure.avgIntake)} kcal · trend{' '}
+                {expenditure.trendChangeKg > 0 ? '+' : ''}
+                {expenditure.trendChangeKg} kg
+              </p>
+            </div>
+          ) : (
+            <p class="text-muted mt-3 text-sm">
+              Needs about two weeks of food logs and weigh-ins. Then Ethereal tells you what your
+              body actually burns, which is the number every other app has to guess.
+            </p>
+          )}
+        </section>
+
+        <section class="surface p-5 sm:p-6" aria-label="Insights">
+          <h3 class="text-lg font-bold tracking-tight">Patterns</h3>
+
+          {insights.length > 0 ? (
+            <ul class="mt-4 grid gap-3">
+              {insights.map((i) => (
+                <li key={i.key} class="flex gap-3">
+                  <span
+                    class={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${i.tone === 'good' ? 'bg-brand-500' : i.tone === 'warn' ? 'bg-accent-500' : 'bg-ink-400'}`}
+                    aria-hidden="true"
+                  />
+
+                  <span>
+                    <span class="block text-sm font-semibold">{i.title}</span>
+
+                    <span class="text-muted block text-sm leading-relaxed">{i.detail}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="text-muted mt-3 text-sm">
+              After five logged days, this card points out the patterns worth acting on: weekend
+              drift, your low-protein meal, fibre, snack share.
+            </p>
+          )}
+        </section>
+      </div>
 
       {chartPoints.length > 1 && (
         <section class="surface p-5 sm:p-6" aria-label="Trend chart">

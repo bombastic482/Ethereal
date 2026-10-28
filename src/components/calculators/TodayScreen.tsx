@@ -39,6 +39,7 @@ import {
 } from '@/lib/food-store';
 import { allFoods, foodById, loadFoods, searchFoods, type Food } from '@/lib/foods';
 import { lookupBarcode, searchProducts, type OffProduct } from '@/lib/off';
+import { resolveQuickEntry, type ResolvedItem } from '@/lib/quick-parse';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { confetti, haptic, onSwipe } from '@/lib/fx';
@@ -292,6 +293,8 @@ export default function TodayScreen() {
           />
         </div>
       </section>
+
+      {date === today && dbReady && <QuickEntry date={date} />}
 
       {!plan.active && (
         <Callout>
@@ -1439,5 +1442,103 @@ function SavedMeals({
         })}
       </ul>
     </div>
+  );
+}
+
+/** "Type what you ate": parses free text against the database, shows a review list, logs everything in one tap. */
+function QuickEntry({ date }: { date: string }) {
+  const [text, setText] = useState('');
+  const [items, setItems] = useState<ResolvedItem[] | null>(null);
+  const [profile] = useProfile();
+  const imperial = profile.units === 'imperial';
+  const slot = mealForTime(new Date().getHours());
+  const parse = () => setItems(text.trim() ? resolveQuickEntry(text, searchFoods) : null);
+  const matched = (items ?? []).filter((i) => i.food);
+  const total = sum(matched.map((i) => scale(i.food!.per100g, i.grams)));
+  const logAll = () => {
+    for (const i of matched) {
+      addFood({
+        date,
+        meal: slot,
+        name: i.food!.name,
+        grams: i.grams,
+        per100g: i.food!.per100g,
+        source: 'local',
+        foodId: i.food!.id,
+        time: minutesNow(),
+      });
+    }
+    haptic([10, 30, 10]);
+    setText('');
+    setItems(null);
+  };
+  return (
+    <section class="surface p-4 sm:p-5" aria-label="Quick entry">
+      <form
+        class="flex flex-col gap-2 sm:flex-row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          parse();
+        }}
+      >
+        <label class="sr-only" for="quick-entry">
+          Type what you ate
+        </label>
+        <input
+          id="quick-entry"
+          class="field flex-1"
+          placeholder='Type what you ate: "2 eggs, a slice of toast and 150g greek yogurt"'
+          value={text}
+          onInput={(e) => setText((e.target as HTMLInputElement).value)}
+          autoComplete="off"
+        />
+        <button type="submit" class="btn btn-secondary" disabled={!text.trim()}>
+          <Icon name="spark" size={16} /> Parse
+        </button>
+      </form>
+      {items && (
+        <div class="mt-3 grid gap-2">
+          <ul class="grid gap-1 text-sm">
+            {items.map((i, idx) => (
+              <li
+                key={idx}
+                class="border-line flex items-center justify-between gap-3 border-t py-2"
+              >
+                {i.food ? (
+                  <>
+                    <span class="min-w-0">
+                      <span class="block truncate font-medium">{i.food.name}</span>
+                      <span class="text-subtle block text-xs">
+                        “{i.raw}” → {i.servingLabel} · {fmtGrams(i.grams, imperial)}
+                      </span>
+                    </span>
+                    <span class="tabular shrink-0 font-semibold">
+                      {scale(i.food.per100g, i.grams).kcal} kcal
+                    </span>
+                  </>
+                ) : (
+                  <span class="text-subtle">
+                    “{i.raw}” — no match. Add it with Search or Quick add.
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {matched.length > 0 && (
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-muted text-sm">
+                {matched.length} item{matched.length === 1 ? '' : 's'} ·{' '}
+                <strong class="text-fg tabular">{total.kcal}</strong> kcal · P {total.protein} · C{' '}
+                {total.carbs} · F {total.fat} →{' '}
+                {MEALS.find((m) => m.key === slot)?.label.toLowerCase()}
+              </span>
+              <button type="button" class="btn btn-primary h-9 px-4 text-sm" onClick={logAll}>
+                <Icon name="check" size={16} /> Log all
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

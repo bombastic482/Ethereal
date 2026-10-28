@@ -3,6 +3,8 @@ import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { buildShareLink, clearAllData, createBackup, logToCsv, restoreBackup } from '@/lib/backup';
 import { diaryStore, foodCsv, prefsStore } from '@/lib/food-store';
 import { logStore } from '@/lib/log';
+import { buildReminderIcs } from '@/lib/reminders';
+import { todayIso } from '@/lib/plan';
 import { planStore } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
@@ -35,6 +37,8 @@ export default function DataManager() {
   const [prefs, patchPrefs] = prefsStore.use();
   const [msg, setMsg] = useState<{ tone: 'success' | 'warn'; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [weighTime, setWeighTime] = useState('07:30');
+  const [mealsTime, setMealsTime] = useState('20:30');
   const [install, setInstall] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
 
@@ -237,6 +241,68 @@ export default function DataManager() {
           </button>
         </div>
         {msg && <Callout tone={msg.tone}>{msg.text}</Callout>}
+      </section>
+
+      <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Reminders">
+        <h2 class="text-lg font-bold tracking-tight">Reminders</h2>
+
+        <p class="text-muted text-sm">
+          Ethereal has no server, so it cannot push notifications. Instead, add two tiny daily
+          events to your own calendar; they open the right page when tapped.
+        </p>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label" for="rem-weigh">
+              Weigh-in
+            </label>
+
+            <input
+              id="rem-weigh"
+              type="time"
+              class="field"
+              value={weighTime}
+              onInput={(e) => setWeighTime((e.target as HTMLInputElement).value)}
+            />
+          </div>
+
+          <div>
+            <label class="label" for="rem-meals">
+              Close the day
+            </label>
+
+            <input
+              id="rem-meals"
+              type="time"
+              class="field"
+              value={mealsTime}
+              onInput={(e) => setMealsTime((e.target as HTMLInputElement).value)}
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+
+          class="btn btn-secondary justify-self-start text-sm"
+
+          onClick={() =>
+            download(
+              'ethereal-reminders.ics',
+
+              buildReminderIcs({
+                weighInTime: weighTime,
+                logMealsTime: mealsTime,
+                startDate: todayIso(),
+                url: new URL(withBase('/'), location.origin).toString(),
+              }),
+
+              'text/calendar',
+            )
+          }
+        >
+          Add to my calendar (.ics)
+        </button>
       </section>
 
       <section class="surface grid gap-4 p-5 sm:p-6" aria-label="App">
