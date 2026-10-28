@@ -16,10 +16,38 @@ import Base from '@/layouts/Base.astro';
       </p>
       <h2>What happens to what you type</h2>
       <p>
-        Your height, weight, age and other inputs are saved in your browser's{' '}
-        <code>localStorage</code> under the key <code>ethereal:profile:v1</code> so that every
-        calculator can pre-fill them. That data never leaves your device. You can erase it with the
-        Reset button on any calculator or by clearing site data in your browser.
+        Your profile, plan, weigh-ins, food diary, saved meals, preferences and weekly reflections
+        are saved in your browser's <code>localStorage</code> under keys starting with{' '}
+        <code>ethereal:</code>. Progress photos are stored in the browser's IndexedDB database named{' '}
+        <code>ethereal-photos</code>, compressed on your device. None of it is ever sent to us or to
+        anyone else; there is no account and no server that could receive it.
+      </p>
+      <p>
+        You can export everything as a JSON backup, import it on another device, and delete all of
+        it in one tap from Settings → Delete all my data, which also removes the photos. Clearing
+        site data in your browser does the same.
+      </p>
+      <h2>Barcodes and product search</h2>
+      <p>
+        When you scan a barcode or search packaged products, your browser asks{' '}
+        <a href="https://world.openfoodfacts.org" rel="noopener">
+          Open Food Facts
+        </a>
+        , a non-profit open database, for that barcode or search text directly. Their servers see
+        the request like any website you visit; nothing about you, your diary or your profile is
+        included. The built-in database of 1,500+ foods and all 68 recipes work without any network
+        at all.
+      </p>
+      <h2>Importing from other apps</h2>
+      <p>
+        CSV files you import from MyFitnessPal, Lose It!, Cronometer or a spreadsheet are read in
+        your browser and written to the same local storage. The file is never uploaded.
+      </p>
+      <h2>Sharing</h2>
+      <p>
+        Progress and weekly cards are rendered on your device and handed to your phone's share sheet
+        or downloaded. A shared plan link encodes your plan settings in the link itself; only the
+        people you send it to can read it, and it never includes weigh-ins or diary entries.
       </p>
       <h2>Cookies and tracking</h2>
       <p>
@@ -35,7 +63,7 @@ import Base from '@/layouts/Base.astro';
       <h2>Changes</h2>
       <p>
         If this policy ever changes, the update will be recorded on this page with the date. Last
-        updated: 15 September 2026.
+        updated: 28 October 2026.
       </p>
     </article>
   </div>

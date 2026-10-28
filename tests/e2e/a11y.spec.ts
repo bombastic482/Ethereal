@@ -18,6 +18,8 @@ const PAGES = [
   '/track/',
   '/settings/',
   '/about/',
+  '/changelog/',
+  '/privacy/',
 ];
 
 for (const path of PAGES) {
