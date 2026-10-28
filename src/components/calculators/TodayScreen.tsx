@@ -633,9 +633,9 @@ function TodayScreenInner() {
             Eating out instead?{' '}
             <a
               class="text-brand-700 dark:text-brand-300 font-semibold"
-              href={withBase('/eating-out/')}
+              href={withBase(`/eating-out/?budget=${Math.max(0, Math.round(day.remaining.kcal))}`)}
             >
-              The leanest orders at the big chains →
+              The best order for your {Math.max(0, Math.round(day.remaining.kcal))} kcal →
             </a>
           </p>
         </section>

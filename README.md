@@ -13,14 +13,14 @@ Free, science-backed weight-loss planning that runs entirely in your browser. Li
 - **Eight calculators** (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water) sharing one profile.
 - **Eighteen evidence-based guides**, a quick launcher (⌘K), a first-run tour, calendar reminders (.ics), installable as an app, works offline, exports/imports full backups (plan, weigh-ins, diary, preferences, reflections), shares a plan between devices via a link.
 - **Switch from another app**: import your history from MyFitnessPal, Lose It!, Cronometer or any CSV with dates and calories, macros or weight; a preview shows what was recognised, duplicates are skipped.
-- **An identity of its own**: warm paper and ink, moss and apricot, serif numerals, paper grain, warm-charcoal dark mode.
+- **Clean by design**: one typeface (Manrope), white and near-black surfaces, a single green accent, generous spacing, no visual noise; dark mode follows the system.
 - **No account, no server, no tracking.** Nothing you enter ever leaves your device.
 
 **Stack:** [Astro](https://astro.build) (static output) · [Preact](https://preactjs.com) islands · [Tailwind CSS v4](https://tailwindcss.com) · TypeScript strict · Vitest · Playwright · Lighthouse CI.
 
 ## Why this stack
 
-- **Fast.** Static HTML; the diary page ships about 25 KB of gzipped JavaScript in total and loads the food database lazily in six 10–13 KB chunks. Fonts are self-hosted, subset and preloaded; no third-party requests at all. Lighthouse 100/100/100/100 on desktop and 94+ performance on a simulated slow phone across the app pages.
+- **Fast.** Static HTML; the diary page ships about 25 KB of gzipped JavaScript in total and loads the food database lazily in six 10–13 KB chunks. The one font file is self-hosted, subset and preloaded; no third-party requests at all. Lighthouse 100/100/100/100 on desktop and 94+ performance on a simulated slow phone across the app pages.
 - **Free to run.** No server, no database. Deploys to GitHub Pages, Cloudflare Pages, Vercel or Netlify on their free tiers.
 - **Private.** Inputs are saved in `localStorage` so every calculator pre-fills. Nothing is ever sent anywhere.
 - **Correct.** Every calculation lives in `src/lib/calc/` as pure functions with unit tests, separate from the UI.

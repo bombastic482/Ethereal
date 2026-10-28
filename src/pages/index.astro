@@ -112,8 +112,8 @@ const steps = [
 <Base title={SITE.name} description={SITE.description} path="/">
   <section class="relative overflow-hidden">
     <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-      <div class="bg-brand-300/40 dark:bg-brand-500/20 absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full blur-3xl"></div>
-      <div class="bg-accent-400/30 dark:bg-accent-500/15 absolute top-20 right-[-10rem] h-[24rem] w-[24rem] rounded-full blur-3xl"></div>
+      <div class="bg-brand-200/35 dark:bg-brand-500/10 absolute -top-48 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full blur-3xl"></div>
+      <div class="bg-brand-100/70 dark:bg-brand-400/5 absolute top-20 right-[-10rem] h-[24rem] w-[24rem] rounded-full blur-3xl"></div>
     </div>
     <div class="container-page pt-16 pb-12 sm:pt-24 sm:pb-16">
       <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
@@ -121,8 +121,8 @@ const steps = [
           <span class="chip">
             <Icon name="shield" size={14} /> Science-backed · Free forever · No tracking
           </span>
-          <h1 class="mt-6 font-display text-6xl leading-[0.92] tracking-tight text-balance sm:text-7xl lg:text-8xl">
-            Weight loss, <em class="text-gradient not-italic italic">done properly.</em>
+          <h1 class="mt-6 font-display text-5xl leading-[1] tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            Weight loss, <em class="text-gradient not-italic">done properly.</em>
           </h1>
           <p class="text-muted mt-6 max-w-2xl lg:mx-0 text-lg leading-relaxed text-pretty sm:text-xl">
             A personal plan, a weight tracker that sees through the noise, and a two-week check that
@@ -293,7 +293,7 @@ const steps = [
         ['0', 'trackers, ads, accounts', 'and nothing you type leaves your device'],
       ].map(([n, label, sub, href]) => (
         <div>
-          <p class="font-display text-5xl leading-none tracking-tight">{n}</p>
+          <p class="font-display text-4xl leading-none tracking-tight">{n}</p>
           <p class="mt-2 font-semibold">
             {href ? (
               <a class="hover:text-brand-600 dark:hover:text-brand-300" href={withBase(href)}>

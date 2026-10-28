@@ -261,3 +261,24 @@ test('eating-out page filters items and chains as you type', async ({ page }) =>
   await q.fill('');
   await expect(page.locator('section#chipotle')).toBeVisible();
 });
+
+test('eating-out page picks the highest-protein order that fits a calorie budget', async ({
+  page,
+}) => {
+  await page.goto('/eating-out/?budget=500');
+  const budget = page.getByLabel('Calories to spend');
+  await expect(budget).toHaveValue('500');
+  const chipotle = page.locator('section#chipotle');
+  await chipotle.getByRole('button', { name: /Best order at Chipotle/ }).click();
+  const bar = chipotle.getByRole('status');
+  await expect(bar).toContainText(/\d+ items? · \d+ kcal/);
+  const text = (await bar.textContent()) ?? '';
+  const kcal = Number(/(\d+) kcal/.exec(text)?.[1]);
+  expect(kcal).toBeGreaterThan(0);
+  expect(kcal).toBeLessThanOrEqual(500);
+  // Grilled chicken is the best protein per calorie here, so it is always in a 500 kcal order.
+  await expect(chipotle.getByRole('checkbox', { name: /Add Chicken, grilled/ })).toBeChecked();
+  await budget.fill('10');
+  await chipotle.getByRole('button', { name: /Best order at Chipotle/ }).click();
+  await expect(bar).toContainText(/Nothing at this chain fits 10 kcal/);
+});

@@ -21,16 +21,16 @@ export function renderShareCard(input: ShareCardInput): HTMLCanvasElement {
   c.height = H;
   const ctx = c.getContext('2d')!;
   const dark = input.dark ?? false;
-  const bg = dark ? '#1c1916' : '#f7f4ee';
-  const fg = dark ? '#f3efe7' : '#2a2520';
-  const muted = dark ? '#b7ae9f' : '#6b6259';
-  const moss = '#4f8a62';
-  const apricot = '#e8a06a';
+  const bg = dark ? '#14171c' : '#ffffff';
+  const fg = dark ? '#f2f4f7' : '#1c2028';
+  const muted = dark ? '#aab1bd' : '#656d7a';
+  const moss = '#15996b';
+  const apricot = '#f0a84a';
 
   // background + grain-ish gradient
   const g = ctx.createLinearGradient(0, 0, W, H);
   g.addColorStop(0, bg);
-  g.addColorStop(1, dark ? '#26211c' : '#efe9df');
+  g.addColorStop(1, dark ? '#1b1f26' : '#f1f3f6');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
   const glow = ctx.createRadialGradient(W * 0.8, H * 0.15, 20, W * 0.8, H * 0.15, 500);
@@ -41,15 +41,15 @@ export function renderShareCard(input: ShareCardInput): HTMLCanvasElement {
 
   // brand
   ctx.fillStyle = fg;
-  ctx.font = '600 34px Inter, system-ui, sans-serif';
+  ctx.font = '600 34px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText('Ethereal', 80, 110);
   ctx.fillStyle = muted;
-  ctx.font = '500 28px Inter, system-ui, sans-serif';
+  ctx.font = '500 28px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText(input.subtitle, 80, 160);
 
-  // headline (serif)
+  // headline
   ctx.fillStyle = fg;
-  ctx.font = '400 150px "Instrument Serif", Georgia, serif';
+  ctx.font = '800 128px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText(input.title, 76, 330);
 
   // chart
@@ -115,7 +115,7 @@ export function renderShareCard(input: ShareCardInput): HTMLCanvasElement {
     ctx.stroke();
     // axis labels
     ctx.fillStyle = muted;
-    ctx.font = '500 24px Inter, system-ui, sans-serif';
+    ctx.font = '500 24px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.fillText(`${max.toFixed(1)} ${input.unit}`, x0, y0 - 14);
     ctx.fillText(`${min.toFixed(1)} ${input.unit}`, x0, y1 + 36);
   }
@@ -125,16 +125,16 @@ export function renderShareCard(input: ShareCardInput): HTMLCanvasElement {
   input.stats.forEach(([label, value], i) => {
     const x = 80 + i * colW;
     ctx.fillStyle = muted;
-    ctx.font = '600 24px Inter, system-ui, sans-serif';
+    ctx.font = '600 24px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.fillText(label.toUpperCase(), x, 1030);
     ctx.fillStyle = fg;
-    ctx.font = '400 72px "Instrument Serif", Georgia, serif';
+    ctx.font = '800 64px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.fillText(value, x, 1110);
   });
 
   // footer
   ctx.fillStyle = muted;
-  ctx.font = '500 26px Inter, system-ui, sans-serif';
+  ctx.font = '500 26px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText('Trend weight, not daily noise · free and private · no account', 80, 1270);
   return c;
 }
@@ -178,14 +178,14 @@ export function renderWeekCard(input: WeekCardInput): HTMLCanvasElement {
   c.height = H;
   const ctx = c.getContext('2d')!;
   const dark = input.dark ?? false;
-  const bg = dark ? '#1c1916' : '#f7f4ee';
-  const fg = dark ? '#f3efe7' : '#2a2520';
-  const muted = dark ? '#b7ae9f' : '#6b6259';
-  const moss = '#4f8a62';
-  const apricot = '#e8a06a';
+  const bg = dark ? '#14171c' : '#ffffff';
+  const fg = dark ? '#f2f4f7' : '#1c2028';
+  const muted = dark ? '#aab1bd' : '#656d7a';
+  const moss = '#15996b';
+  const apricot = '#f0a84a';
   const grad = ctx.createLinearGradient(0, 0, W, H);
   grad.addColorStop(0, bg);
-  grad.addColorStop(1, dark ? '#24201b' : '#efe9df');
+  grad.addColorStop(1, dark ? '#1b1f26' : '#f1f3f6');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
@@ -195,14 +195,14 @@ export function renderWeekCard(input: WeekCardInput): HTMLCanvasElement {
   ctx.roundRect(80, 80, 56, 56, 16);
   ctx.fill();
   ctx.fillStyle = fg;
-  ctx.font = 'italic 400 44px "Instrument Serif", Georgia, serif';
+  ctx.font = '700 40px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText('Ethereal', 156, 124);
 
   ctx.fillStyle = muted;
-  ctx.font = '600 28px Inter, system-ui, sans-serif';
+  ctx.font = '600 28px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText(input.subtitle.toUpperCase(), 80, 230);
   ctx.fillStyle = fg;
-  ctx.font = '400 104px "Instrument Serif", Georgia, serif';
+  ctx.font = '800 96px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText(input.title, 80, 340);
 
   // bars
@@ -227,7 +227,7 @@ export function renderWeekCard(input: WeekCardInput): HTMLCanvasElement {
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = muted;
-    ctx.font = '600 22px Inter, system-ui, sans-serif';
+    ctx.font = '600 22px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.fillText(`TARGET ${Math.round(target).toLocaleString('en-US')}`, x0, sy(target) - 12);
   }
   input.days.forEach((d, i) => {
@@ -243,12 +243,12 @@ export function renderWeekCard(input: WeekCardInput): HTMLCanvasElement {
       ctx.roundRect(x, sy(d.kcal), bw, y1 - sy(d.kcal), 14);
       ctx.fill();
       ctx.fillStyle = fg;
-      ctx.font = '700 26px Inter, system-ui, sans-serif';
+      ctx.font = '700 26px "Manrope Variable", Manrope, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(Math.round(d.kcal).toLocaleString('en-US'), x + bw / 2, sy(d.kcal) - 14);
     }
     ctx.fillStyle = muted;
-    ctx.font = '600 24px Inter, system-ui, sans-serif';
+    ctx.font = '600 24px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(d.label.toUpperCase(), x + bw / 2, y1 + 40);
     ctx.textAlign = 'left';
@@ -259,15 +259,15 @@ export function renderWeekCard(input: WeekCardInput): HTMLCanvasElement {
   input.stats.forEach(([label, value], i) => {
     const x = 80 + i * colW;
     ctx.fillStyle = muted;
-    ctx.font = '600 24px Inter, system-ui, sans-serif';
+    ctx.font = '600 24px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.fillText(label.toUpperCase(), x, 1040);
     ctx.fillStyle = fg;
-    ctx.font = '400 72px "Instrument Serif", Georgia, serif';
+    ctx.font = '800 64px "Manrope Variable", Manrope, system-ui, sans-serif';
     ctx.fillText(value, x, 1120);
   });
 
   ctx.fillStyle = muted;
-  ctx.font = '500 26px Inter, system-ui, sans-serif';
+  ctx.font = '500 26px "Manrope Variable", Manrope, system-ui, sans-serif';
   ctx.fillText('Logged with Ethereal · free and private · no account', 80, 1270);
   return c;
 }

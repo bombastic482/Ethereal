@@ -6,7 +6,7 @@ export const SITE = {
   author: 'Ethereal',
   locale: 'en_US',
   twitter: '',
-  themeColor: '#3f7a52',
+  themeColor: '#15996b',
 } as const;
 
 export const NAV = [

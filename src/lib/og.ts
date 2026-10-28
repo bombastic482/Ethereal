@@ -43,8 +43,8 @@ const star = (cx: number, cy: number, r: number) =>
   `M${cx} ${cy - r}l${r * 0.29} ${r * 0.71}L${cx + r} ${cy}l-${r * 0.71} ${r * 0.29}L${cx} ${cy + r}l-${r * 0.29}-${r * 0.71}L${cx - r} ${cy}l${r * 0.71}-${r * 0.29}Z`;
 
 export function ogSvg(card: OgCard): string {
-  const brand = '#5aa072';
-  const accent = '#e8a06a';
+  const brand = '#22c38a';
+  const accent = '#5eead4';
   const hasRing = !!card.ring;
   const titleWidth = hasRing ? 26 : 34;
   const title = wrap(card.title, titleWidth, 3);
@@ -53,11 +53,11 @@ export function ogSvg(card: OgCard): string {
   const stats = card.stats ?? [];
   const stat = (x: number, label: string, value: string) =>
     `<text x="${x}" y="536" font-family="Helvetica, Arial, sans-serif" font-size="44" font-weight="800" fill="#fff" letter-spacing="-1.5">${esc(value)}</text>
-     <text x="${x}" y="566" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#b8ae9f" letter-spacing="1.5">${esc(label.toUpperCase())}</text>`;
+     <text x="${x}" y="566" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#9aa1ad" letter-spacing="1.5">${esc(label.toUpperCase())}</text>`;
   const summary = card.summary && stats.length === 0 ? wrap(card.summary, 70, 2) : [];
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d1a16"/><stop offset="1" stop-color="#2a251f"/></linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f1217"/><stop offset="1" stop-color="#171b22"/></linearGradient>
     <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${brand}"/><stop offset="1" stop-color="${accent}"/></linearGradient>
     <radialGradient id="glow" cx="0.85" cy="0.2" r="0.6"><stop offset="0" stop-color="${brand}" stop-opacity="0.4"/><stop offset="1" stop-color="${brand}" stop-opacity="0"/></radialGradient>
   </defs>
@@ -70,14 +70,14 @@ export function ogSvg(card: OgCard): string {
   ${title
     .map(
       (line, i) =>
-        `<text x="80" y="${y0 + i * (size + 8)}" font-family="Georgia, Times New Roman, serif" font-size="${size}" fill="#fff" letter-spacing="-2">${esc(line)}</text>`,
+        `<text x="80" y="${y0 + i * (size + 8)}" font-family="Helvetica, Arial, sans-serif" font-size="${size}" font-weight="800" fill="#fff" letter-spacing="-3">${esc(line)}</text>`,
     )
     .join('\n  ')}
   ${stats.map((s, i) => stat(80 + i * 220, s.label, s.value)).join('\n  ')}
   ${summary
     .map(
       (line, i) =>
-        `<text x="80" y="${520 + i * 40}" font-family="Helvetica, Arial, sans-serif" font-size="28" fill="#d9d2c7">${esc(line)}</text>`,
+        `<text x="80" y="${520 + i * 40}" font-family="Helvetica, Arial, sans-serif" font-size="28" fill="#c3c8d1">${esc(line)}</text>`,
     )
     .join('\n  ')}
   ${
@@ -86,7 +86,7 @@ export function ogSvg(card: OgCard): string {
     <circle cx="110" cy="110" r="90" fill="none" stroke="#ffffff14" stroke-width="20"/>
     <circle cx="110" cy="110" r="90" fill="none" stroke="url(#g)" stroke-width="20" stroke-linecap="round" stroke-dasharray="${(2 * Math.PI * 90 * Math.min(0.95, Math.max(0.02, card.ring.fraction))).toFixed(1)} 999" transform="rotate(-90 110 110)"/>
     <text x="110" y="104" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="800" fill="#fff" letter-spacing="-1.5">${esc(card.ring.big)}</text>
-    <text x="110" y="134" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#b8ae9f" letter-spacing="1.5">${esc(card.ring.label.toUpperCase())}</text>
+    <text x="110" y="134" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#9aa1ad" letter-spacing="1.5">${esc(card.ring.label.toUpperCase())}</text>
   </g>`
       : ''
   }

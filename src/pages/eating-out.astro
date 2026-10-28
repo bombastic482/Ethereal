@@ -34,7 +34,7 @@ const jsonLd = [
       <p class="text-brand-700 dark:text-brand-300 text-sm font-semibold tracking-wide uppercase">
         Eating out
       </p>
-      <h1 class="font-display mt-2 text-5xl leading-[0.95] tracking-tight sm:text-6xl">
+      <h1 class="font-display mt-2 text-4xl leading-[1.05] tracking-tight sm:text-5xl">
         The leanest order at {chains.length} chains
       </h1>
       <p class="text-muted mt-4 text-lg">
@@ -53,34 +53,70 @@ const jsonLd = [
       ))}
     </nav>
 
-    <div class="mt-6 max-w-md" data-chain-filter>
-      <label
-        class="text-subtle mb-1.5 block text-xs font-semibold tracking-wide uppercase"
-        for="eo-q"
-      >
-        Find an item
-      </label>
-      <input
-        id="eo-q"
-        type="search"
-        class="field"
-        placeholder="chicken, wrap, latte…"
-        autocomplete="off"
-        enterkeyhint="search"
-      />
-      <p class="text-subtle mt-1.5 text-xs" data-filter-status role="status" aria-live="polite" />
+    <div class="mt-6 grid gap-4 sm:grid-cols-2 sm:gap-6">
+      <div data-chain-filter>
+        <label
+          class="text-subtle mb-1.5 block text-xs font-semibold tracking-wide uppercase"
+          for="eo-q"
+        >
+          Find an item
+        </label>
+        <input
+          id="eo-q"
+          type="search"
+          class="field"
+          placeholder="chicken, wrap, latte…"
+          autocomplete="off"
+          enterkeyhint="search"
+        />
+        <p class="text-subtle mt-1.5 text-xs" data-filter-status role="status" aria-live="polite" />
+      </div>
+      <div data-budget-box>
+        <label
+          class="text-subtle mb-1.5 block text-xs font-semibold tracking-wide uppercase"
+          for="eo-budget"
+        >
+          Calories to spend
+        </label>
+        <input
+          id="eo-budget"
+          type="number"
+          class="field"
+          inputmode="numeric"
+          min="0"
+          max="5000"
+          step="10"
+          placeholder="e.g. 600"
+          autocomplete="off"
+        />
+        <p class="text-subtle mt-1.5 text-xs">
+          Then press <strong>Best order</strong> on any chain: the most protein that fits.
+        </p>
+      </div>
     </div>
 
     <div class="mt-12 grid gap-10">
       {chains.map((c) => (
         <section id={c.slug} class="scroll-mt-24" aria-labelledby={`${c.slug}-h`}>
-          <div class="flex items-baseline justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
             <h2 id={`${c.slug}-h`} class="font-display text-3xl tracking-tight">
               {c.name}
             </h2>
-            <span class="text-subtle text-xs">
-              {c.items.length} items ·{' '}
-              {c.kind === 'drinks' ? 'lowest calories first' : 'best first'}
+            <span class="flex items-center gap-3">
+              <span class="text-subtle hidden text-xs sm:inline">
+                {c.items.length} items ·{' '}
+                {c.kind === 'drinks' ? 'lowest calories first' : 'best first'}
+              </span>
+              {c.kind === 'food' && (
+                <button
+                  type="button"
+                  class="btn btn-ghost border-line h-8 border px-3 text-xs"
+                  data-best-order
+                  aria-label={`Best order at ${c.name} for your calorie budget`}
+                >
+                  <Icon name="spark" size={14} /> Best order
+                </button>
+              )}
             </span>
           </div>
           <div
@@ -237,7 +273,8 @@ const jsonLd = [
         bar.classList.add('flex');
       };
       root.addEventListener('change', (e) => {
-        if ((e.target as HTMLElement).matches('[data-order-item]')) render();
+        const t = e.target as HTMLElement;
+        if (t === root || t.matches('[data-order-item]')) render();
       });
       bar.querySelector('[data-order-clear]')?.addEventListener('click', () => {
         for (const b of boxes()) b.checked = false;
@@ -276,10 +313,65 @@ const jsonLd = [
     };
     input.addEventListener('input', apply);
   }
+  // Best order: the subset of a chain's items with the most protein that fits the calorie
+  // budget (ties go to fewer calories). Chains have at most ~15 items, so every subset is tried.
+  function bindBudget() {
+    const box = document.querySelector<HTMLElement>('[data-budget-box]');
+    const input = box?.querySelector<HTMLInputElement>('input');
+    if (!box || !input || box.dataset.bound) return;
+    box.dataset.bound = '1';
+    const fromUrl = Number(new URLSearchParams(location.search).get('budget'));
+    if (fromUrl > 0 && !input.value) input.value = String(Math.round(fromUrl));
+    for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-best-order]')) {
+      btn.addEventListener('click', () => {
+        const budget = Number(input.value);
+        if (!(budget > 0)) {
+          input.focus();
+          box.classList.add('animate-pulse');
+          setTimeout(() => box.classList.remove('animate-pulse'), 900);
+          return;
+        }
+        const section = btn.closest('section')!;
+        const boxes = [...section.querySelectorAll<HTMLInputElement>('[data-order-item]')];
+        const items = boxes.map((b) => ({
+          b,
+          kcal: Number(b.dataset.kcal),
+          protein: Number(b.dataset.protein),
+        }));
+        let best = { mask: 0, protein: -1, kcal: 0 };
+        const n = Math.min(items.length, 16);
+        for (let mask = 1; mask < 1 << n; mask++) {
+          let kcal = 0;
+          let protein = 0;
+          for (let i = 0; i < n; i++) {
+            if (mask & (1 << i)) {
+              kcal += items[i]!.kcal;
+              protein += items[i]!.protein;
+              if (kcal > budget) break;
+            }
+          }
+          if (kcal > budget) continue;
+          if (protein > best.protein || (protein === best.protein && kcal < best.kcal))
+            best = { mask, protein, kcal };
+        }
+        for (let i = 0; i < items.length; i++)
+          items[i]!.b.checked = i < n && !!(best.mask & (1 << i));
+        section.dispatchEvent(new Event('change', { bubbles: true }));
+        const status = section.querySelector<HTMLElement>('[data-order-bar]');
+        if (best.protein < 0 && status) {
+          status.textContent = `Nothing at this chain fits ${budget} kcal.`;
+          status.classList.remove('hidden');
+          status.classList.add('flex');
+        }
+      });
+    }
+  }
   bind();
   bindFilter();
+  bindBudget();
   document.addEventListener('astro:page-load', () => {
     bind();
     bindFilter();
+    bindBudget();
   });
 </script>

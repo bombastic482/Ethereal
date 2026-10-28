@@ -7,11 +7,9 @@ import Seo from '@/components/Seo.astro';
 import TabBar from '@/components/TabBar.astro';
 import { ClientRouter } from 'astro:transitions';
 import { SITE } from '@/lib/site';
-// Preload the three fonts the first paint needs; otherwise they are discovered only after the
+// Preload the one font file the first paint needs; otherwise it is discovered only after the
 // stylesheet is parsed, which adds a network round trip before the final text render.
-import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
-import serifUrl from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
-import serifItalicUrl from '@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2?url';
+import fontUrl from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -38,9 +36,7 @@ const { class: cls, ...seo } = Astro.props;
     <meta name="theme-color" content={SITE.themeColor} />
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
-    {[interUrl, serifUrl, serifItalicUrl].map((href) => (
-      <link rel="preload" as="font" type="font/woff2" href={href} crossorigin />
-    ))}
+    <link rel="preload" as="font" type="font/woff2" href={fontUrl} crossorigin />
     <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     <link rel="icon" href={withBase('/favicon.ico')} sizes="32x32" />
     <link rel="apple-touch-icon" href={withBase('/icons/apple-touch-icon.png')} />
