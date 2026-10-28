@@ -123,3 +123,36 @@ test.describe('day planner', () => {
     ).toBeVisible();
   });
 });
+
+test.describe('weekly review', () => {
+  test('shows the week, a twelve-week consistency grid and saves a reflection', async ({
+    page,
+  }) => {
+    // Log something today so the grid and the week have data.
+    await ready(page, '/today/');
+    await page.getByRole('region', { name: 'Lunch' }).getByRole('button', { name: 'Add' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('searchbox').fill('banana');
+    await dialog
+      .getByRole('button', { name: /^Banana/ })
+      .first()
+      .click();
+    await dialog.getByRole('button', { name: /^Add \d+ g$/ }).click();
+
+    await ready(page, '/review/');
+    const grid = page.getByRole('region', { name: 'Consistency' });
+    await expect(grid).toBeVisible();
+    await expect(grid.getByText('Days logged')).toBeVisible();
+    await expect(grid.getByText(/^1 \/ 84$/)).toBeVisible();
+    await expect(grid.getByRole('img', { name: /meals logged per day/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /plan next week's meals/i })).toBeVisible();
+
+    const reflection = page.getByRole('region', { name: 'Reflection' });
+    await reflection.getByRole('textbox').first().fill('Walked every day');
+    await reflection.getByRole('button', { name: /save/i }).click();
+    await ready(page, '/review/');
+    await expect(
+      page.getByRole('region', { name: 'Reflection' }).getByRole('textbox').first(),
+    ).toHaveValue('Walked every day');
+  });
+});

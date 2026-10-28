@@ -11,6 +11,7 @@ import {
   type RecipeMeal,
   type ResolvedRecipe,
 } from '@/lib/recipes';
+import { withBase } from '@/lib/url';
 import { Icon } from '../ui/Icon';
 import { Segmented } from '../ui/Segmented';
 
@@ -94,6 +95,15 @@ export function StarterRecipes({ date, slot, diet, remainingKcal, focusId, onLog
           {ready ? `${list.length} ${diet === 'omnivore' ? '' : diet + ' '}recipes` : 'Loading…'}
         </p>
       </div>
+      <p class="text-subtle -mt-1 text-xs">
+        Want the whole day done for you?{' '}
+        <a
+          class="text-brand-700 dark:text-brand-300 font-semibold"
+          href={withBase('/plan/#dayplan-h')}
+        >
+          Plan a day that hits your numbers →
+        </a>
+      </p>
       <Segmented name="recipe-meal" options={RECIPE_MEALS} value={meal} onChange={setMeal} />
       <div class="flex gap-2">
         <input

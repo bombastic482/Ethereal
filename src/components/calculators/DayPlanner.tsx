@@ -154,9 +154,20 @@ function DayPlannerInner() {
   const copyList = async () => {
     if (!day) return;
     const text = shoppingListText(day, days);
+    const label = `Shopping list for ${days} day${days === 1 ? '' : 's'}`;
+    // Phones get the share sheet (Notes, Messages, a shopping app); desktops get the clipboard.
+    if (typeof navigator.share === 'function' && /Mobi|Android/i.test(navigator.userAgent)) {
+      try {
+        await navigator.share({ title: label, text });
+        setStatus(`${label} shared.`);
+        return;
+      } catch {
+        /* cancelled or unsupported payload: fall through to the clipboard */
+      }
+    }
     try {
       await navigator.clipboard.writeText(text);
-      setStatus(`Shopping list for ${days} day${days === 1 ? '' : 's'} copied.`);
+      setStatus(`${label} copied.`);
     } catch {
       setStatus(text);
     }

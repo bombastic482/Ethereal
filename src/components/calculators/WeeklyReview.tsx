@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { estimateExpenditure } from '@/lib/calc/expenditure';
 import { buildInsights } from '@/lib/calc/insights';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
-import { shift } from '@/lib/calc/streaks';
+import { currentStreak, longestStreak, shift } from '@/lib/calc/streaks';
 import { assessProgress, daysBetween, trendSeries } from '@/lib/calc/trend';
 import { formatNumber, formatWeight, kgToLb, round } from '@/lib/calc/units';
 import { diaryStore, prefsStore } from '@/lib/food-store';
@@ -15,6 +15,7 @@ import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 import { Stat } from '../ui/Stat';
+import { Heatmap } from '../ui/Heatmap';
 import { WeekBars } from '../ui/WeekBars';
 
 import { reflectionStore } from '@/lib/reflections';
@@ -66,6 +67,24 @@ function WeeklyReviewInner() {
     [days, diary.food, diary.exercise, t, prefs.eatBack],
   );
   const logged = per.filter((x) => x.s.eaten.kcal > 0);
+  // Consistency grid: meal slots with food per day over the last 12 weeks.
+  const consistency = useMemo(() => {
+    const slots = new Map<string, Set<string>>();
+    for (const e of diary.food) {
+      const set = slots.get(e.date) ?? new Set<string>();
+      set.add(e.meal);
+      slots.set(e.date, set);
+    }
+    const values: Record<string, number> = {};
+    for (const [d, set] of slots) values[d] = set.size;
+    const dates = [...slots.keys()];
+    return {
+      values,
+      daysLogged: dates.filter((d) => d > shift(today, -84) && d <= today).length,
+      current: currentStreak(dates, today),
+      longest: longestStreak(dates),
+    };
+  }, [diary.food, today]);
   const avg = (f: (x: (typeof per)[number]) => number) =>
     logged.length ? Math.round(logged.reduce((a, x) => a + f(x), 0) / logged.length) : null;
   const adherence = adherencePercent(
@@ -323,6 +342,14 @@ function WeeklyReviewInner() {
                   simply to log and weigh.
                 </p>
               )}
+              <p class="mt-4 text-sm">
+                <a
+                  class="text-brand-700 dark:text-brand-300 font-semibold"
+                  href={withBase('/plan/#dayplan-h')}
+                >
+                  Plan next week's meals around the new target →
+                </a>
+              </p>
               {expenditure && (
                 <p class="text-subtle mt-4 text-xs">
                   Measured expenditure {formatNumber(expenditure.tdee)} kcal (
@@ -348,6 +375,43 @@ function WeeklyReviewInner() {
             </section>
           </div>
 
+          <section class="surface p-5 sm:p-6" aria-label="Consistency">
+            <div class="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h3 class="text-lg font-bold tracking-tight">Twelve weeks of showing up</h3>
+                <p class="text-subtle text-xs">
+                  One square per day; darker means more meals logged. Consistency predicts results
+                  better than any single day.
+                </p>
+              </div>
+              <dl class="flex gap-5 text-sm">
+                <div>
+                  <dt class="text-subtle text-xs">Days logged</dt>
+                  <dd class="tabular font-semibold">{consistency.daysLogged} / 84</dd>
+                </div>
+                <div>
+                  <dt class="text-subtle text-xs">Current streak</dt>
+                  <dd class="tabular font-semibold">{consistency.current} d</dd>
+                </div>
+                <div>
+                  <dt class="text-subtle text-xs">Longest</dt>
+                  <dd class="tabular font-semibold">{consistency.longest} d</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="mt-4">
+              <Heatmap
+                values={consistency.values}
+                max={4}
+                end={today}
+                weeks={12}
+                label="Meals logged per day over the last twelve weeks"
+                describe={(d, v) =>
+                  `${v} meal${v === 1 ? '' : 's'} logged on ${new Date(`${d}T00:00:00`).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
+                }
+              />
+            </div>
+          </section>
           <section class="surface p-5 sm:p-6" aria-label="Reflection">
             <h3 class="text-lg font-bold tracking-tight">Two lines for future you</h3>
             <p class="text-subtle text-xs">
