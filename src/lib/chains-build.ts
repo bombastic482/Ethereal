@@ -17,23 +17,30 @@ export interface ChainItem {
   fat: number;
   /** Grams of protein per 100 kcal: the leanest choices score highest. */
   proteinPer100: number;
+  /** For drinks: kcal per 100 ml, so sizes compare fairly. */
+  kcalPer100ml: number;
 }
 
 export interface Chain {
   name: string;
   slug: string;
+  /** Food chains rank by protein per calorie; coffee chains rank by calories, lowest first. */
+  kind: 'food' | 'drinks';
   items: ChainItem[];
 }
 
 const CHAIN_CATEGORIES = new Set(['Fast food & takeaway']);
+/** Brands in the Drinks category that are chains with a counter, not supermarket products. */
+const COFFEE_CHAINS = new Set(['Starbucks', 'Costa Coffee']);
 
 export const chains: Chain[] = (() => {
   const by = new Map<string, ChainItem[]>();
   for (const f of foodsE as Food[]) {
-    if (!CHAIN_CATEGORIES.has(f.category)) continue;
     const m = /^(.*)\s\(([^)]+)\)\s*$/.exec(f.name);
     const s = f.servings[0];
     if (!m || !s) continue;
+    const drinks = f.category === 'Drinks' && COFFEE_CHAINS.has(m[2]!);
+    if (!drinks && !CHAIN_CATEGORIES.has(f.category)) continue;
     const k = s.grams / 100;
     const kcal = Math.round(f.per100g.kcal * k);
     const item: ChainItem = {
@@ -46,6 +53,7 @@ export const chains: Chain[] = (() => {
       carbs: Math.round(f.per100g.carbs * k),
       fat: Math.round(f.per100g.fat * k),
       proteinPer100: kcal > 0 ? Math.round(((f.per100g.protein * k) / kcal) * 1000) / 10 : 0,
+      kcalPer100ml: Math.round(f.per100g.kcal),
     };
     const list = by.get(m[2]!) ?? [];
     list.push(item);
@@ -53,14 +61,21 @@ export const chains: Chain[] = (() => {
   }
   return [...by.entries()]
     .filter(([, items]) => items.length >= 4)
-    .map(([name, items]) => ({
-      name,
-      slug: name
-        .toLowerCase()
-        .replace(/['’]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, ''),
-      items: items.sort((a, b) => b.proteinPer100 - a.proteinPer100),
-    }))
+    .map(([name, items]) => {
+      const kind: Chain['kind'] = COFFEE_CHAINS.has(name) ? 'drinks' : 'food';
+      return {
+        name,
+        slug: name
+          .toLowerCase()
+          .replace(/['’]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, ''),
+        kind,
+        items:
+          kind === 'drinks'
+            ? items.sort((a, b) => a.kcal - b.kcal || b.protein - a.protein)
+            : items.sort((a, b) => b.proteinPer100 - a.proteinPer100),
+      };
+    })
     .sort((a, b) => b.items.length - a.items.length);
 })();

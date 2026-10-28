@@ -37,9 +37,10 @@ const jsonLd = [
         The leanest order at {chains.length} chains
       </h1>
       <p class="text-muted mt-4 text-lg">
-        {total} menu items from published nutrition data, ranked by grams of protein per 100 kcal.
-        Nothing here is off limits; the ranking just shows which orders leave the most room in the
-        day. Tap <strong>Log</strong> to add one to Today with the right portion.
+        {total} menu items from published nutrition data. Food is ranked by grams of protein per 100
+        kcal; coffee-shop drinks by calories, lowest first. Nothing here is off limits; the ranking
+        just shows which orders leave the most room in the day. Tap <strong>Log</strong> to add one
+        to Today with the right portion.
       </p>
     </header>
 
@@ -58,7 +59,10 @@ const jsonLd = [
             <h2 id={`${c.slug}-h`} class="font-display text-3xl tracking-tight">
               {c.name}
             </h2>
-            <span class="text-subtle text-xs">{c.items.length} items · best first</span>
+            <span class="text-subtle text-xs">
+              {c.items.length} items ·{' '}
+              {c.kind === 'drinks' ? 'lowest calories first' : 'best first'}
+            </span>
           </div>
           <div
             class="surface mt-4 overflow-x-auto"
@@ -74,7 +78,9 @@ const jsonLd = [
                   <th class="px-4 py-3 text-right font-semibold">Protein</th>
                   <th class="px-4 py-3 text-right font-semibold">Carbs</th>
                   <th class="px-4 py-3 text-right font-semibold">Fat</th>
-                  <th class="px-4 py-3 text-right font-semibold">P / 100 kcal</th>
+                  <th class="px-4 py-3 text-right font-semibold">
+                    {c.kind === 'drinks' ? 'kcal / 100 ml' : 'P / 100 kcal'}
+                  </th>
                   <th class="hidden px-4 py-3 sm:table-cell" />
                 </tr>
               </thead>
@@ -99,7 +105,7 @@ const jsonLd = [
                     <td
                       class={`px-4 py-2.5 text-right font-semibold ${i === 0 ? 'text-brand-700 dark:text-brand-300' : ''}`}
                     >
-                      {it.proteinPer100}
+                      {c.kind === 'drinks' ? it.kcalPer100ml : it.proteinPer100}
                     </td>
                     <td class="hidden px-2 py-2.5 text-right sm:table-cell">
                       <a
@@ -124,10 +130,12 @@ const jsonLd = [
       <p class="text-muted mt-2 text-sm leading-relaxed">
         Protein per 100 kcal is the quickest way to spot the order that keeps you full for the
         calories: 8 or more is excellent, 4 to 8 is a fair trade, under 4 is mostly fat or sugar.
-        Values come from the chains' published nutrition tables at the time of writing and change
-        with recipes and regions; scan the receipt barcode or use the chain's own numbers if yours
-        differ. For a planned night out, bank 100 to 150 kcal on the surrounding days rather than
-        skipping meals, and read{' '}
+        Coffee is different: the drink itself is almost free, so the table ranks by calories and
+        shows kcal per 100 ml; a grande sweetened drink with cream can carry a meal's worth, while
+        an americano or a small flat white costs next to nothing. Values come from the chains'
+        published nutrition tables at the time of writing and change with recipes and regions; scan
+        the receipt barcode or use the chain's own numbers if yours differ. For a planned night out,
+        bank 100 to 150 kcal on the surrounding days rather than skipping meals, and read{' '}
         <a
           class="text-brand-700 dark:text-brand-300 font-semibold"
           href={withBase('/guides/eating-out-and-alcohol/')}
