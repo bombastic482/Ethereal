@@ -8,6 +8,7 @@ import { readingTime } from '@/lib/reading-time';
 import { SITE } from '@/lib/site';
 import { toolBySlug } from '@/lib/tools';
 import { getCollection, render } from 'astro:content';
+import { builtRecipes } from '@/lib/recipes-build';
 
 export async function getStaticPaths() {
   const guides = await getCollection('guides', ({ data }) => !data.draft);
@@ -21,6 +22,22 @@ const site = Astro.site ?? new URL('https://ethereal.pages.dev');
 const minutes = readingTime(guide.body ?? '');
 const related = guide.data.relatedTools.map(toolBySlug).filter((t) => t !== undefined);
 const toc = headings.filter((h) => h.depth === 2);
+// Three recipes that fit the article: vegan/vegetarian guides get plant-based ones, protein
+// guides the highest-protein, quick-living guides the fastest; otherwise a spread by meal.
+const tagText = `${guide.id} ${guide.data.tags.join(' ')} ${guide.data.title}`.toLowerCase();
+const pool = /vegan|vegetarian|plant/.test(tagText)
+  ? builtRecipes.filter((r) => r.diet === 'vegan' || r.diet === 'vegetarian')
+  : builtRecipes;
+const ranked = /protein|muscle|strength/.test(tagText)
+  ? [...pool].sort((a, b) => b.totals.protein - a.totals.protein)
+  : /busy|habit|snack|neat|walking|hunger/.test(tagText)
+    ? [...pool].sort((a, b) => a.minutes - b.minutes)
+    : [...pool].sort((a, b) => (a.id.charCodeAt(1) % 7) - (b.id.charCodeAt(1) % 7));
+const recipePicks: typeof builtRecipes = [];
+for (const meal of ['breakfast', 'lunch', 'dinner'] as const) {
+  const r = ranked.find((x) => x.meal === meal);
+  if (r) recipePicks.push(r);
+}
 const fmt = (d: Date) =>
   d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -101,6 +118,39 @@ const jsonLd = [
             <Content />
           </BaseLinks>
         </div>
+        {recipePicks.length > 0 && (
+          <section class="mt-12" aria-labelledby="recipes-h">
+            <div class="flex items-baseline justify-between gap-3">
+              <h2 id="recipes-h" class="font-display text-2xl">
+                Recipes that fit this article
+              </h2>
+              <a
+                class="text-brand-700 dark:text-brand-300 text-sm font-semibold"
+                href={withBase('/recipes/')}
+              >
+                All 68 →
+              </a>
+            </div>
+            <ul class="mt-4 grid gap-3 sm:grid-cols-3">
+              {recipePicks.map((r) => (
+                <li class="surface p-4">
+                  <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
+                    {r.meal} · {r.minutes} min
+                  </span>
+                  <a
+                    class="mt-1 block font-bold tracking-tight hover:underline"
+                    href={withBase(`/recipes/${r.id}/`)}
+                  >
+                    {r.name}
+                  </a>
+                  <span class="text-subtle mt-1 block text-xs">
+                    {Math.round(r.totals.kcal)} kcal · P {Math.round(r.totals.protein)} g
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <aside class="surface-muted mt-12 grid gap-4 p-6 sm:grid-cols-[1fr_auto] sm:items-center">
           <div>
             <h2 class="font-display text-2xl">Put it into practice</h2>
