@@ -1,7 +1,5 @@
 /** Built-in food database: ~500 generic foods, searchable offline. */
 import type { Nutrients } from './calc/nutrition';
-import foodsA from '@/data/foods-a.json';
-import foodsB from '@/data/foods-b.json';
 
 export interface Food {
   id: string;
@@ -13,9 +11,31 @@ export interface Food {
   tags?: string[];
 }
 
-export const FOODS: Food[] = [...(foodsA as Food[]), ...(foodsB as Food[])];
-const BY_ID = new Map(FOODS.map((f) => [f.id, f]));
+let FOODS: Food[] = [];
+let BY_ID = new Map<string, Food>();
+let INDEX: Array<{ f: Food; text: string; nameTokens: string[] }> = [];
+let loading: Promise<Food[]> | null = null;
 
+/** Loads the database on first use (two JSON chunks, cached by the service worker after that). */
+export function loadFoods(): Promise<Food[]> {
+  if (FOODS.length) return Promise.resolve(FOODS);
+  loading ??= Promise.all([import('@/data/foods-a.json'), import('@/data/foods-b.json')]).then(
+    ([a, b]) => {
+      FOODS = [...(a.default as Food[]), ...(b.default as Food[])];
+      BY_ID = new Map(FOODS.map((f) => [f.id, f]));
+      INDEX = FOODS.map((f) => ({
+        f,
+        text: norm(`${f.name} ${f.category} ${(f.tags ?? []).join(' ')}`),
+        nameTokens: norm(f.name).split(' '),
+      }));
+      return FOODS;
+    },
+  );
+  return loading;
+}
+
+/** Synchronous accessors; empty until loadFoods() has resolved. */
+export const allFoods = (): Food[] => FOODS;
 export const foodById = (id: string): Food | undefined => BY_ID.get(id);
 
 const norm = (s: string) =>
@@ -25,12 +45,6 @@ const norm = (s: string) =>
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9%]+/g, ' ')
     .trim();
-
-const INDEX = FOODS.map((f) => ({
-  f,
-  text: norm(`${f.name} ${f.category} ${(f.tags ?? []).join(' ')}`),
-  nameTokens: norm(f.name).split(' '),
-}));
 
 /** Token-prefix search with light ranking: exact name hit > name-start > token prefix > category/tag. */
 export function searchFoods(query: string, limit = 25): Food[] {
@@ -62,4 +76,4 @@ export function searchFoods(query: string, limit = 25): Food[] {
     .map((x) => x.f);
 }
 
-export const CATEGORIES: string[] = [...new Set(FOODS.map((f) => f.category))].sort();
+export const categories = (): string[] => [...new Set(FOODS.map((f) => f.category))].sort();

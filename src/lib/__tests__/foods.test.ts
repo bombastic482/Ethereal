@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest';
-import { FOODS, foodById, searchFoods } from '../foods';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { allFoods, foodById, loadFoods, searchFoods } from '../foods';
+
+beforeAll(() => loadFoods());
 
 describe('food database search', () => {
   it('has unique ids and a useful size', () => {
-    expect(FOODS.length).toBeGreaterThan(200);
-    expect(new Set(FOODS.map((f) => f.id)).size).toBe(FOODS.length);
+    expect(allFoods().length).toBeGreaterThan(200);
+    expect(new Set(allFoods().map((f) => f.id)).size).toBe(allFoods().length);
   });
   it('ranks the obvious match first', () => {
     const r = searchFoods('chicken breast');
@@ -22,7 +24,7 @@ describe('food database search', () => {
     expect(searchFoods('zzqxv')).toEqual([]);
   });
   it('looks up by id', () => {
-    const first = FOODS[0]!;
+    const first = allFoods()[0]!;
     expect(foodById(first.id)).toBe(first);
     expect(foodById('nope')).toBeUndefined();
   });

@@ -26,7 +26,7 @@ import {
   saveCustomFood,
   type CustomFood,
 } from '@/lib/food-store';
-import { FOODS, foodById, searchFoods, type Food } from '@/lib/foods';
+import { allFoods, foodById, loadFoods, searchFoods, type Food } from '@/lib/foods';
 import { lookupBarcode, searchProducts, type OffProduct } from '@/lib/off';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
@@ -105,6 +105,10 @@ export default function TodayScreen() {
   const [date, setDate] = useState(today);
   const [adding, setAdding] = useState<Meal | null>(null);
   const [exAdding, setExAdding] = useState(false);
+  const [dbReady, setDbReady] = useState(false);
+  useEffect(() => {
+    loadFoods().then(() => setDbReady(true));
+  }, []);
 
   const summary = useMemo(() => {
     try {
@@ -145,8 +149,8 @@ export default function TodayScreen() {
     [diary.food, today],
   );
   const suggestions = useMemo(
-    () => (date === today ? suggestFoods(day.remaining, FOODS, prefs.diet, 4) : []),
-    [day.remaining, prefs.diet, date, today],
+    () => (date === today && dbReady ? suggestFoods(day.remaining, allFoods(), prefs.diet, 4) : []),
+    [day.remaining, prefs.diet, date, today, dbReady],
   );
 
   const remainingTone = day.remaining.kcal < 0 ? 'warn' : 'brand';

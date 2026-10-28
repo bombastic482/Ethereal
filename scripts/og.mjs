@@ -25,7 +25,18 @@ const og = `
   <text x="172" y="134" font-family="Inter, Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#fff" letter-spacing="-1">Ethereal</text>
   <text x="80" y="330" font-family="Inter, Helvetica, Arial, sans-serif" font-size="84" font-weight="800" fill="#fff" letter-spacing="-3">Weight loss,</text>
   <text x="80" y="420" font-family="Inter, Helvetica, Arial, sans-serif" font-size="84" font-weight="800" fill="url(#g)" letter-spacing="-3">done properly.</text>
-  <text x="80" y="500" font-family="Inter, Helvetica, Arial, sans-serif" font-size="30" fill="#c7d2e0">Free calorie, macro, body-fat and timeline calculators. Private. Science-backed.</text>
+  <text x="80" y="500" font-family="Inter, Helvetica, Arial, sans-serif" font-size="30" fill="#c7d2e0">Food diary, barcode scanning, adaptive calorie targets. Free and private.</text>
+  <g transform="translate(900 150)">
+    <circle cx="120" cy="120" r="96" fill="none" stroke="#ffffff14" stroke-width="22"/>
+    <circle cx="120" cy="120" r="96" fill="none" stroke="url(#g)" stroke-width="22" stroke-linecap="round" stroke-dasharray="${(2 * Math.PI * 96 * 0.68).toFixed(1)} 999" transform="rotate(-90 120 120)"/>
+    <text x="120" y="112" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-size="46" font-weight="800" fill="#fff" letter-spacing="-2">612</text>
+    <text x="120" y="142" text-anchor="middle" font-family="Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#9fb0c4" letter-spacing="1.5">KCAL LEFT</text>
+    <g transform="translate(20 260)">
+      <rect width="200" height="10" rx="5" fill="#ffffff14"/><rect width="150" height="10" rx="5" fill="${brand}"/>
+      <rect y="24" width="200" height="10" rx="5" fill="#ffffff14"/><rect y="24" width="118" height="10" rx="5" fill="${accent}"/>
+      <rect y="48" width="200" height="10" rx="5" fill="#ffffff14"/><rect y="48" width="90" height="10" rx="5" fill="#f5c04a"/>
+    </g>
+  </g>
   <g font-family="Inter, Helvetica, Arial, sans-serif" font-size="22" font-weight="600" fill="#fff">
     <rect x="80" y="540" width="132" height="44" rx="22" fill="#ffffff18"/><text x="146" y="569" text-anchor="middle">No sign-up</text>
     <rect x="228" y="540" width="132" height="44" rx="22" fill="#ffffff18"/><text x="294" y="569" text-anchor="middle">No ads</text>
