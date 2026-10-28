@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { Layer } from './Layer';
 import { withBase } from '@/lib/url';
 import { Icon, type IconName } from './Icon';
 
@@ -49,53 +50,55 @@ export default function Tour() {
   if (!open) return null;
   const step = STEPS[i]!;
   return (
-    <div
-      class="fixed inset-0 z-50 grid place-items-end bg-black/30 p-3 backdrop-blur-sm sm:place-items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tour-title"
-      onClick={(e) => e.target === e.currentTarget && close()}
-    >
-      <div class="bg-elevated w-full max-w-md rounded-3xl p-6 shadow-2xl">
-        <div class="flex items-center justify-between">
-          <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 place-items-center rounded-2xl">
-            <Icon name={step.icon} size={22} />
-          </span>
-          <button
-            type="button"
-            class="btn btn-ghost h-9 w-9 rounded-full p-0"
-            onClick={close}
-            aria-label="Skip tour"
-          >
-            <Icon name="close" size={18} />
-          </button>
-        </div>
-        <h2 id="tour-title" class="font-display mt-4 text-3xl tracking-tight">
-          {step.title}
-        </h2>
-        <p class="text-muted mt-2 leading-relaxed">{step.text}</p>
-        <div class="mt-6 flex items-center justify-between">
-          <div class="flex gap-1.5" aria-hidden="true">
-            {STEPS.map((_, k) => (
-              <span
-                key={k}
-                class={`h-1.5 rounded-full transition-all ${k === i ? 'bg-brand-600 w-6' : 'bg-muted w-1.5'}`}
-              />
-            ))}
+    <Layer>
+      <div
+        class="fixed inset-0 z-50 grid place-items-end bg-black/30 p-3 backdrop-blur-sm sm:place-items-center"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tour-title"
+        onClick={(e) => e.target === e.currentTarget && close()}
+      >
+        <div class="bg-elevated w-full max-w-md rounded-3xl p-6 shadow-2xl">
+          <div class="flex items-center justify-between">
+            <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 place-items-center rounded-2xl">
+              <Icon name={step.icon} size={22} />
+            </span>
+            <button
+              type="button"
+              class="btn btn-ghost h-9 w-9 rounded-full p-0"
+              onClick={close}
+              aria-label="Skip tour"
+            >
+              <Icon name="close" size={18} />
+            </button>
           </div>
-          <div class="flex gap-2">
-            {i < STEPS.length - 1 ? (
-              <button type="button" class="btn btn-primary" onClick={() => setI(i + 1)}>
-                Next <Icon name="arrow" size={16} />
-              </button>
-            ) : (
-              <a href={withBase('/start/')} class="btn btn-primary" onClick={close}>
-                Build my plan <Icon name="arrow" size={16} />
-              </a>
-            )}
+          <h2 id="tour-title" class="font-display mt-4 text-3xl tracking-tight">
+            {step.title}
+          </h2>
+          <p class="text-muted mt-2 leading-relaxed">{step.text}</p>
+          <div class="mt-6 flex items-center justify-between">
+            <div class="flex gap-1.5" aria-hidden="true">
+              {STEPS.map((_, k) => (
+                <span
+                  key={k}
+                  class={`h-1.5 rounded-full transition-all ${k === i ? 'bg-brand-600 w-6' : 'bg-muted w-1.5'}`}
+                />
+              ))}
+            </div>
+            <div class="flex gap-2">
+              {i < STEPS.length - 1 ? (
+                <button type="button" class="btn btn-primary" onClick={() => setI(i + 1)}>
+                  Next <Icon name="arrow" size={16} />
+                </button>
+              ) : (
+                <a href={withBase('/start/')} class="btn btn-primary" onClick={close}>
+                  Build my plan <Icon name="arrow" size={16} />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }
