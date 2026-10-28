@@ -1,5 +1,6 @@
 ---
 import { SITE } from '@/lib/site';
+import { absoluteUrl } from '@/lib/url';
 
 interface Props {
   title: string;
@@ -27,27 +28,28 @@ const {
   jsonLd = [],
 } = Astro.props;
 const site = Astro.site ?? new URL('https://ethereal.pages.dev');
-const canonical = new URL(path ?? Astro.url.pathname, site).toString();
-const imageUrl = new URL(image, site).toString();
+const canonical = path ? absoluteUrl(path, site) : new URL(Astro.url.pathname, site).toString();
+const imageUrl = absoluteUrl(image, site);
+const homeUrl = absoluteUrl('/', site);
 const fullTitle =
   title === SITE.name ? `${SITE.name} — ${SITE.tagline}` : `${title} · ${SITE.name}`;
 
 const graph = [
   {
     '@type': 'WebSite',
-    '@id': `${site}#website`,
-    url: site.toString(),
+    '@id': `${homeUrl}#website`,
+    url: homeUrl,
     name: SITE.name,
     description: SITE.description,
     inLanguage: 'en',
-    publisher: { '@id': `${site}#org` },
+    publisher: { '@id': `${homeUrl}#org` },
   },
   {
     '@type': 'Organization',
-    '@id': `${site}#org`,
+    '@id': `${homeUrl}#org`,
     name: SITE.name,
-    url: site.toString(),
-    logo: { '@type': 'ImageObject', url: new URL('/icons/icon-512.png', site).toString() },
+    url: homeUrl,
+    logo: { '@type': 'ImageObject', url: absoluteUrl('/icons/icon-512.png', site) },
   },
   ...jsonLd,
 ];

@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import BmiCalculator from '@/components/calculators/BmiCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -42,14 +43,14 @@ const faq = [
   <p>
     BMI does not know how much of your weight is muscle, where your fat is stored, or how fit you
     are. Two people with the same BMI can have completely different health profiles. If your BMI is
-    above 25, the most useful next step is a <a href="/tools/body-fat/">body-fat estimate</a> and a
-    waist measurement: a waist of more than half your height is a stronger warning sign than BMI
-    alone.
+    above 25, the most useful next step is a{' '}
+    <a href={withBase('/tools/body-fat/')}>body-fat estimate</a> and a waist measurement: a waist of
+    more than half your height is a stronger warning sign than BMI alone.
   </p>
   <h2>Using it well</h2>
   <p>
     Use the healthy weight range as a broad guide, then set a goal that reflects your build and your
     body-fat percentage rather than the arithmetic midpoint. When you are ready, the{' '}
-    <a href="/tools/calories/">calorie calculator</a> will show you how to get there.
+    <a href={withBase('/tools/calories/')}>calorie calculator</a> will show you how to get there.
   </p>
 </ToolLayout>

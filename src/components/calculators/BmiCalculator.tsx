@@ -8,6 +8,7 @@ import { Gauge } from '../ui/Gauge';
 import { ProfileFields } from '../ui/ProfileFields';
 import { ResultActions } from '../ui/ResultActions';
 import { Stat } from '../ui/Stat';
+import { withBase } from '@/lib/url';
 
 const COLORS: Record<string, string> = {
   underweight: 'oklch(75% 0.12 240)',
@@ -98,7 +99,7 @@ export default function BmiCalculator() {
             <Callout>
               BMI is a population screening tool, not a diagnosis. It cannot tell muscle from fat,
               and healthy ranges differ by ethnicity and age. If your BMI is high but your{' '}
-              <a class="underline" href="/tools/body-fat/">
+              <a class="underline" href={withBase('/tools/body-fat/')}>
                 body-fat percentage
               </a>{' '}
               is low, trust the body fat.

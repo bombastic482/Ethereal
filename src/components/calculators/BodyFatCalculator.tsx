@@ -9,6 +9,7 @@ import { NumberField } from '../ui/NumberField';
 import { ProfileFields } from '../ui/ProfileFields';
 import { ResultActions } from '../ui/ResultActions';
 import { Stat } from '../ui/Stat';
+import { withBase } from '@/lib/url';
 
 const BAND_COLORS = [
   'oklch(75% 0.12 240)',
@@ -156,7 +157,7 @@ export default function BodyFatCalculator() {
               The Navy method is accurate to about ±3–4% versus a DEXA scan. Measure at the same
               time of day, unflexed, and track the trend rather than any single reading. Saving this
               to your profile unlocks the Katch-McArdle formula in the{' '}
-              <a class="underline" href="/tools/calories/">
+              <a class="underline" href={withBase('/tools/calories/')}>
                 calorie calculator
               </a>
               .

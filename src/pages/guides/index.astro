@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import Base from '@/layouts/Base.astro';
 import { readingTime } from '@/lib/reading-time';
 import { getCollection } from 'astro:content';
@@ -34,7 +35,7 @@ const categories = [...new Set(guides.map((g) => g.data.category))];
             .filter((g) => g.data.category === cat)
             .map((g) => (
               <a
-                href={`/guides/${g.id}/`}
+                href={withBase(`/guides/${g.id}/`)}
                 class="surface hover:shadow-glow flex flex-col gap-2 p-6 transition hover:-translate-y-0.5"
               >
                 <span class="text-lg font-bold tracking-tight">{g.data.title}</span>

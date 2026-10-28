@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import ProteinCalculator from '@/components/calculators/ProteinCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -52,7 +53,7 @@ const faq = [
     </li>
   </ul>
   <p>
-    Once you know your protein, the <a href="/tools/macros/">macro calculator</a> will build the
-    rest of the day around it.
+    Once you know your protein, the <a href={withBase('/tools/macros/')}>macro calculator</a> will
+    build the rest of the day around it.
   </p>
 </ToolLayout>

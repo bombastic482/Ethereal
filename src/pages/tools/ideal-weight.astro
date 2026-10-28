@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import IdealWeightCalculator from '@/components/calculators/IdealWeightCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -38,8 +39,8 @@ const faq = [
   <h2>A better definition of ideal</h2>
   <p>
     Health outcomes track body-fat distribution far better than any single weight. Use the{' '}
-    <a href="/tools/body-fat/">body-fat calculator</a> and a waist measurement, set a target in the
-    fitness range for your sex, then plan the route with the{' '}
-    <a href="/tools/timeline/">timeline tool</a>.
+    <a href={withBase('/tools/body-fat/')}>body-fat calculator</a> and a waist measurement, set a
+    target in the fitness range for your sex, then plan the route with the{' '}
+    <a href={withBase('/tools/timeline/')}>timeline tool</a>.
   </p>
 </ToolLayout>

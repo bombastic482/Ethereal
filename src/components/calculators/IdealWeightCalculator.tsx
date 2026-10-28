@@ -7,6 +7,7 @@ import { Callout } from '../ui/Callout';
 import { ProfileFields } from '../ui/ProfileFields';
 import { ResultActions } from '../ui/ResultActions';
 import { Stat } from '../ui/Stat';
+import { withBase } from '@/lib/url';
 
 export default function IdealWeightCalculator() {
   const [profile, update] = useProfile();
@@ -61,7 +62,7 @@ export default function IdealWeightCalculator() {
             ))}
             <Callout tone="success">
               A better "ideal" is the weight where your{' '}
-              <a class="underline" href="/tools/body-fat/">
+              <a class="underline" href={withBase('/tools/body-fat/')}>
                 body fat
               </a>{' '}
               sits in the fitness range and you feel strong. Use the BMI range as the guard rails,

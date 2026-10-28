@@ -10,6 +10,7 @@ import { RangeField } from '../ui/RangeField';
 import { ResultActions } from '../ui/ResultActions';
 import { Segmented } from '../ui/Segmented';
 import { Stat } from '../ui/Stat';
+import { withBase } from '@/lib/url';
 
 const GOALS = [
   { value: 'lose', label: 'Lose fat' },
@@ -145,7 +146,7 @@ export default function CalorieCalculator() {
             <Callout>
               Every formula is an estimate with roughly ±10% error. Eat at this target for 2–3
               weeks, compare your weekly average weight, then adjust by 100–150 kcal. See the{' '}
-              <a class="underline" href="/tools/timeline/">
+              <a class="underline" href={withBase('/tools/timeline/')}>
                 timeline tool
               </a>{' '}
               for your goal date.

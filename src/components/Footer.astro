@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
@@ -9,7 +10,7 @@ const year = new Date().getFullYear();
 <footer class="border-line mt-24 border-t">
   <div class="container-page grid gap-10 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
     <div class="max-w-sm">
-      <a href="/" class="flex items-center gap-2.5 font-bold tracking-tight">
+      <a href={withBase('/')} class="flex items-center gap-2.5 font-bold tracking-tight">
         <span class="from-brand-500 to-accent-500 grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br text-white">
           <Icon name="spark" size={18} />
         </span>
@@ -26,7 +27,7 @@ const year = new Date().getFullYear();
       <ul class="grid gap-2 text-sm">
         {TOOLS.map((t) => (
           <li>
-            <a class="text-muted hover:text-fg" href={`/tools/${t.slug}/`}>
+            <a class="text-muted hover:text-fg" href={withBase(`/tools/${t.slug}/`)}>
               {t.name}
             </a>
           </li>
@@ -37,22 +38,22 @@ const year = new Date().getFullYear();
       <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Learn</h2>
       <ul class="grid gap-2 text-sm">
         <li>
-          <a class="text-muted hover:text-fg" href="/guides/">
+          <a class="text-muted hover:text-fg" href={withBase('/guides/')}>
             All guides
           </a>
         </li>
         <li>
-          <a class="text-muted hover:text-fg" href="/guides/calorie-deficit-explained/">
+          <a class="text-muted hover:text-fg" href={withBase('/guides/calorie-deficit-explained/')}>
             Calorie deficit
           </a>
         </li>
         <li>
-          <a class="text-muted hover:text-fg" href="/guides/protein-for-fat-loss/">
+          <a class="text-muted hover:text-fg" href={withBase('/guides/protein-for-fat-loss/')}>
             Protein for fat loss
           </a>
         </li>
         <li>
-          <a class="text-muted hover:text-fg" href="/guides/weight-loss-plateaus/">
+          <a class="text-muted hover:text-fg" href={withBase('/guides/weight-loss-plateaus/')}>
             Breaking plateaus
           </a>
         </li>
@@ -62,22 +63,22 @@ const year = new Date().getFullYear();
       <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Site</h2>
       <ul class="grid gap-2 text-sm">
         <li>
-          <a class="text-muted hover:text-fg" href="/about/">
+          <a class="text-muted hover:text-fg" href={withBase('/about/')}>
             About &amp; methodology
           </a>
         </li>
         <li>
-          <a class="text-muted hover:text-fg" href="/disclaimer/">
+          <a class="text-muted hover:text-fg" href={withBase('/disclaimer/')}>
             Medical disclaimer
           </a>
         </li>
         <li>
-          <a class="text-muted hover:text-fg" href="/privacy/">
+          <a class="text-muted hover:text-fg" href={withBase('/privacy/')}>
             Privacy
           </a>
         </li>
         <li>
-          <a class="text-muted hover:text-fg" href="/sitemap-index.xml">
+          <a class="text-muted hover:text-fg" href={withBase('/sitemap-index.xml')}>
             Sitemap
           </a>
         </li>

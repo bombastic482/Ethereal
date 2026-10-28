@@ -31,6 +31,11 @@ createServer((req, res) => {
   if (!existsSync(file) || statSync(file).isDirectory()) {
     status = 404;
     file = join(root, '404.html');
+    if (!existsSync(file)) {
+      res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+      res.end('Not found');
+      return;
+    }
   }
   const type = types[extname(file)] ?? 'application/octet-stream';
   res.writeHead(status, {

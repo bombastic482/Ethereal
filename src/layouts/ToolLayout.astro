@@ -1,4 +1,5 @@
 ---
+import { absoluteUrl, withBase } from '@/lib/url';
 import Disclaimer from '@/components/Disclaimer.astro';
 import Faq, { type FaqItem } from '@/components/Faq.astro';
 import ToolCard from '@/components/ToolCard.astro';
@@ -36,7 +37,7 @@ const jsonLd = [
   {
     '@type': 'WebApplication',
     name: title,
-    url: new URL(path, site).toString(),
+    url: absoluteUrl(path, site),
     description,
     applicationCategory: 'HealthApplication',
     operatingSystem: 'Any',
@@ -55,14 +56,14 @@ const jsonLd = [
   {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: site.toString() },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/', site) },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Tools',
-        item: new URL('/tools/', site).toString(),
+        item: absoluteUrl('/tools/', site),
       },
-      { '@type': 'ListItem', position: 3, name: title, item: new URL(path, site).toString() },
+      { '@type': 'ListItem', position: 3, name: title, item: absoluteUrl(path, site) },
     ],
   },
 ];
@@ -71,11 +72,11 @@ const jsonLd = [
 <Base title={title} description={description} path={path} jsonLd={jsonLd}>
   <div class="container-page pt-10 pb-16 sm:pt-14">
     <nav aria-label="Breadcrumb" class="text-subtle mb-6 flex items-center gap-2 text-sm">
-      <a class="hover:text-fg" href="/">
+      <a class="hover:text-fg" href={withBase('/')}>
         Home
       </a>
       <span aria-hidden="true">/</span>
-      <a class="hover:text-fg" href="/tools/">
+      <a class="hover:text-fg" href={withBase('/tools/')}>
         Tools
       </a>
       <span aria-hidden="true">/</span>
@@ -110,7 +111,7 @@ const jsonLd = [
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
           {guides.map((g) => (
             <a
-              href={`/guides/${g.id}/`}
+              href={withBase(`/guides/${g.id}/`)}
               class="surface hover:shadow-glow flex flex-col gap-2 p-5 transition hover:-translate-y-0.5"
             >
               <span class="text-subtle text-xs font-semibold tracking-wide uppercase">

@@ -1,4 +1,5 @@
 dist
+dist-base
 node_modules
 .astro
 public/og.png

@@ -1,6 +1,8 @@
-# Zero-cost hosting on GitHub Pages. Enable Pages → Source: "GitHub Actions" in the repo settings,
-# then every push to main deploys. For Cloudflare Pages / Vercel / Netlify, connect the repo instead
-# and use build command `npm run build`, output directory `dist`, and set SITE_URL.
+# Zero-cost hosting on GitHub Pages. Every push to main builds and deploys.
+# One-time setup in the repository settings: Pages → Build and deployment → Source: "GitHub Actions".
+# (The workflow also asks GitHub to enable Pages itself; that works when the token is allowed to.)
+# For Cloudflare Pages / Vercel / Netlify, connect the repo instead and use build command
+# `npm run build`, output directory `dist`, and set SITE_URL.
 name: Deploy to GitHub Pages
 
 on:
@@ -28,6 +30,8 @@ jobs:
           cache: npm
       - uses: actions/configure-pages@v5
         id: pages
+        with:
+          enablement: true
       - run: npm ci
       - run: npm run build
         env:

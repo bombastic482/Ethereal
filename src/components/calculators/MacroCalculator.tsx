@@ -19,6 +19,7 @@ import { ResultActions } from '../ui/ResultActions';
 import { Segmented } from '../ui/Segmented';
 import { SelectField } from '../ui/SelectField';
 import { Stat } from '../ui/Stat';
+import { withBase } from '@/lib/url';
 
 type Mode = 'preset' | 'protein-first';
 
@@ -241,7 +242,7 @@ export default function MacroCalculator() {
             <Callout>
               Protein and fibre are the numbers that matter most. Hit them daily, then let carbs and
               fat float with your appetite and training. Need a protein target on its own? Try the{' '}
-              <a class="underline" href="/tools/protein/">
+              <a class="underline" href={withBase('/tools/protein/')}>
                 protein calculator
               </a>
               .

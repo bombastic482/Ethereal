@@ -1,0 +1,13 @@
+---
+/**
+ * Rewrites root-relative links and images in rendered Markdown so guide articles can link
+ * to "/tools/calories/" and still resolve correctly under a sub-path deployment.
+ * A no-op when the site is served from the domain root.
+ */
+import { BASE } from '@/lib/url';
+
+const html = await Astro.slots.render('default');
+const fixed = BASE ? html.replace(/\b(href|src)="\/(?!\/)/g, `$1="${BASE}/`) : html;
+---
+
+<Fragment set:html={fixed} />

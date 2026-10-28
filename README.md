@@ -27,7 +27,19 @@ Requires Node 22+ (see `.nvmrc`).
 
 ## Deploy
 
-Set `SITE_URL` to your canonical URL (used for canonicals, sitemap and Open Graph). See `.env.example`.
+The site is live on GitHub Pages at **https://bombastic482.github.io/Ethereal/** once Pages is switched on for the repository (one-time, see below). Every push to `main` rebuilds and redeploys it automatically.
+
+### Going live on GitHub Pages (one time)
+
+1. Repository **Settings → Pages → Build and deployment → Source**: choose **GitHub Actions**.
+2. GitHub Pages on the free plan requires a **public** repository: **Settings → General → Danger Zone → Change visibility → Public**. (The code contains no secrets; everything runs in the visitor's browser.)
+3. Open the **Actions** tab and re-run "Deploy to GitHub Pages" if it ran before the switch was flipped. The deployment URL is printed in the run summary.
+
+The build is base-path aware: under GitHub project pages it serves from `/Ethereal/`; on a custom domain or any other host it serves from `/`. Set `SITE_URL` (and `BASE_PATH` when not at the root) for canonical URLs, the sitemap and Open Graph. See `.env.example`.
+
+### Custom domain
+
+Add the domain under **Settings → Pages → Custom domain**, set the `SITE_URL` repository variable to it, and the next deploy builds with base `/`.
 
 | Host             | Setup                                                                                             |
 | ---------------- | ------------------------------------------------------------------------------------------------- |

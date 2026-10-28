@@ -1,8 +1,12 @@
+---
+import { withBase } from '@/lib/url';
+---
+
 <p class="text-subtle mt-10 text-xs leading-relaxed">
   Ethereal provides general educational information and estimates only. It is not medical advice and
   does not replace an assessment by a doctor or registered dietitian. Do not use it if you are under
   18, pregnant, or have a history of disordered eating without professional guidance.
-  <a class="underline" href="/disclaimer/">
+  <a class="underline" href={withBase('/disclaimer/')}>
     Read the full disclaimer.
   </a>
 </p>

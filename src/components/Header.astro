@@ -1,10 +1,12 @@
 ---
+import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
 import { NAV, SITE } from '@/lib/site';
 import ThemeToggle from './ThemeToggle.astro';
 
 const current = Astro.url.pathname;
-const isActive = (href: string) => current === href || (href !== '/' && current.startsWith(href));
+const isActive = (href: string) =>
+  current === withBase(href) || (href !== '/' && current.startsWith(withBase(href)));
 ---
 
 <header
@@ -13,7 +15,7 @@ const isActive = (href: string) => current === href || (href !== '/' && current.
 >
   <div class="container-page flex h-16 items-center justify-between gap-4">
     <a
-      href="/"
+      href={withBase('/')}
       class="flex items-center gap-2.5 font-bold tracking-tight"
       aria-label={`${SITE.name} home`}
     >
@@ -26,7 +28,7 @@ const isActive = (href: string) => current === href || (href !== '/' && current.
     <nav class="hidden items-center gap-1 md:flex" aria-label="Primary">
       {NAV.map((item) => (
         <a
-          href={item.href}
+          href={withBase(item.href)}
           class:list={[
             'rounded-full px-4 py-2 text-sm font-medium transition',
             isActive(item.href) ? 'bg-muted text-fg' : 'text-muted hover:text-fg hover:bg-muted',
@@ -39,7 +41,10 @@ const isActive = (href: string) => current === href || (href !== '/' && current.
     </nav>
 
     <div class="flex items-center gap-2">
-      <a href="/tools/calories/" class="btn btn-primary hidden h-10 px-4 text-sm sm:inline-flex">
+      <a
+        href={withBase('/tools/calories/')}
+        class="btn btn-primary hidden h-10 px-4 text-sm sm:inline-flex"
+      >
         Start free
         <Icon name="arrow" size={16} />
       </a>
@@ -61,7 +66,7 @@ const isActive = (href: string) => current === href || (href !== '/' && current.
     <div class="surface grid gap-1 p-2">
       {NAV.map((item) => (
         <a
-          href={item.href}
+          href={withBase(item.href)}
           class:list={[
             'rounded-xl px-4 py-3 text-sm font-medium',
             isActive(item.href) ? 'bg-muted' : 'hover:bg-muted',
@@ -70,7 +75,7 @@ const isActive = (href: string) => current === href || (href !== '/' && current.
           {item.label}
         </a>
       ))}
-      <a href="/tools/calories/" class="btn btn-primary mt-1">
+      <a href={withBase('/tools/calories/')} class="btn btn-primary mt-1">
         Start with the calorie calculator
       </a>
     </div>

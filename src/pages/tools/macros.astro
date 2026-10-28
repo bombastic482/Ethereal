@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import MacroCalculator from '@/components/calculators/MacroCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -45,7 +46,7 @@ const faq = [
     </li>
     <li>
       <strong>Protein</strong> decides how much of what you lose is muscle. See the{' '}
-      <a href="/tools/protein/">protein calculator</a> for a target on its own.
+      <a href={withBase('/tools/protein/')}>protein calculator</a> for a target on its own.
     </li>
     <li>
       <strong>Fibre</strong> and food quality decide how hungry you are.

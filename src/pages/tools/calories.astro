@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import CalorieCalculator from '@/components/calculators/CalorieCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -17,7 +18,7 @@ const faq = [
   },
   {
     q: 'Why am I not losing weight at this number?',
-    a: 'Formulas have a ±10% error and food logging is usually 20–30% under. Track your weekly average weight for three weeks. If it has not moved, cut 100–150 kcal or add 2,000 steps, then re-check. See our <a href="/guides/weight-loss-plateaus/">plateau guide</a>.',
+    a: `Formulas have a ±10% error and food logging is usually 20–30% under. Track your weekly average weight for three weeks. If it has not moved, cut 100–150 kcal or add 2,000 steps, then re-check. See our <a href="${withBase('/guides/weight-loss-plateaus/')}">plateau guide</a>.`,
   },
   {
     q: 'Should I eat back exercise calories?',
@@ -67,6 +68,6 @@ const faq = [
     Eat at your target for two to three weeks and weigh yourself daily, comparing weekly averages.
     If you are losing at roughly the expected pace, change nothing. If not, adjust by 100–150 kcal
     and repeat. Your target will need to drop slowly as you get lighter; the{' '}
-    <a href="/tools/timeline/">timeline tool</a> shows exactly how much.
+    <a href={withBase('/tools/timeline/')}>timeline tool</a> shows exactly how much.
   </p>
 </ToolLayout>

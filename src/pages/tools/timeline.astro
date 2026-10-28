@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import TimelineCalculator from '@/components/calculators/TimelineCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -51,7 +52,8 @@ const faq = [
     </li>
     <li>
       <strong>Expect noise.</strong> Compare weekly averages, not single weigh-ins. Our{' '}
-      <a href="/guides/reading-the-scale/">guide to the scale</a> explains what to ignore.
+      <a href={withBase('/guides/reading-the-scale/')}>guide to the scale</a> explains what to
+      ignore.
     </li>
     <li>
       <strong>Plan a diet break</strong> every 8–12 weeks for longer projects: two weeks at

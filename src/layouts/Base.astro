@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import '@/styles/global.css';
 import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
@@ -30,11 +31,11 @@ const { class: cls, ...seo } = Astro.props;
     <meta name="theme-color" content={SITE.themeColor} />
     <meta name="color-scheme" content="light dark" />
     <meta name="generator" content={Astro.generator} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('/favicon.ico')} sizes="32x32" />
+    <link rel="apple-touch-icon" href={withBase('/icons/apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('/manifest.webmanifest')} />
+    <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
     <Seo {...seo} />
     <script is:inline>
       // Theme is resolved before first paint to avoid a flash. Explicit choice wins, then system preference.

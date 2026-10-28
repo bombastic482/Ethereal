@@ -1,4 +1,6 @@
 ---
+import { absoluteUrl, withBase } from '@/lib/url';
+import BaseLinks from '@/components/BaseLinks.astro';
 import Disclaimer from '@/components/Disclaimer.astro';
 import ToolCard from '@/components/ToolCard.astro';
 import Base from '@/layouts/Base.astro';
@@ -30,26 +32,26 @@ const jsonLd = [
     datePublished: guide.data.pubDate.toISOString(),
     dateModified: (guide.data.updatedDate ?? guide.data.pubDate).toISOString(),
     author: { '@type': 'Organization', name: SITE.name },
-    publisher: { '@id': `${site}#org` },
-    mainEntityOfPage: new URL(path, site).toString(),
+    publisher: { '@id': `${absoluteUrl('/', site)}#org` },
+    mainEntityOfPage: absoluteUrl(path, site),
     articleSection: guide.data.category,
     keywords: guide.data.tags.join(', '),
   },
   {
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: site.toString() },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/', site) },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Guides',
-        item: new URL('/guides/', site).toString(),
+        item: absoluteUrl('/guides/', site),
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: guide.data.title,
-        item: new URL(path, site).toString(),
+        item: absoluteUrl(path, site),
       },
     ],
   },
@@ -67,11 +69,11 @@ const jsonLd = [
 >
   <div class="container-page pt-10 pb-16 sm:pt-14">
     <nav aria-label="Breadcrumb" class="text-subtle mb-6 flex items-center gap-2 text-sm">
-      <a class="hover:text-fg" href="/">
+      <a class="hover:text-fg" href={withBase('/')}>
         Home
       </a>
       <span aria-hidden="true">/</span>
-      <a class="hover:text-fg" href="/guides/">
+      <a class="hover:text-fg" href={withBase('/guides/')}>
         Guides
       </a>
       <span aria-hidden="true">/</span>
@@ -95,7 +97,9 @@ const jsonLd = [
           </p>
         </header>
         <div class="prose-ethereal mt-10">
-          <Content />
+          <BaseLinks>
+            <Content />
+          </BaseLinks>
         </div>
         <Disclaimer />
       </article>

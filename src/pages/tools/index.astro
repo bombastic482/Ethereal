@@ -2,6 +2,7 @@
 import ToolCard from '@/components/ToolCard.astro';
 import Base from '@/layouts/Base.astro';
 import { TOOLS } from '@/lib/tools';
+import { absoluteUrl } from '@/lib/url';
 
 const tools = [...TOOLS].sort((a, b) => a.order - b.order);
 const site = Astro.site ?? new URL('https://ethereal.pages.dev');
@@ -12,7 +13,7 @@ const jsonLd = [
       '@type': 'ListItem',
       position: i + 1,
       name: t.name,
-      url: new URL(`/tools/${t.slug}/`, site).toString(),
+      url: absoluteUrl(`/tools/${t.slug}/`, site),
     })),
   },
 ];

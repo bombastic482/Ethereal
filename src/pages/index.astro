@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import ToolCard from '@/components/ToolCard.astro';
 import Faq from '@/components/Faq.astro';
 import { Icon } from '@/components/ui/Icon';
@@ -78,10 +79,10 @@ const steps = [
           equations dietitians use, explained in plain English, running privately in your browser.
         </p>
         <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-          <a href="/tools/calories/" class="btn btn-primary h-12 px-6 text-base">
+          <a href={withBase('/tools/calories/')} class="btn btn-primary h-12 px-6 text-base">
             Calculate my calories <Icon name="arrow" size={18} />
           </a>
-          <a href="/tools/" class="btn btn-secondary h-12 px-6 text-base">
+          <a href={withBase('/tools/')} class="btn btn-secondary h-12 px-6 text-base">
             See all tools
           </a>
         </div>
@@ -99,7 +100,7 @@ const steps = [
     <div class="grid gap-4 md:grid-cols-3">
       {steps.map((s, i) => (
         <a
-          href={s.href}
+          href={withBase(s.href)}
           class="surface hover:shadow-glow animate-rise flex gap-4 p-5 transition hover:-translate-y-0.5"
           style={`animation-delay:${120 + i * 60}ms`}
         >
@@ -126,7 +127,10 @@ const steps = [
         </h2>
         <p class="text-muted mt-2">Eight calculators, one shared profile, zero fluff.</p>
       </div>
-      <a href="/tools/" class="text-brand-600 dark:text-brand-300 text-sm font-semibold">
+      <a
+        href={withBase('/tools/')}
+        class="text-brand-600 dark:text-brand-300 text-sm font-semibold"
+      >
         All tools →
       </a>
     </div>
@@ -198,14 +202,17 @@ const steps = [
         </h2>
         <p class="text-muted mt-2">Short, expert guides that make the numbers make sense.</p>
       </div>
-      <a href="/guides/" class="text-brand-600 dark:text-brand-300 text-sm font-semibold">
+      <a
+        href={withBase('/guides/')}
+        class="text-brand-600 dark:text-brand-300 text-sm font-semibold"
+      >
         All guides →
       </a>
     </div>
     <div class="mt-8 grid gap-4 md:grid-cols-3">
       {guides.map((g) => (
         <a
-          href={`/guides/${g.id}/`}
+          href={withBase(`/guides/${g.id}/`)}
           class="surface hover:shadow-glow flex flex-col gap-2 p-6 transition hover:-translate-y-0.5"
         >
           <span class="text-subtle text-xs font-semibold tracking-wide uppercase">

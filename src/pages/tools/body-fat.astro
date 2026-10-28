@@ -1,4 +1,5 @@
 ---
+import { withBase } from '@/lib/url';
 import BodyFatCalculator from '@/components/calculators/BodyFatCalculator';
 import ToolLayout from '@/layouts/ToolLayout.astro';
 
@@ -43,7 +44,8 @@ const faq = [
     The scale cannot tell muscle from fat. When you lose weight without resistance training, up to a
     quarter of the loss can be lean tissue. Tracking body fat alongside weight tells you whether
     your deficit is doing its job. Combine this tool with the{' '}
-    <a href="/tools/protein/">protein calculator</a> and read{' '}
-    <a href="/guides/strength-training-while-dieting/">why lifting while dieting</a> matters.
+    <a href={withBase('/tools/protein/')}>protein calculator</a> and read{' '}
+    <a href={withBase('/guides/strength-training-while-dieting/')}>why lifting while dieting</a>{' '}
+    matters.
   </p>
 </ToolLayout>
