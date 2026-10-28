@@ -11,6 +11,7 @@ const PAGES = [
   '/tools/timeline/',
   '/guides/',
   '/guides/calorie-deficit-explained/',
+  '/recipes/',
   '/start/',
   '/plan/',
   '/track/',

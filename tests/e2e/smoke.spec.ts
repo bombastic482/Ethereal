@@ -145,9 +145,12 @@ test('command palette jumps to pages and logs a food', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
   await page.goto('/plan/');
   await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
-  await page.keyboard.press('ControlOrMeta+k');
   const dialog = page.getByRole('dialog', { name: /quick launcher/i });
-  await expect(dialog).toBeVisible();
+  // The island's hydration marker clears a tick before its key listener mounts, so retry the shortcut.
+  await expect(async () => {
+    await page.keyboard.press('ControlOrMeta+k');
+    await expect(dialog).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 10_000 });
   await dialog.getByRole('combobox').fill('banana');
   await expect(dialog.getByRole('option').first()).toContainText(/Log Banana/i);
   await page.keyboard.press('Enter');

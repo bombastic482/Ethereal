@@ -1,0 +1,204 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { absoluteUrl, withBase } from '@/lib/url';
+import recipesRaw from '@/data/recipes.json';
+import foodsA from '@/data/foods-a.json';
+import foodsB from '@/data/foods-b.json';
+import foodsC from '@/data/foods-c.json';
+import foodsD from '@/data/foods-d.json';
+import foodsE from '@/data/foods-e.json';
+import foodsF from '@/data/foods-f.json';
+import type { Recipe } from '@/lib/recipes';
+import type { Food } from '@/lib/foods';
+
+const foods = new Map<string, Food>(
+  ([...foodsA, ...foodsB, ...foodsC, ...foodsD, ...foodsE, ...foodsF] as Food[]).map((f) => [
+    f.id,
+    f,
+  ]),
+);
+const recipes = (recipesRaw as Recipe[]).map((r) => {
+  const items = r.items.map((it) => {
+    const f = foods.get(it.foodId);
+    if (!f) throw new Error(`recipe ${r.id} references unknown food ${it.foodId}`);
+    return { name: f.name, grams: it.grams, per100g: f.per100g };
+  });
+  const t = { kcal: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 };
+  for (const it of items) {
+    const k = it.grams / 100;
+    t.kcal += it.per100g.kcal * k;
+    t.protein += it.per100g.protein * k;
+    t.carbs += it.per100g.carbs * k;
+    t.fat += it.per100g.fat * k;
+    t.fibre += (it.per100g.fibre ?? 0) * k;
+  }
+  return { ...r, items, totals: t };
+});
+
+const SECTIONS: Array<{ key: Recipe['meal']; title: string; blurb: string }> = [
+  {
+    key: 'breakfast',
+    title: 'Breakfasts',
+    blurb: 'Thirty-plus grams of protein before the day gets busy.',
+  },
+  { key: 'lunch', title: 'Lunches', blurb: 'Bowls, wraps and salads that hold you until dinner.' },
+  {
+    key: 'dinner',
+    title: 'Dinners',
+    blurb: 'Proper plates from around the world, mostly under 650 kcal.',
+  },
+  { key: 'snack', title: 'Snacks', blurb: 'Ten grams of protein or more, under 250 kcal.' },
+];
+const DIET: Record<Recipe['diet'], string> = {
+  vegan: 'Vegan',
+  vegetarian: 'Vegetarian',
+  pescatarian: 'Pescatarian',
+  omnivore: '',
+};
+const site = Astro.site;
+const r0 = Math.round;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Ethereal starter recipes',
+    numberOfItems: recipes.length,
+    itemListElement: recipes.map((r, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Recipe',
+        name: r.name,
+        url: absoluteUrl(`/recipes/#${r.id}`, site),
+        recipeCategory: r.meal,
+        totalTime: `PT${r.minutes}M`,
+        recipeYield: '1 serving',
+        recipeIngredient: r.items.map((it) => `${it.grams} g ${it.name}`),
+        recipeInstructions: r.method,
+        keywords: r.tags.join(', '),
+        ...(r.diet === 'vegan' || r.diet === 'vegetarian'
+          ? {
+              suitableForDiet: `https://schema.org/${r.diet === 'vegan' ? 'Vegan' : 'Vegetarian'}Diet`,
+            }
+          : {}),
+        nutrition: {
+          '@type': 'NutritionInformation',
+          servingSize: '1 serving',
+          calories: `${r0(r.totals.kcal)} kcal`,
+          proteinContent: `${r0(r.totals.protein)} g`,
+          carbohydrateContent: `${r0(r.totals.carbs)} g`,
+          fatContent: `${r0(r.totals.fat)} g`,
+          fiberContent: `${r0(r.totals.fibre)} g`,
+        },
+      },
+    })),
+  },
+];
+const vegCount = recipes.filter((r) => r.diet === 'vegan' || r.diet === 'vegetarian').length;
+const quickCount = recipes.filter((r) => r.minutes <= 15).length;
+---
+
+<Base
+  title={`${recipes.length} High-Protein Recipes for Weight Loss`}
+  description={`${recipes.length} simple, high-protein recipes with calories and macros computed from the same database as the diary. Every one can be logged in a tap. ${vegCount} vegetarian or vegan, ${quickCount} ready in 15 minutes.`}
+  path="/recipes/"
+  jsonLd={jsonLd}
+>
+  <div class="container-page pt-12 pb-16 sm:pt-16">
+    <header class="max-w-2xl">
+      <p class="text-brand-700 dark:text-brand-300 text-sm font-semibold tracking-wide uppercase">
+        Starter recipes
+      </p>
+      <h1 class="font-display mt-2 text-5xl leading-[0.95] tracking-tight sm:text-6xl">
+        {recipes.length} meals that make a deficit easy
+      </h1>
+      <p class="text-muted mt-4 text-lg">
+        Every recipe is built from foods in the Ethereal database, so the numbers below are exactly
+        what lands in your diary. Meals carry at least 25 g of protein, snacks at least 10 g.{' '}
+        {vegCount}
+        are vegetarian or vegan and {quickCount} take fifteen minutes or less.
+      </p>
+      <p class="text-muted mt-3 text-sm">
+        On{' '}
+        <a
+          class="text-brand-700 dark:text-brand-300 font-semibold underline underline-offset-2"
+          href={withBase('/today/')}
+        >
+          Today
+        </a>
+        , open Add → Meals to log any of these in one tap, scale the portion, or save it as your own
+        meal and edit it.
+      </p>
+    </header>
+
+    <nav aria-label="Recipe sections" class="mt-8 flex flex-wrap gap-2">
+      {SECTIONS.map((s) => (
+        <a class="chip" href={`#${s.key}`}>
+          {s.title} · {recipes.filter((r) => r.meal === s.key).length}
+        </a>
+      ))}
+    </nav>
+
+    {SECTIONS.map((s) => {
+      const list = recipes.filter((r) => r.meal === s.key);
+      return (
+        <section id={s.key} class="mt-14 scroll-mt-24" aria-labelledby={`${s.key}-h`}>
+          <h2 id={`${s.key}-h`} class="font-display text-3xl tracking-tight sm:text-4xl">
+            {s.title}
+          </h2>
+          <p class="text-muted mt-2">{s.blurb}</p>
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+            {list.map((r) => (
+              <li id={r.id} class="surface scroll-mt-24 p-5">
+                <article>
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="text-lg font-bold tracking-tight">{r.name}</h3>
+                    <span class="text-subtle tabular shrink-0 text-xs">{r.minutes} min</span>
+                  </div>
+                  <p class="text-subtle mt-1 text-xs">
+                    {r0(r.totals.kcal)} kcal · P {r0(r.totals.protein)} g · C {r0(r.totals.carbs)} g
+                    · F {r0(r.totals.fat)} g · Fibre {r0(r.totals.fibre)} g
+                    {DIET[r.diet] ? ` · ${DIET[r.diet]}` : ''}
+                  </p>
+                  <ul class="text-muted mt-3 grid gap-1 text-sm">
+                    {r.items.map((it) => (
+                      <li class="flex justify-between gap-3">
+                        <span>{it.name}</span>
+                        <span class="tabular text-subtle shrink-0">{it.grams} g</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="mt-3 text-sm leading-relaxed">{r.method}</p>
+                  <div class="mt-4 flex flex-wrap items-center gap-2">
+                    {r.tags.map((t) => (
+                      <span class="text-subtle bg-muted rounded-full px-2 py-0.5 text-xs">{t}</span>
+                    ))}
+                    <a
+                      class="btn btn-primary ml-auto h-9 px-3 text-sm"
+                      href={withBase(`/today/#recipe=${r.id}`)}
+                      aria-label={`Log ${r.name} on Today`}
+                    >
+                      Log it <Icon name="arrow" size={14} />
+                    </a>
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    })}
+
+    <section class="surface mt-14 p-6 sm:p-8">
+      <h2 class="text-xl font-bold tracking-tight">How the numbers are computed</h2>
+      <p class="text-muted mt-2 text-sm leading-relaxed">
+        Each ingredient is a row in the Ethereal food database with energy and macros per 100 g,
+        taken from national composition tables and manufacturer labels. Totals are the ingredient
+        sums for one serving, rounded to the nearest kcal and gram. Cooking changes weight, not
+        energy, so grams refer to the state named in the ingredient (cooked rice, raw chicken).
+        Portion sizes are a starting point: scale them on Today to fit what you have left.
+      </p>
+    </section>
+  </div>
+</Base>

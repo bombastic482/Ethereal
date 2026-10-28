@@ -112,9 +112,48 @@ test.describe('saved meals and sharing', () => {
     await page.getByRole('region', { name: 'Lunch' }).getByRole('button', { name: 'Add' }).click();
     await dialog.getByRole('radio', { name: 'Meals' }).check();
     await expect(dialog.getByText('My usual breakfast')).toBeVisible();
-    await dialog.getByRole('radio', { name: 'Double' }).check();
-    await dialog.getByRole('button', { name: 'Log' }).click();
+    await dialog
+      .getByRole('radiogroup')
+      .filter({ hasText: 'As saved' })
+      .getByRole('radio', { name: 'Double' })
+      .check();
+    await dialog.getByRole('button', { name: 'Log', exact: true }).click();
     await expect(page.getByRole('region', { name: 'Lunch' }).getByText(/^Oats/)).toBeVisible();
+  });
+
+  test('a starter recipe can be logged from the Meals tab and from the recipes page', async ({
+    page,
+  }) => {
+    await ready(page, '/today/');
+    await page.getByRole('region', { name: 'Dinner' }).getByRole('button', { name: 'Add' }).click();
+    const dialog = page.getByRole('dialog');
+    // The sheet must cover the viewport, above the sticky header (a transformed ancestor would trap it).
+    const box = (await dialog.boundingBox())!;
+    expect(box.y).toBe(0);
+    expect(box.x).toBe(0);
+    await dialog.getByRole('radio', { name: 'Meals' }).check();
+    const recipes = dialog.getByRole('region', { name: 'Starter recipes' });
+    await expect(recipes.getByRole('button', { name: /^Log / }).first()).toBeVisible();
+    // Dinner slot preselects dinners; the 15-minute filter narrows the list.
+    await recipes.getByRole('button', { name: 'Ready in 15 minutes or less' }).click();
+    await recipes.getByLabel('Find a recipe').fill('teriyaki');
+    await recipes.getByRole('button', { name: /^Seitan teriyaki/ }).click();
+    await expect(recipes.getByText(/Save as my meal/)).toBeVisible();
+    await recipes.getByRole('button', { name: 'Log Seitan teriyaki udon stir-fry' }).click();
+    await expect(dialog).toHaveCount(0);
+    const dinner = page.getByRole('region', { name: 'Dinner' });
+    await expect(dinner.getByText(/seitan/i).first()).toBeVisible();
+    await expect(dinner.getByText(/udon/i).first()).toBeVisible();
+
+    // Deep link from the public recipes page opens the sheet on that recipe.
+    await ready(page, '/recipes/');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/meals that make/);
+    await page.getByRole('link', { name: 'Log Greek yogurt berry bowl on Today' }).click();
+    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+    const sheet = page.getByRole('dialog');
+    await expect(sheet.getByRole('button', { name: 'Log Greek yogurt berry bowl' })).toBeVisible();
+    await sheet.getByRole('button', { name: 'Log Greek yogurt berry bowl' }).click();
+    await expect(page.getByText(/blueberr/i).first()).toBeVisible();
   });
 
   test('tracker offers a share card once there is a trend', async ({ page }) => {

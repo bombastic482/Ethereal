@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { Layer } from '../ui/Layer';
 import { ACTIVITIES, exerciseKcal, stepsKcal } from '@/lib/calc/exercise';
 import {
   MEALS,
@@ -7,6 +8,7 @@ import {
   suggestFoods,
   sum,
   summariseDay,
+  type Diet,
   type FoodEntry,
   type Meal,
   type Nutrients,
@@ -44,6 +46,7 @@ import { resolveQuickEntry, type ResolvedItem } from '@/lib/quick-parse';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { confetti, haptic, onSwipe } from '@/lib/fx';
+import { StarterRecipes } from './StarterRecipes';
 import { withBase } from '@/lib/url';
 import { Bar } from '../ui/Bar';
 import { BarcodeScanner } from '../ui/BarcodeScanner';
@@ -123,6 +126,15 @@ function TodayScreenInner() {
   const today = todayIso();
   const [date, setDate] = useState(today);
   const [adding, setAdding] = useState<Meal | null>(null);
+  const [focusRecipe, setFocusRecipe] = useState<string | null>(null);
+  // Deep link from the recipes page: /today/#recipe=<id> opens the sheet on that recipe.
+  useEffect(() => {
+    const m = /#recipe=([a-z0-9-]+)/.exec(location.hash);
+    if (!m) return;
+    setFocusRecipe(m[1]!);
+    setAdding(mealForTime(new Date().getHours()));
+    history.replaceState(null, '', location.pathname + location.search);
+  }, []);
   const [exAdding, setExAdding] = useState(false);
   const [dbReady, setDbReady] = useState(false);
   useEffect(() => {
@@ -540,7 +552,17 @@ function TodayScreenInner() {
       </div>
 
       {adding && (
-        <AddFoodSheet date={date} meal={adding} diet={prefs.diet} onClose={() => setAdding(null)} />
+        <AddFoodSheet
+          date={date}
+          meal={adding}
+          diet={prefs.diet}
+          remainingKcal={day.remaining.kcal}
+          focusRecipe={focusRecipe}
+          onClose={() => {
+            setAdding(null);
+            setFocusRecipe(null);
+          }}
+        />
       )}
       {exAdding && (
         <AddExerciseSheet
@@ -662,14 +684,18 @@ function AddFoodSheet({
   date,
   meal,
   diet,
+  remainingKcal,
+  focusRecipe,
   onClose,
 }: {
   date: string;
   meal: Meal;
-  diet: string;
+  diet: Diet;
+  remainingKcal: number;
+  focusRecipe: string | null;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<Tab>('search');
+  const [tab, setTab] = useState<Tab>(focusRecipe ? 'meals' : 'search');
   const [q, setQ] = useState('');
   const [local, setLocal] = useState<Food[]>([]);
   const [remote, setRemote] = useState<OffProduct[] | null>(null);
@@ -765,196 +791,208 @@ function AddFoodSheet({
   };
 
   return (
-    <div
-      class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Add food to ${meal}`}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div class="bg-elevated flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl shadow-2xl sm:rounded-3xl">
-        <header class="border-line flex items-center justify-between gap-3 border-b px-5 py-4">
-          <h2 class="text-lg font-bold tracking-tight">
-            Add to {MEALS.find((m) => m.key === meal)?.label.toLowerCase()}
-          </h2>
-          <button
-            type="button"
-            class="btn btn-ghost h-9 w-9 rounded-full p-0"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <Icon name="close" size={18} />
-          </button>
-        </header>
-        {picked ? (
-          <PortionPicker
-            candidate={picked}
-            onBack={() => setPicked(null)}
-            onAdd={(grams) => {
-              addFood({
-                date,
-                meal,
-                name: picked.name,
-                ...(picked.brand ? { brand: picked.brand } : {}),
-                grams,
-                per100g: picked.per100g,
-                source: picked.source,
-                ...(picked.foodId ? { foodId: picked.foodId } : {}),
-                ...(picked.barcode ? { barcode: picked.barcode } : {}),
-                time: minutesNow(),
-              });
-              onClose();
-            }}
-          />
-        ) : (
-          <>
-            <div class="px-5 pt-4">
-              <Segmented
-                name="add-tab"
-                options={[
-                  { value: 'search', label: 'Search' },
-                  { value: 'scan', label: 'Scan' },
-                  { value: 'meals', label: 'Meals' },
-                  { value: 'quick', label: 'Quick add' },
-                  { value: 'custom', label: 'My foods' },
-                ]}
-                value={tab}
-                onChange={setTab}
-              />
-            </div>
-            <div class="min-h-0 flex-1 overflow-y-auto px-5 pb-6">
-              {tab === 'search' && (
-                <div class="grid gap-3 pt-4">
-                  <input
-                    type="search"
-                    class="field"
-                    placeholder="Search 1,500+ foods, chains and brands, or millions of products…"
-                    value={q}
-                    onInput={(e) => setQ((e.target as HTMLInputElement).value)}
-                    autoFocus
-                    aria-label="Search foods"
-                  />
-                  {!q && (
-                    <>
-                      {quickLists.favs.length > 0 && (
-                        <CandidateList
-                          title="Favourites"
-                          items={quickLists.favs}
-                          onPick={setPicked}
-                        />
-                      )}
-                      {quickLists.recents.length > 0 && (
-                        <CandidateList
-                          title="Recent"
-                          items={quickLists.recents}
-                          onPick={setPicked}
-                        />
-                      )}
-                      {quickLists.favs.length + quickLists.recents.length === 0 && (
-                        <p class="text-subtle text-sm">
-                          Try "chicken", "oats", "greek yogurt" or a brand name. Favourites and
-                          recent foods will appear here.
-                        </p>
-                      )}
-                    </>
-                  )}
-                  {q && (
-                    <CandidateList
-                      title={`Built-in foods${local.length ? ` · ${local.length}` : ''}`}
-                      items={local.map(fromFood)}
-                      onPick={setPicked}
-                      empty="No built-in match."
+    <Layer>
+      <div
+        class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Add food to ${meal}`}
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <div class="bg-elevated flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl shadow-2xl sm:rounded-3xl">
+          <header class="border-line flex items-center justify-between gap-3 border-b px-5 py-4">
+            <h2 class="text-lg font-bold tracking-tight">
+              Add to {MEALS.find((m) => m.key === meal)?.label.toLowerCase()}
+            </h2>
+            <button
+              type="button"
+              class="btn btn-ghost h-9 w-9 rounded-full p-0"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <Icon name="close" size={18} />
+            </button>
+          </header>
+          {picked ? (
+            <PortionPicker
+              candidate={picked}
+              onBack={() => setPicked(null)}
+              onAdd={(grams) => {
+                addFood({
+                  date,
+                  meal,
+                  name: picked.name,
+                  ...(picked.brand ? { brand: picked.brand } : {}),
+                  grams,
+                  per100g: picked.per100g,
+                  source: picked.source,
+                  ...(picked.foodId ? { foodId: picked.foodId } : {}),
+                  ...(picked.barcode ? { barcode: picked.barcode } : {}),
+                  time: minutesNow(),
+                });
+                onClose();
+              }}
+            />
+          ) : (
+            <>
+              <div class="px-5 pt-4">
+                <Segmented
+                  name="add-tab"
+                  options={[
+                    { value: 'search', label: 'Search' },
+                    { value: 'scan', label: 'Scan' },
+                    { value: 'meals', label: 'Meals' },
+                    { value: 'quick', label: 'Quick add' },
+                    { value: 'custom', label: 'My foods' },
+                  ]}
+                  value={tab}
+                  onChange={setTab}
+                />
+              </div>
+              <div class="relative min-h-0 flex-1 overflow-y-auto px-5 pb-6" data-scroll>
+                {tab === 'search' && (
+                  <div class="grid gap-3 pt-4">
+                    <input
+                      type="search"
+                      class="field"
+                      placeholder="Search 1,500+ foods, chains and brands, or millions of products…"
+                      value={q}
+                      onInput={(e) => setQ((e.target as HTMLInputElement).value)}
+                      autoFocus
+                      aria-label="Search foods"
                     />
-                  )}
-                  {q.trim().length >= 3 && (
-                    <div>
-                      <p class="text-subtle mb-2 text-xs font-semibold tracking-wide uppercase">
-                        Open Food Facts · packaged products
-                      </p>
-                      {remoteState === 'loading' && <p class="text-subtle text-sm">Searching…</p>}
-                      {remoteState === 'offline' && (
-                        <p class="text-subtle text-sm">
-                          You're offline; built-in foods still work.
-                        </p>
-                      )}
-                      {remoteState === 'error' && (
-                        <p class="text-sm text-rose-700 dark:text-rose-300">
-                          Open Food Facts didn't respond. Try again in a moment.
-                        </p>
-                      )}
-                      {remote && remote.length === 0 && (
-                        <p class="text-subtle text-sm">No products found.</p>
-                      )}
-                      {remote && remote.length > 0 && (
-                        <CandidateList items={remote.map(fromOff)} onPick={setPicked} />
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {tab === 'scan' && (
-                <div class="grid gap-4 pt-4">
-                  <BarcodeScanner onDetected={onBarcode} onClose={() => setTab('search')} />
-                  <div class="flex items-end gap-2">
-                    <div class="flex-1">
-                      <label class="label" for="bc-text">
-                        Or type the barcode
-                      </label>
-                      <input
-                        id="bc-text"
-                        class="field"
-                        inputMode="numeric"
-                        value={barcodeText}
-                        onInput={(e) => setBarcodeText((e.target as HTMLInputElement).value)}
-                        placeholder="e.g. 5000159484695"
+                    {!q && (
+                      <>
+                        {quickLists.favs.length > 0 && (
+                          <CandidateList
+                            title="Favourites"
+                            items={quickLists.favs}
+                            onPick={setPicked}
+                          />
+                        )}
+                        {quickLists.recents.length > 0 && (
+                          <CandidateList
+                            title="Recent"
+                            items={quickLists.recents}
+                            onPick={setPicked}
+                          />
+                        )}
+                        {quickLists.favs.length + quickLists.recents.length === 0 && (
+                          <p class="text-subtle text-sm">
+                            Try "chicken", "oats", "greek yogurt" or a brand name. Favourites and
+                            recent foods will appear here.
+                          </p>
+                        )}
+                      </>
+                    )}
+                    {q && (
+                      <CandidateList
+                        title={`Built-in foods${local.length ? ` · ${local.length}` : ''}`}
+                        items={local.map(fromFood)}
+                        onPick={setPicked}
+                        empty="No built-in match."
                       />
-                    </div>
-                    <button
-                      type="button"
-                      class="btn btn-secondary h-[46px]"
-                      onClick={() => barcodeText && onBarcode(barcodeText.trim())}
-                    >
-                      Look up
-                    </button>
+                    )}
+                    {q.trim().length >= 3 && (
+                      <div>
+                        <p class="text-subtle mb-2 text-xs font-semibold tracking-wide uppercase">
+                          Open Food Facts · packaged products
+                        </p>
+                        {remoteState === 'loading' && <p class="text-subtle text-sm">Searching…</p>}
+                        {remoteState === 'offline' && (
+                          <p class="text-subtle text-sm">
+                            You're offline; built-in foods still work.
+                          </p>
+                        )}
+                        {remoteState === 'error' && (
+                          <p class="text-sm text-rose-700 dark:text-rose-300">
+                            Open Food Facts didn't respond. Try again in a moment.
+                          </p>
+                        )}
+                        {remote && remote.length === 0 && (
+                          <p class="text-subtle text-sm">No products found.</p>
+                        )}
+                        {remote && remote.length > 0 && (
+                          <CandidateList items={remote.map(fromOff)} onPick={setPicked} />
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {scanMsg && <p class="text-muted text-sm">{scanMsg}</p>}
-                </div>
-              )}
-              {tab === 'quick' && (
-                <QuickAdd
-                  onAdd={(name, n) => {
-                    addFood({
-                      date,
-                      meal,
-                      name,
-                      grams: 100,
-                      per100g: n,
-                      source: 'quick',
-                      time: minutesNow(),
-                    });
-                    onClose();
-                  }}
-                />
-              )}
-              {tab === 'meals' && (
-                <SavedMeals
-                  meals={diary.meals ?? []}
-                  onLog={(saved, portion) => {
-                    haptic();
-                    logSavedMeal(saved, date, meal, portion, minutesNow());
-                    onClose();
-                  }}
-                />
-              )}
-              {tab === 'custom' && (
-                <CustomFoods foods={diary.customFoods} onPick={(c) => setPicked(fromCustom(c))} />
-              )}
-            </div>
-          </>
-        )}
+                )}
+                {tab === 'scan' && (
+                  <div class="grid gap-4 pt-4">
+                    <BarcodeScanner onDetected={onBarcode} onClose={() => setTab('search')} />
+                    <div class="flex items-end gap-2">
+                      <div class="flex-1">
+                        <label class="label" for="bc-text">
+                          Or type the barcode
+                        </label>
+                        <input
+                          id="bc-text"
+                          class="field"
+                          inputMode="numeric"
+                          value={barcodeText}
+                          onInput={(e) => setBarcodeText((e.target as HTMLInputElement).value)}
+                          placeholder="e.g. 5000159484695"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        class="btn btn-secondary h-[46px]"
+                        onClick={() => barcodeText && onBarcode(barcodeText.trim())}
+                      >
+                        Look up
+                      </button>
+                    </div>
+                    {scanMsg && <p class="text-muted text-sm">{scanMsg}</p>}
+                  </div>
+                )}
+                {tab === 'quick' && (
+                  <QuickAdd
+                    onAdd={(name, n) => {
+                      addFood({
+                        date,
+                        meal,
+                        name,
+                        grams: 100,
+                        per100g: n,
+                        source: 'quick',
+                        time: minutesNow(),
+                      });
+                      onClose();
+                    }}
+                  />
+                )}
+                {tab === 'meals' && (
+                  <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
+                    <SavedMeals
+                      meals={diary.meals ?? []}
+                      onLog={(saved, portion) => {
+                        haptic();
+                        logSavedMeal(saved, date, meal, portion, minutesNow());
+                        onClose();
+                      }}
+                    />
+                    <StarterRecipes
+                      date={date}
+                      slot={meal}
+                      diet={diet}
+                      remainingKcal={remainingKcal}
+                      {...(focusRecipe ? { focusId: focusRecipe } : {})}
+                      onLogged={() => onClose()}
+                    />
+                  </div>
+                )}
+                {tab === 'custom' && (
+                  <CustomFoods foods={diary.customFoods} onPick={(c) => setPicked(fromCustom(c))} />
+                )}
+              </div>
+            </>
+          )}
+        </div>
+        <span class="sr-only">{diet}</span>
       </div>
-      <span class="sr-only">{diet}</span>
-    </div>
+    </Layer>
   );
 }
 
@@ -1365,65 +1403,67 @@ function AddExerciseSheet({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
   return (
-    <div
-      class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-6"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Add exercise"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div class="bg-elevated w-full max-w-lg rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-6">
-        <header class="flex items-center justify-between">
-          <h2 class="text-lg font-bold tracking-tight">Add exercise</h2>
-          <button
-            type="button"
-            class="btn btn-ghost h-9 w-9 rounded-full p-0"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <Icon name="close" size={18} />
-          </button>
-        </header>
-        <div class="mt-4 grid gap-4">
-          <SelectField
-            id="ex-act"
-            label="Activity"
-            value={key}
-            options={ACTIVITIES.map((a) => ({
-              value: a.key,
-              label: `${a.label} · ${a.met} MET`,
-              description: a.group,
-            }))}
-            onChange={setKey}
-          />
-          <NumberField
-            id="ex-min"
-            label="Minutes"
-            value={minutes}
-            min={1}
-            max={600}
-            dp={0}
-            suffix="min"
-            onChange={setMinutes}
-          />
-          <p class="text-muted text-sm">
-            ≈ <strong class="text-fg tabular">{kcal} kcal</strong> at your weight. Estimates from
-            MET tables run high; that's why exercise isn't added to your target unless you turn it
-            on in settings.
-          </p>
-          <button
-            type="button"
-            class="btn btn-primary"
-            onClick={() => {
-              addExercise({ date, activity: key, minutes, kcal });
-              onClose();
-            }}
-          >
-            <Icon name="check" size={16} /> Log {minutes} min
-          </button>
+    <Layer>
+      <div
+        class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-6"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Add exercise"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <div class="bg-elevated w-full max-w-lg rounded-t-3xl p-5 shadow-2xl sm:rounded-3xl sm:p-6">
+          <header class="flex items-center justify-between">
+            <h2 class="text-lg font-bold tracking-tight">Add exercise</h2>
+            <button
+              type="button"
+              class="btn btn-ghost h-9 w-9 rounded-full p-0"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <Icon name="close" size={18} />
+            </button>
+          </header>
+          <div class="mt-4 grid gap-4">
+            <SelectField
+              id="ex-act"
+              label="Activity"
+              value={key}
+              options={ACTIVITIES.map((a) => ({
+                value: a.key,
+                label: `${a.label} · ${a.met} MET`,
+                description: a.group,
+              }))}
+              onChange={setKey}
+            />
+            <NumberField
+              id="ex-min"
+              label="Minutes"
+              value={minutes}
+              min={1}
+              max={600}
+              dp={0}
+              suffix="min"
+              onChange={setMinutes}
+            />
+            <p class="text-muted text-sm">
+              ≈ <strong class="text-fg tabular">{kcal} kcal</strong> at your weight. Estimates from
+              MET tables run high; that's why exercise isn't added to your target unless you turn it
+              on in settings.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={() => {
+                addExercise({ date, activity: key, minutes, kcal });
+                onClose();
+              }}
+            >
+              <Icon name="check" size={16} /> Log {minutes} min
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Layer>
   );
 }
 
@@ -1460,7 +1500,7 @@ function SavedMeals({
         value={String(portion)}
         onChange={(v) => setPortion(Number(v))}
       />
-      <ul class="grid gap-2">
+      <ul class="grid grid-cols-[minmax(0,1fr)] gap-2">
         {meals.map((saved) => {
           const n = sum(saved.items.map((it) => scale(it.per100g, it.grams * portion)));
           return (

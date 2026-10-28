@@ -16,7 +16,9 @@ import foodsC from '@/data/foods-c.json';
 import foodsD from '@/data/foods-d.json';
 import foodsE from '@/data/foods-e.json';
 import foodsF from '@/data/foods-f.json';
+import recipes from '@/data/recipes.json';
 
+const recipeCount = recipes.length;
 const foodCount =
   foodsA.length + foodsB.length + foodsC.length + foodsD.length + foodsE.length + foodsF.length;
 const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
@@ -252,12 +254,25 @@ const steps = [
           'plus millions of packaged products via Open Food Facts',
         ],
         [String(guideCount), 'evidence-based guides', 'written to be read, not to rank'],
-        ['8', 'calculators', 'every formula documented'],
+        [
+          String(recipeCount),
+          'high-protein recipes',
+          'built from the database, logged in a tap',
+          '/recipes/',
+        ],
         ['0', 'trackers, ads, accounts', 'and nothing you type leaves your device'],
-      ].map(([n, label, sub]) => (
+      ].map(([n, label, sub, href]) => (
         <div>
           <p class="font-display text-5xl leading-none tracking-tight">{n}</p>
-          <p class="mt-2 font-semibold">{label}</p>
+          <p class="mt-2 font-semibold">
+            {href ? (
+              <a class="hover:text-brand-600 dark:hover:text-brand-300" href={withBase(href)}>
+                {label} →
+              </a>
+            ) : (
+              label
+            )}
+          </p>
           <p class="text-subtle mt-1 text-sm">{sub}</p>
         </div>
       ))}

@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "og": "node scripts/og.mjs",
     "validate:foods": "node scripts/validate-foods.mjs",
-    "verify": "npm run validate:foods && npm run check && npm run test && npm run build"
+    "validate:recipes": "node scripts/validate-recipes.mjs",
+    "verify": "npm run validate:foods && npm run validate:recipes && npm run check && npm run test && npm run build"
   },
   "engines": {
     "node": ">=20"
