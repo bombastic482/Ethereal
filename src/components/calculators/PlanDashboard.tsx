@@ -13,6 +13,7 @@ import { useProfile } from '@/lib/profile';
 import { confetti, haptic } from '@/lib/fx';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { DonutChart } from '../ui/DonutChart';
 import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
@@ -29,7 +30,7 @@ const STATUS_STYLE: Record<string, string> = {
   'insufficient-data': 'bg-muted text-muted',
 };
 
-export default function PlanDashboard() {
+function PlanDashboardInner() {
   const [profile] = useProfile();
   const [plan, patchPlan] = planStore.use();
   const [log] = logStore.use();
@@ -646,5 +647,13 @@ export default function PlanDashboard() {
         </section>
       )}
     </div>
+  );
+}
+
+export default function PlanDashboard() {
+  return (
+    <ErrorBoundary area="your plan">
+      <PlanDashboardInner />
+    </ErrorBoundary>
   );
 }

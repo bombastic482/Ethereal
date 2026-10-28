@@ -48,6 +48,7 @@ import { withBase } from '@/lib/url';
 import { Bar } from '../ui/Bar';
 import { BarcodeScanner } from '../ui/BarcodeScanner';
 import { Callout } from '../ui/Callout';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { CountUp } from '../ui/CountUp';
 import { Icon } from '../ui/Icon';
 import { NumberField } from '../ui/NumberField';
@@ -114,7 +115,7 @@ const fmtDay = (iso: string, today: string) => {
   });
 };
 
-export default function TodayScreen() {
+function TodayScreenInner() {
   const [profile] = useProfile();
   const [plan] = planStore.use();
   const [diary] = diaryStore.use();
@@ -1595,5 +1596,13 @@ function QuickEntry({ date }: { date: string }) {
         </div>
       )}
     </section>
+  );
+}
+
+export default function TodayScreen() {
+  return (
+    <ErrorBoundary area="Today">
+      <TodayScreenInner />
+    </ErrorBoundary>
   );
 }

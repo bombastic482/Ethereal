@@ -1,0 +1,215 @@
+---
+/** Animated explainer: noisy daily weights, the smoothed trend drawing itself, and the decision point. */
+import { withBase } from '@/lib/url';
+const pts = Array.from({ length: 28 }, (_, i) => ({
+  x: 40 + i * 20,
+  y: 150 - i * 2.6 + Math.sin(i * 1.7) * 9,
+}));
+const trend = pts.map((p, i) => ({ x: p.x, y: 150 - i * 2.6 }));
+const path = trend.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+---
+
+<section class="container-page mt-24" aria-labelledby="how">
+  <div class="surface-muted grid gap-10 p-8 sm:p-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center">
+    <div>
+      <h2 id="how" class="font-display text-4xl tracking-tight">
+        The scale is noisy. The trend is honest.
+      </h2>
+      <p class="text-muted mt-4 leading-relaxed">
+        Every weigh-in carries a kilo of water, salt and timing. Ethereal smooths them into a trend
+        line, then every two weeks compares that trend with your plan and tells you the one number
+        to change.
+      </p>
+      <ol class="mt-6 grid gap-3 text-sm">
+        {[
+          ['Weigh in daily', 'Dots. Noisy by nature.'],
+          ['Watch the trend', 'The line that actually moves.'],
+          ['Decide every two weeks', 'Keep, nudge down, or nudge up. Capped and safe.'],
+        ].map(([t, d], i) => (
+          <li class="flex gap-3">
+            <span class="font-display text-brand-700 dark:text-brand-300 w-6 text-2xl leading-none">
+              {i + 1}
+            </span>
+            <span>
+              <span class="block font-semibold">{t}</span>
+              <span class="text-muted">{d}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <a href={withBase('/start/')} class="btn btn-primary mt-8 text-sm">
+        Start the two-week check
+      </a>
+    </div>
+    <figure class="hiw" aria-hidden="true">
+      <svg viewBox="0 0 620 220" class="h-auto w-full">
+        <defs>
+          <linearGradient id="hiw-area" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="var(--color-brand-500)" stop-opacity="0.3"></stop>
+            <stop offset="1" stop-color="var(--color-brand-500)" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        {[60, 100, 140, 180].map((y) => (
+          <line x1="30" x2="600" y1={y} y2={y} stroke="var(--border)" stroke-dasharray="2 5"></line>
+        ))}
+        <path
+          d={`${path} L${trend[trend.length - 1]!.x},200 L${trend[0]!.x},200 Z`}
+          fill="url(#hiw-area)"
+          class="hiw-area"
+        ></path>
+        {pts.map((p, i) => (
+          <circle
+            cx={p.x}
+            cy={p.y}
+            r="3.5"
+            fill="var(--fg-subtle)"
+            opacity="0.55"
+            class="hiw-dot"
+            style={`animation-delay:${i * 60}ms`}
+          ></circle>
+        ))}
+        <path
+          d={path}
+          fill="none"
+          stroke="var(--color-brand-600)"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="hiw-line"
+        ></path>
+        <g class="hiw-flag" style="animation-delay:2.4s">
+          <line
+            x1={trend[13]!.x}
+            x2={trend[13]!.x}
+            y1="40"
+            y2="200"
+            stroke="var(--color-accent-500)"
+            stroke-dasharray="4 4"
+            stroke-width="1.5"
+          ></line>
+          <rect
+            x={trend[13]!.x - 44}
+            y="22"
+            width="88"
+            height="22"
+            rx="11"
+            fill="var(--color-accent-500)"
+          ></rect>
+          <text
+            x={trend[13]!.x}
+            y="37"
+            text-anchor="middle"
+            font-size="11"
+            font-weight="700"
+            fill="#1d1a16"
+          >
+            Week 2 check
+          </text>
+        </g>
+        <g class="hiw-flag" style="animation-delay:3.2s">
+          <line
+            x1={trend[27]!.x}
+            x2={trend[27]!.x}
+            y1="40"
+            y2="200"
+            stroke="var(--color-accent-500)"
+            stroke-dasharray="4 4"
+            stroke-width="1.5"
+          ></line>
+          <rect
+            x={trend[27]!.x - 44}
+            y="22"
+            width="88"
+            height="22"
+            rx="11"
+            fill="var(--color-accent-500)"
+          ></rect>
+          <text
+            x={trend[27]!.x}
+            y="37"
+            text-anchor="middle"
+            font-size="11"
+            font-weight="700"
+            fill="#1d1a16"
+          >
+            Week 4 check
+          </text>
+        </g>
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hiw-line {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 900;
+  }
+  .hiw-area,
+  .hiw-flag {
+    opacity: 0;
+  }
+  .hiw-dot {
+    opacity: 0;
+  }
+  .hiw.is-visible .hiw-line {
+    animation: hiw-draw 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards;
+  }
+  .hiw.is-visible .hiw-dot {
+    animation: hiw-pop 0.4s ease-out forwards;
+  }
+  .hiw.is-visible .hiw-area {
+    animation: hiw-fade 1s ease-out 2s forwards;
+  }
+  .hiw.is-visible .hiw-flag {
+    animation: hiw-fade 0.5s ease-out forwards;
+  }
+  @keyframes hiw-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes hiw-pop {
+    to {
+      opacity: 0.55;
+    }
+  }
+  @keyframes hiw-fade {
+    to {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hiw-line {
+      stroke-dashoffset: 0;
+    }
+    .hiw-dot,
+    .hiw-area,
+    .hiw-flag {
+      opacity: 1;
+      animation: none !important;
+    }
+    .hiw-dot {
+      opacity: 0.55;
+    }
+  }
+</style>
+
+<script>
+  function arm() {
+    const el = document.querySelector<HTMLElement>('.hiw');
+    if (!el || el.dataset.armed) return;
+    el.dataset.armed = '1';
+    if (!('IntersectionObserver' in window)) return el.classList.add('is-visible');
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach(
+          (e) => e.isIntersecting && (el.classList.add('is-visible'), io.disconnect()),
+        ),
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+  }
+  arm();
+  document.addEventListener('astro:page-load', arm);
+</script>

@@ -10,6 +10,7 @@ import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { updateProfile, useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 import { NumberField } from '../ui/NumberField';
 import { ProfileFields } from '../ui/ProfileFields';
@@ -20,7 +21,7 @@ import { Stat } from '../ui/Stat';
 
 const STEPS = ['About you', 'Your goal', 'Your plan'] as const;
 
-export default function Onboarding() {
+function OnboardingInner() {
   const [profile, update] = useProfile();
   const [plan, patchPlan] = planStore.use();
   const [prefs, patchPrefs] = prefsStore.use();
@@ -303,5 +304,13 @@ export default function Onboarding() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function Onboarding() {
+  return (
+    <ErrorBoundary area="the plan builder">
+      <OnboardingInner />
+    </ErrorBoundary>
   );
 }

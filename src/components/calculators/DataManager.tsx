@@ -9,6 +9,7 @@ import { planStore } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 import { NumberField } from '../ui/NumberField';
 import { ProfileFields } from '../ui/ProfileFields';
@@ -29,7 +30,7 @@ function download(name: string, content: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export default function DataManager() {
+function DataManagerInner() {
   const [profile, update] = useProfile();
   const [plan, patchPlan] = planStore.use();
   const [log] = logStore.use();
@@ -361,5 +362,13 @@ export default function DataManager() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function DataManager() {
+  return (
+    <ErrorBoundary area="settings">
+      <DataManagerInner />
+    </ErrorBoundary>
   );
 }

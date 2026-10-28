@@ -13,6 +13,7 @@ import { useProfile } from '@/lib/profile';
 import { createStore } from '@/lib/store';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 import { Stat } from '../ui/Stat';
 import { WeekBars } from '../ui/WeekBars';
@@ -24,7 +25,7 @@ interface Reflections {
 const reflectionStore = createStore<Reflections>('ethereal:reflections:v1', { notes: {} });
 
 /** Sunday-night review: the week in numbers, the patterns, the decision for next week, and a two-line reflection. */
-export default function WeeklyReview() {
+function WeeklyReviewInner() {
   const [profile] = useProfile();
   const [plan, patchPlan] = planStore.use();
   const [diary] = diaryStore.use();
@@ -395,5 +396,13 @@ export default function WeeklyReview() {
         </>
       )}
     </div>
+  );
+}
+
+export default function WeeklyReview() {
+  return (
+    <ErrorBoundary area="the review">
+      <WeeklyReviewInner />
+    </ErrorBoundary>
   );
 }

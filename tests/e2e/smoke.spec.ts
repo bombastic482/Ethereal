@@ -126,6 +126,9 @@ test.describe('calculators', () => {
 
 test('first-run tour shows once on Today and can be completed', async ({ page }) => {
   await page.goto('/today/');
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0, {
+    timeout: 15000,
+  });
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('heading', { name: /log in seconds/i })).toBeVisible();

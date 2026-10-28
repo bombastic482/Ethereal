@@ -101,6 +101,26 @@ const jsonLd = [
             <Content />
           </BaseLinks>
         </div>
+        <aside class="surface-muted mt-12 grid gap-4 p-6 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div>
+            <h2 class="font-display text-2xl">Put it into practice</h2>
+
+            <p class="text-muted mt-1 text-sm">
+              Reading changes nothing until it meets a plate and a scale. Log today's food, or build
+              the plan this article assumes.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href={withBase('/today/')} class="btn btn-primary text-sm">
+              Log today
+            </a>
+
+            <a href={withBase('/start/')} class="btn btn-secondary text-sm">
+              Build a plan
+            </a>
+          </div>
+        </aside>
         <Disclaimer />
       </article>
       <aside class="hidden lg:block">

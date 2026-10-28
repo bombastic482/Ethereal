@@ -6,6 +6,7 @@ import { planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
+import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
 import { NumberField } from '../ui/NumberField';
@@ -14,7 +15,7 @@ import { Stat } from '../ui/Stat';
 
 type Range = '30' | '90' | 'all';
 
-export default function WeightTracker() {
+function WeightTrackerInner() {
   const [profile] = useProfile();
   const [plan] = planStore.use();
   const [log] = logStore.use();
@@ -423,5 +424,13 @@ export default function WeightTracker() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function WeightTracker() {
+  return (
+    <ErrorBoundary area="the tracker">
+      <WeightTrackerInner />
+    </ErrorBoundary>
   );
 }

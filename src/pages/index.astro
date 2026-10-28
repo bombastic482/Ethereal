@@ -1,6 +1,7 @@
 ---
 import { withBase } from '@/lib/url';
 import HeroPreview from '@/components/HeroPreview';
+import HowItWorks from '@/components/HowItWorks.astro';
 import ToolCard from '@/components/ToolCard.astro';
 import Faq from '@/components/Faq.astro';
 import { Icon } from '@/components/ui/Icon';
@@ -151,6 +152,8 @@ const steps = [
       ))}
     </div>
   </section>
+
+  <HowItWorks />
 
   <section class="container-page mt-24" aria-labelledby="features">
     <div class="max-w-2xl">
