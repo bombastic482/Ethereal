@@ -10,11 +10,12 @@ interface Props {
   path: string;
   heading: string;
   lede: string;
-  current: 'plan' | 'track' | 'settings' | 'start';
+  current: 'today' | 'plan' | 'track' | 'settings' | 'start';
   noindex?: boolean;
 }
 const { title, description, path, heading, lede, current, noindex = false } = Astro.props;
 const tabs = [
+  { key: 'today', href: '/today/', label: 'Today', icon: 'flame' },
   { key: 'plan', href: '/plan/', label: 'My plan', icon: 'target' },
   { key: 'track', href: '/track/', label: 'Track', icon: 'scale' },
   { key: 'settings', href: '/settings/', label: 'Settings & data', icon: 'shield' },
@@ -24,7 +25,10 @@ const tabs = [
 <Base title={title} description={description} path={path} noindex={noindex}>
   <div class="container-page pt-8 pb-16 sm:pt-12">
     {current !== 'start' && (
-      <nav class="bg-muted mb-8 inline-flex gap-1 rounded-2xl p-1" aria-label="App sections">
+      <nav
+        class="bg-muted mb-8 hidden gap-1 rounded-2xl p-1 md:inline-flex"
+        aria-label="App sections"
+      >
         {tabs.map((t) => (
           <a
             href={withBase(t.href)}

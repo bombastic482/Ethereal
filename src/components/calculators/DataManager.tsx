@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { buildShareLink, clearAllData, createBackup, logToCsv, restoreBackup } from '@/lib/backup';
+import { diaryStore, foodCsv, prefsStore } from '@/lib/food-store';
 import { logStore } from '@/lib/log';
 import { planStore } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
@@ -30,6 +31,8 @@ export default function DataManager() {
   const [profile, update] = useProfile();
   const [plan, patchPlan] = planStore.use();
   const [log] = logStore.use();
+  const [diary] = diaryStore.use();
+  const [prefs, patchPrefs] = prefsStore.use();
   const [msg, setMsg] = useState<{ tone: 'success' | 'warn'; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [install, setInstall] = useState<InstallPromptEvent | null>(null);
@@ -141,12 +144,54 @@ export default function DataManager() {
         )}
       </section>
 
+      <section class="surface grid gap-5 p-5 sm:p-6" aria-label="Food diary">
+        <h2 class="text-lg font-bold tracking-tight">Food diary</h2>
+        <Segmented
+          name="st-diet"
+          label="Diet (for suggestions)"
+          options={[
+            { value: 'omnivore', label: 'Omnivore' },
+            { value: 'vegetarian', label: 'Vegetarian' },
+            { value: 'vegan', label: 'Vegan' },
+          ]}
+          value={prefs.diet}
+          onChange={(diet) => patchPrefs({ diet })}
+        />
+        <label class="flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            class="accent-brand-600 mt-0.5 h-4 w-4"
+            checked={prefs.eatBack}
+            onChange={(e) => patchPrefs({ eatBack: (e.target as HTMLInputElement).checked })}
+          />
+          <span>
+            <span class="font-semibold">Add exercise calories to my daily target</span>
+            <span class="text-muted block text-xs">
+              Off by default. MET estimates and watches run 20–40% high, and your activity level
+              already covers routine training.
+            </span>
+          </span>
+        </label>
+        <NumberField
+          id="st-water"
+          label="Water goal"
+          value={prefs.waterGoalGlasses}
+          min={2}
+          max={20}
+          dp={0}
+          suffix="glasses"
+          onChange={(waterGoalGlasses) => patchPrefs({ waterGoalGlasses })}
+          hint="250 ml glasses. 8 is a sensible default for most adults."
+        />
+      </section>
+
       <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Your data">
         <h2 class="text-lg font-bold tracking-tight">Your data</h2>
         <p class="text-muted text-sm">
-          {log.entries.length} weigh-in{log.entries.length === 1 ? '' : 's'} stored on this device.
-          Nothing is uploaded anywhere, which also means{' '}
-          <strong>we cannot recover it for you</strong>: export a backup now and then.
+          {log.entries.length} weigh-in{log.entries.length === 1 ? '' : 's'} and {diary.food.length}{' '}
+          food entr{diary.food.length === 1 ? 'y' : 'ies'} stored on this device. Nothing is
+          uploaded anywhere, which also means <strong>we cannot recover it for you</strong>: export
+          a backup now and then.
         </p>
         <div class="flex flex-wrap gap-2">
           <button
@@ -169,6 +214,14 @@ export default function DataManager() {
             disabled={log.entries.length === 0}
           >
             Export weigh-ins (CSV)
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary text-sm"
+            onClick={() => download(`ethereal-food-${stamp}.csv`, foodCsv(diary.food), 'text/csv')}
+            disabled={diary.food.length === 0}
+          >
+            Export food diary (CSV)
           </button>
           <label class="btn btn-secondary cursor-pointer text-sm">
             Import backup

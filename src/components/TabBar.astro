@@ -1,0 +1,61 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import { withBase } from '@/lib/url';
+
+const current = Astro.url.pathname;
+const tabs = [
+  { href: '/today/', label: 'Today', icon: 'flame' },
+  { href: '/plan/', label: 'Plan', icon: 'target' },
+  { href: '/track/', label: 'Track', icon: 'scale' },
+  { href: '/tools/', label: 'Tools', icon: 'pie' },
+  { href: '/settings/', label: 'More', icon: 'menu' },
+] as const;
+const active = (href: string) => current === withBase(href) || current.startsWith(withBase(href));
+---
+
+<nav class="tabbar md:hidden" aria-label="App">
+  {tabs.map((t) => (
+    <a
+      href={withBase(t.href)}
+      class:list={['tab', active(t.href) && 'tab-active']}
+      aria-current={active(t.href) ? 'page' : undefined}
+    >
+      <Icon name={t.icon} size={22} />
+      <span>{t.label}</span>
+    </a>
+  ))}
+</nav>
+
+<style>
+  .tabbar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in oklab, var(--bg-elevated) 88%, transparent);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border);
+  }
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.4rem 0.25rem;
+    border-radius: 0.9rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--fg-subtle);
+  }
+  .tab-active {
+    color: var(--color-brand-700);
+    background: var(--color-brand-100);
+  }
+  :global([data-theme='dark']) .tab-active {
+    color: var(--color-brand-200);
+    background: oklch(64% 0.15 170 / 0.15);
+  }
+</style>

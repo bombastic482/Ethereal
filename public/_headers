@@ -3,8 +3,8 @@
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(), interest-cohort=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://images.openfoodfacts.org https://*.openfoodfacts.org; font-src 'self'; connect-src 'self' https://world.openfoodfacts.org; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 /icons/*

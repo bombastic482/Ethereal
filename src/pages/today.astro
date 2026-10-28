@@ -1,0 +1,15 @@
+---
+import TodayScreen from '@/components/calculators/TodayScreen';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Today"
+  description="Log meals, scan barcodes, track exercise and water, and watch your calorie ring and macros fill up against your plan. Private, works offline."
+  path="/today/"
+  heading="Today"
+  lede="Log what you eat, see what's left, and get a nudge toward what to eat next."
+  current="today"
+>
+  <TodayScreen client:load />
+</AppLayout>

@@ -2,7 +2,14 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "url": ["/", "/tools/calories/", "/tools/timeline/", "/guides/calorie-deficit-explained/"],
+      "url": [
+        "/",
+        "/today/",
+        "/plan/",
+        "/tools/calories/",
+        "/tools/timeline/",
+        "/guides/calorie-deficit-explained/"
+      ],
       "numberOfRuns": 2,
       "settings": { "preset": "desktop" }
     },

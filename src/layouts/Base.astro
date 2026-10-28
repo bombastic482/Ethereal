@@ -4,6 +4,7 @@ import '@/styles/global.css';
 import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
+import TabBar from '@/components/TabBar.astro';
 import { SITE } from '@/lib/site';
 
 interface Props {
@@ -52,7 +53,7 @@ const { class: cls, ...seo } = Astro.props;
       })();
     </script>
   </head>
-  <body class="flex min-h-dvh flex-col">
+  <body class="flex min-h-dvh flex-col pb-20 md:pb-0">
     <a
       href="#main"
       class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
@@ -64,6 +65,7 @@ const { class: cls, ...seo } = Astro.props;
       <slot />
     </main>
     <Footer />
+    <TabBar />
     <script>
       if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
         const base = import.meta.env.BASE_URL.endsWith('/')

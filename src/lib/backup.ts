@@ -3,6 +3,7 @@
  * so a plan can be moved between devices with no server involved.
  */
 import type { WeighIn } from './calc/trend';
+import { diaryStore, prefsStore, type Diary, type DiaryPrefs } from './food-store';
 import { logStore, type WeightLog } from './log';
 import { DEFAULT_PLAN, planStore, type Plan } from './plan';
 import { DEFAULT_PROFILE, updateProfile, type Profile } from './profile';
@@ -14,6 +15,8 @@ export interface Backup {
   profile: Profile;
   plan: Plan;
   log: WeightLog;
+  diary?: Diary;
+  prefs?: DiaryPrefs;
 }
 
 const PROFILE_KEY = 'ethereal:profile:v1';
@@ -55,6 +58,8 @@ export function validateBackup(raw: unknown): Backup | null {
     profile: { ...DEFAULT_PROFILE, ...b.profile },
     plan: { ...DEFAULT_PLAN, ...(b.plan ?? {}) },
     log: { entries },
+    ...(b.diary && typeof b.diary === 'object' ? { diary: b.diary } : {}),
+    ...(b.prefs && typeof b.prefs === 'object' ? { prefs: b.prefs } : {}),
   };
 }
 
@@ -65,6 +70,8 @@ export function restoreBackup(raw: unknown): boolean {
   updateProfile(b.profile);
   planStore.set(b.plan);
   logStore.set(b.log);
+  if (b.diary) diaryStore.set({ ...diaryStore.get(), ...b.diary });
+  if (b.prefs) prefsStore.set({ ...prefsStore.get(), ...b.prefs });
   return true;
 }
 
@@ -120,6 +127,8 @@ export function readShareLink(
 export function clearAllData(): void {
   planStore.reset();
   logStore.reset();
+  diaryStore.reset();
+  prefsStore.reset();
   try {
     localStorage.removeItem(PROFILE_KEY);
   } catch {

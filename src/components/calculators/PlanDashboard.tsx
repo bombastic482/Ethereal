@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'preact/hooks';
+import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
+import { currentStreak, longestStreak, shift, weightMilestones } from '@/lib/calc/streaks';
 import { assessProgress, daysBetween, trendSeries } from '@/lib/calc/trend';
+import { diaryStore, prefsStore } from '@/lib/food-store';
 import { humaniseWeeks } from '@/lib/calc/timeline';
 import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { logStore, upsertEntry } from '@/lib/log';
@@ -26,6 +29,8 @@ export default function PlanDashboard() {
   const [profile] = useProfile();
   const [plan, patchPlan] = planStore.use();
   const [log] = logStore.use();
+  const [diary] = diaryStore.use();
+  const [prefs] = prefsStore.use();
   const today = todayIso();
   const imperial = profile.units === 'imperial';
   const [quick, setQuick] = useState<number | null>(null);
@@ -61,6 +66,59 @@ export default function PlanDashboard() {
           )
         : null,
     [summary, log.entries, plan, today],
+  );
+
+  const week = useMemo(() => {
+    if (!summary) return null;
+    const days = Array.from({ length: 7 }, (_, i) => shift(today, -i));
+    const t = {
+      kcal: summary.target,
+      protein: summary.macros.grams.protein,
+      carbs: summary.macros.grams.carbs,
+      fat: summary.macros.grams.fat,
+      fibre: summary.macros.grams.fibre,
+    };
+    const per = days.map((d) =>
+      summariseDay(
+        diary.food.filter((e) => e.date === d),
+        diary.exercise.filter((e) => e.date === d),
+        t,
+        prefs.eatBack,
+      ),
+    );
+    const logged = per.filter((d) => d.eaten.kcal > 0);
+    const avgKcal = logged.length
+      ? Math.round(logged.reduce((a, d) => a + d.eaten.kcal, 0) / logged.length)
+      : null;
+    const avgProtein = logged.length
+      ? Math.round(logged.reduce((a, d) => a + d.eaten.protein, 0) / logged.length)
+      : null;
+    const adherence = adherencePercent(
+      per.map((d) => ({ eatenKcal: d.eaten.kcal, targetKcal: d.target.kcal })),
+    );
+    const weighIns = log.entries.filter((e) => days.includes(e.date)).length;
+    return { loggedDays: logged.length, avgKcal, avgProtein, adherence, weighIns, target: t };
+  }, [summary, diary.food, diary.exercise, prefs.eatBack, log.entries, today]);
+  const streak = useMemo(
+    () =>
+      currentStreak([...diary.food.map((e) => e.date), ...log.entries.map((e) => e.date)], today),
+    [diary.food, log.entries, today],
+  );
+  const best = useMemo(
+    () => longestStreak([...diary.food.map((e) => e.date), ...log.entries.map((e) => e.date)]),
+    [diary.food, log.entries],
+  );
+  const milestones = useMemo(
+    () =>
+      plan.goal === 'maintain'
+        ? []
+        : weightMilestones(
+            plan.startWeightKg,
+            trend[trend.length - 1]?.trendKg ?? null,
+            plan.goalWeightKg,
+            imperial,
+          ),
+    [plan, trend, imperial],
   );
 
   if (!plan.active) {
@@ -259,6 +317,83 @@ export default function PlanDashboard() {
           >
             Open the full tracker →
           </a>
+        </section>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <section class="surface p-5 sm:p-6" aria-label="This week">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-lg font-bold tracking-tight">This week</h3>
+            {streak > 0 && (
+              <span class="chip">
+                <Icon name="flame" size={14} /> {streak}-day streak
+                {best > streak ? ` · best ${best}` : ''}
+              </span>
+            )}
+          </div>
+          {week && week.loggedDays > 0 ? (
+            <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <Stat label="Days logged" value={`${week.loggedDays}/7`} />
+              <Stat
+                label="Avg calories"
+                value={week.avgKcal === null ? '—' : formatNumber(week.avgKcal)}
+                sub={`target ${formatNumber(week.target.kcal)}`}
+              />
+              <Stat
+                label="Avg protein"
+                value={week.avgProtein === null ? '—' : `${week.avgProtein} g`}
+                sub={`target ${week.target.protein} g`}
+                tone={
+                  week.avgProtein !== null && week.avgProtein >= week.target.protein * 0.9
+                    ? 'brand'
+                    : 'default'
+                }
+              />
+              <Stat
+                label="On target"
+                value={week.adherence === null ? '—' : `${week.adherence}%`}
+                sub="days within ±10%"
+              />
+            </div>
+          ) : (
+            <p class="text-muted mt-3 text-sm">
+              No meals logged this week.{' '}
+              <a class="underline" href={withBase('/today/')}>
+                Log today
+              </a>{' '}
+              and this card becomes your weekly report.
+            </p>
+          )}
+        </section>
+        <section class="surface p-5 sm:p-6" aria-label="Milestones">
+          <h3 class="text-lg font-bold tracking-tight">Milestones</h3>
+          {milestones.length > 0 ? (
+            <ul class="mt-4 grid gap-3">
+              {milestones.map((m) => (
+                <li key={m.key} class="flex items-center gap-3">
+                  <span
+                    class={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${m.reached ? 'bg-brand-600 text-white' : 'bg-muted text-subtle'}`}
+                  >
+                    <Icon name={m.reached ? 'check' : 'target'} size={16} />
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-semibold">{m.label}</span>
+                    <span class="text-subtle block text-xs">{m.detail}</span>
+                    {!m.reached && (
+                      <span class="bg-muted mt-1 block h-1.5 w-full overflow-hidden rounded-full">
+                        <span
+                          class="bg-brand-500 block h-full rounded-full"
+                          style={{ width: `${Math.round(m.progress * 100)}%` }}
+                        />
+                      </span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="text-muted mt-3 text-sm">Milestones appear once your trend starts moving.</p>
+          )}
         </section>
       </div>
 

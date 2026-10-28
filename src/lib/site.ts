@@ -10,7 +10,8 @@ export const SITE = {
 } as const;
 
 export const NAV = [
-  { href: '/plan/', label: 'My plan' },
+  { href: '/today/', label: 'Today' },
+  { href: '/plan/', label: 'Plan' },
   { href: '/track/', label: 'Track' },
   { href: '/tools/', label: 'Tools' },
   { href: '/guides/', label: 'Guides' },

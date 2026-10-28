@@ -2,8 +2,12 @@
 
 Free, science-backed weight-loss planning that runs entirely in your browser.
 
+- **A food diary** (`/today/`): calorie ring, macro bars, four meals, built-in offline food database, Open Food Facts search and barcode scanning, quick add, custom foods, exercise (MET), water, copy-yesterday, favourites and "what to eat next" suggestions.
+- **A food diary** (`/today/`): calorie ring, macro bars, four meals, a built-in offline food database, Open Food Facts search and barcode scanning, quick add, custom foods, exercise (MET-based), water, copy-yesterday, favourites and "what to eat next" suggestions.
 - **A personal plan** (`/start/` → `/plan/`): calories, protein, macros and a realistic goal date from your stats, in three steps.
 - **A weight tracker** (`/track/`): daily weigh-ins, an exponentially-smoothed trend line, weekly averages, waist and notes.
+- **Streaks, milestones and a weekly report** on the plan page.
+- **Streaks, milestones and a weekly report** on the plan page.
 - **A two-week check**: compares your measured trend with the plan and recommends a specific calorie adjustment (capped, never below safe floors), which you can apply with one click.
 - **Eight calculators** (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water) sharing one profile.
 - **Twelve evidence-based guides**, installable as an app, works offline, exports/imports backups, shares a plan between devices via a link.
@@ -66,6 +70,12 @@ src/
   lib/log.ts         weigh-in log
   lib/backup.ts      export / import / share-link
   lib/calc/trend.ts  smoothed trend, slope, progress assessment and adjustment
+  lib/calc/nutrition.ts, exercise.ts, streaks.ts  diary maths
+  lib/food-store.ts  food/exercise diary; lib/foods.ts local DB search; lib/off.ts Open Food Facts client
+  data/foods-*.json  built-in food database
+  lib/calc/nutrition.ts, exercise.ts, streaks.ts  diary maths
+  lib/food-store.ts  food/exercise diary; lib/foods.ts local DB search; lib/off.ts Open Food Facts client
+  data/foods-*.json  built-in food database
   lib/tools.ts       tool registry (nav, cards, sitemap)
   components/ui/     Preact primitives (inputs, gauge, charts, callouts)
   components/calculators/  one island per tool, plus Onboarding, PlanDashboard, WeightTracker, DataManager

@@ -78,6 +78,32 @@ import Base from '@/layouts/Base.astro';
             <td>Reference points only</td>
           </tr>
           <tr>
+            <td>Food diary</td>
+            <td>
+              Built-in database of ~500 generic foods (values aligned with USDA FoodData Central),
+              plus Open Food Facts for packaged products and barcodes, queried directly from your
+              browser
+            </td>
+            <td>Energy 4/4/9 kcal per gram; per-100 g storage so portions stay editable</td>
+          </tr>
+          <tr>
+            <td>Exercise</td>
+            <td>
+              Compendium of Physical Activities MET values; kcal = MET × 3.5 × kg ÷ 200 per minute
+            </td>
+            <td>
+              Not added to the target unless you opt in, because MET and watch estimates run high
+            </td>
+          </tr>
+          <tr>
+            <td>Two-week check</td>
+            <td>
+              Exponentially-smoothed trend (α 0.1), 14-day regression slope, adjustment capped at
+              ±250 kcal, floors respected
+            </td>
+            <td>Waits for 14 days of data before recommending anything</td>
+          </tr>
+          <tr>
             <td>Water</td>
             <td>
               35 ml/kg baseline + 12 ml per minute of exercise + climate and pregnancy allowances

@@ -1,0 +1,141 @@
+/** Food and exercise diary plus diary preferences, all stored locally. */
+import type { ExerciseEntry, FoodEntry, Nutrients, Diet } from './calc/nutrition';
+import { createStore } from './store';
+
+export interface CustomFood {
+  id: string;
+  name: string;
+  brand?: string;
+  per100g: Nutrients;
+  servingGrams: number;
+  servingLabel: string;
+}
+
+export interface Diary {
+  food: FoodEntry[];
+  exercise: ExerciseEntry[];
+  /** Glasses of water per day: { 'YYYY-MM-DD': n }. */
+  water: Record<string, number>;
+  customFoods: CustomFood[];
+  /** Food ids (local or barcode) used recently, newest first. */
+  recent: string[];
+  favourites: string[];
+}
+
+export interface DiaryPrefs {
+  diet: Diet;
+  /** Add exercise calories to the day's target. Off by default; trackers overestimate burn. */
+  eatBack: boolean;
+  waterGoalGlasses: number;
+}
+
+export const diaryStore = createStore<Diary>(
+  'ethereal:diary:v1',
+  { food: [], exercise: [], water: {}, customFoods: [], recent: [], favourites: [] },
+  (raw) => {
+    if (!raw || typeof raw !== 'object') return null;
+    const r = raw as Partial<Diary>;
+    return {
+      food: Array.isArray(r.food) ? r.food : [],
+      exercise: Array.isArray(r.exercise) ? r.exercise : [],
+      water: r.water && typeof r.water === 'object' ? r.water : {},
+      customFoods: Array.isArray(r.customFoods) ? r.customFoods : [],
+      recent: Array.isArray(r.recent) ? r.recent : [],
+      favourites: Array.isArray(r.favourites) ? r.favourites : [],
+    };
+  },
+);
+
+export const prefsStore = createStore<DiaryPrefs>('ethereal:prefs:v1', {
+  diet: 'omnivore',
+  eatBack: false,
+  waterGoalGlasses: 8,
+});
+
+export const uid = (): string => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+
+export function addFood(entry: Omit<FoodEntry, 'id'>): FoodEntry {
+  const d = diaryStore.get();
+  const e: FoodEntry = { ...entry, id: uid() };
+  const key = entry.barcode ?? entry.foodId;
+  const recent = key ? [key, ...d.recent.filter((k) => k !== key)].slice(0, 30) : d.recent;
+  diaryStore.set({ ...d, food: [...d.food, e], recent });
+  return e;
+}
+
+export function updateFood(id: string, patch: Partial<FoodEntry>): void {
+  const d = diaryStore.get();
+  diaryStore.set({ ...d, food: d.food.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
+}
+
+export function removeFood(id: string): void {
+  const d = diaryStore.get();
+  diaryStore.set({ ...d, food: d.food.filter((e) => e.id !== id) });
+}
+
+export function addExercise(entry: Omit<ExerciseEntry, 'id'>): ExerciseEntry {
+  const d = diaryStore.get();
+  const e: ExerciseEntry = { ...entry, id: uid() };
+  diaryStore.set({ ...d, exercise: [...d.exercise, e] });
+  return e;
+}
+
+export function removeExercise(id: string): void {
+  const d = diaryStore.get();
+  diaryStore.set({ ...d, exercise: d.exercise.filter((e) => e.id !== id) });
+}
+
+export function setWater(date: string, glasses: number): void {
+  const d = diaryStore.get();
+  diaryStore.set({ ...d, water: { ...d.water, [date]: Math.max(0, glasses) } });
+}
+
+export function toggleFavourite(key: string): void {
+  const d = diaryStore.get();
+  const favourites = d.favourites.includes(key)
+    ? d.favourites.filter((k) => k !== key)
+    : [key, ...d.favourites].slice(0, 50);
+  diaryStore.set({ ...d, favourites });
+}
+
+export function saveCustomFood(food: Omit<CustomFood, 'id'> & { id?: string }): CustomFood {
+  const d = diaryStore.get();
+  const id = food.id ?? `custom-${uid()}`;
+  const next: CustomFood = { ...food, id };
+  diaryStore.set({ ...d, customFoods: [next, ...d.customFoods.filter((c) => c.id !== id)] });
+  return next;
+}
+
+/** Copies yesterday's entries for a meal to today. The single most used shortcut in diet apps. */
+export function copyMeal(fromDate: string, toDate: string, meal: FoodEntry['meal']): number {
+  const d = diaryStore.get();
+  const items = d.food.filter((e) => e.date === fromDate && e.meal === meal);
+  if (items.length === 0) return 0;
+  const copies = items.map((e) => ({ ...e, id: uid(), date: toDate }));
+  diaryStore.set({ ...d, food: [...d.food, ...copies] });
+  return copies.length;
+}
+
+export function foodCsv(food: FoodEntry[]): string {
+  const rows = [
+    ['date', 'meal', 'name', 'brand', 'grams', 'kcal', 'protein_g', 'carbs_g', 'fat_g', 'fibre_g'],
+  ];
+  for (const e of [...food].sort((a, b) => a.date.localeCompare(b.date))) {
+    const f = e.grams / 100;
+    rows.push([
+      e.date,
+      e.meal,
+      e.name,
+      e.brand ?? '',
+      String(e.grams),
+      String(Math.round(e.per100g.kcal * f)),
+      (e.per100g.protein * f).toFixed(1),
+      (e.per100g.carbs * f).toFixed(1),
+      (e.per100g.fat * f).toFixed(1),
+      ((e.per100g.fibre ?? 0) * f).toFixed(1),
+    ]);
+  }
+  return rows
+    .map((r) => r.map((c) => (/[",\n]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c)).join(','))
+    .join('\n');
+}

@@ -1,5 +1,6 @@
 ---
 import { withBase } from '@/lib/url';
+import HeroPreview from '@/components/HeroPreview';
 import ToolCard from '@/components/ToolCard.astro';
 import Faq from '@/components/Faq.astro';
 import { Icon } from '@/components/ui/Icon';
@@ -67,29 +68,34 @@ const steps = [
       <div class="bg-accent-400/30 dark:bg-accent-500/15 absolute top-20 right-[-10rem] h-[24rem] w-[24rem] rounded-full blur-3xl"></div>
     </div>
     <div class="container-page pt-16 pb-12 sm:pt-24 sm:pb-16">
-      <div class="animate-rise mx-auto max-w-3xl text-center">
-        <span class="chip">
-          <Icon name="shield" size={14} /> Science-backed · Free forever · No tracking
-        </span>
-        <h1 class="mt-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
-          Weight loss, <span class="text-gradient">done properly.</span>
-        </h1>
-        <p class="text-muted mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-pretty sm:text-xl">
-          A personal plan, a weight tracker that sees through the noise, and a two-week check that
-          tells you what to change. Built on the equations dietitians use, explained in plain
-          English, running privately in your browser.
-        </p>
-        <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-          <a href={withBase('/start/')} class="btn btn-primary h-12 px-6 text-base">
-            Build my plan <Icon name="arrow" size={18} />
-          </a>
-          <a href={withBase('/tools/calories/')} class="btn btn-secondary h-12 px-6 text-base">
-            Just the calculators
-          </a>
+      <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div class="animate-rise max-w-2xl text-center lg:text-left">
+          <span class="chip">
+            <Icon name="shield" size={14} /> Science-backed · Free forever · No tracking
+          </span>
+          <h1 class="mt-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            Weight loss, <span class="text-gradient">done properly.</span>
+          </h1>
+          <p class="text-muted mt-6 max-w-2xl lg:mx-0 text-lg leading-relaxed text-pretty sm:text-xl">
+            A personal plan, a weight tracker that sees through the noise, and a two-week check that
+            tells you what to change. Built on the equations dietitians use, explained in plain
+            English, running privately in your browser.
+          </p>
+          <div class="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+            <a href={withBase('/start/')} class="btn btn-primary h-12 px-6 text-base">
+              Build my plan <Icon name="arrow" size={18} />
+            </a>
+            <a href={withBase('/tools/calories/')} class="btn btn-secondary h-12 px-6 text-base">
+              Just the calculators
+            </a>
+          </div>
+          <p class="text-subtle mt-5 text-xs">
+            One minute · No account · Your data never leaves your device
+          </p>
         </div>
-        <p class="text-subtle mt-5 text-xs">
-          One minute · No account · Your data never leaves your device
-        </p>
+        <div class="animate-rise [animation-delay:150ms]">
+          <HeroPreview client:visible />
+        </div>
       </div>
     </div>
   </section>

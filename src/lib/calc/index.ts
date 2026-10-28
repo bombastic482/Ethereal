@@ -8,3 +8,6 @@ export * from './timeline';
 export * from './hydration';
 export * from './protein';
 export * from './trend';
+export * from './nutrition';
+export * from './exercise';
+export * from './streaks';
