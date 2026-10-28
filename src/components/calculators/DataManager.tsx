@@ -350,7 +350,10 @@ function DataManagerInner() {
               {csvPreview.weighIns.length === 1 ? '' : 's'}
               {csvPreview.weightUnit ? ` (read as ${csvPreview.weightUnit})` : ''} across{' '}
               <strong>{csvPreview.days}</strong> day{csvPreview.days === 1 ? '' : 's'}
-              {csvPreview.skipped ? `; ${csvPreview.skipped} rows skipped` : ''}.
+              {csvPreview.skipped
+                ? `; ${csvPreview.skipped} row${csvPreview.skipped === 1 ? '' : 's'} skipped (no date, zero calories, exercise or deleted)`
+                : ''}
+              .
               {csvPreview.food.length > 0 &&
                 ' Imported food keeps its calories and macros exactly; portions show as 100 g.'}
             </p>

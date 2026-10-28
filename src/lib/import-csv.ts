@@ -77,7 +77,8 @@ type Col =
   | 'satFat'
   | 'sodium'
   | 'weight'
-  | 'waist';
+  | 'waist'
+  | 'deleted';
 
 const HEADERS: Array<[Col, RegExp]> = [
   ['date', /^(date|day|logged on|entry date|datetime|timestamp)$/],
@@ -100,6 +101,7 @@ const HEADERS: Array<[Col, RegExp]> = [
     /^(weight|body weight|bodyweight|weight[ _]?\((kg|lbs?)\)|weight_(kg|lbs?)|weightkg|mass)$/,
   ],
   ['waist', /^(waist|waist_cm|waist \(cm\)|waist \(in\))$/],
+  ['deleted', /^(deleted|is deleted|removed)$/],
 ];
 
 const normHeader = (h: string) => h.toLowerCase().replace(/[ ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -243,6 +245,11 @@ export function previewImport(text: string): ImportPreview | null {
   for (const r of rows.slice(1)) {
     const date = parseDate(r[cols.date] ?? '', dayFirst);
     if (!date) {
+      skipped++;
+      continue;
+    }
+    // Lose It! keeps deleted rows in its export with a flag; honour it.
+    if (cols.deleted !== undefined && /^(true|1|yes|y)$/i.test((r[cols.deleted] ?? '').trim())) {
       skipped++;
       continue;
     }
