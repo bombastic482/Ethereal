@@ -1,4 +1,5 @@
 import { eatingWindowHours, lateShare as lateCalorieShare, topFoods } from './breakdown';
+import { chainShare } from './chains';
 import { MEALS, summariseDay, type ExerciseEntry, type FoodEntry } from './nutrition';
 import { round } from './units';
 
@@ -154,6 +155,18 @@ export function buildInsights(
       title: `Three foods make up ${round(topShare * 100)}% of your calories`,
       detail: `${top.map((x) => x.name).join(', ')}. Weigh these three carefully; small errors on repeat foods compound across the week.`,
       tone: 'neutral',
+    });
+  }
+
+  // 7b. Takeaway and coffee shops
+  const chain = chainShare(food, dates);
+  if (chain.count >= 3 && chain.share >= 0.15) {
+    const where = chain.chains.slice(0, 3).join(', ');
+    out.push({
+      key: 'takeaway',
+      title: `Chains were ${round(chain.share * 100)}% of your calories`,
+      detail: `${chain.count} items from ${where}, about ${chain.kcal.toLocaleString('en-US')} kcal. Nothing wrong with that. The eating-out page ranks every menu by protein per calorie, so the same habit can cost a few hundred calories less.`,
+      tone: chain.share >= 0.3 ? 'warn' : 'neutral',
     });
   }
 

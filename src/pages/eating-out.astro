@@ -41,17 +41,35 @@ const jsonLd = [
         {total} menu items from published nutrition data. Food is ranked by grams of protein per 100
         kcal; coffee-shop drinks by calories, lowest first. Nothing here is off limits; the ranking
         just shows which orders leave the most room in the day. Tap <strong>Log</strong> to add one
-        to Today with the right portion.
+        to Today with the right portion, or tick several to build and log a whole order.
       </p>
     </header>
 
     <nav aria-label="Chains" class="mt-8 flex flex-wrap gap-2">
       {chains.map((c) => (
-        <a class="chip" href={`#${c.slug}`}>
+        <a class="chip" href={`#${c.slug}`} data-chain-chip={c.slug}>
           {c.name}
         </a>
       ))}
     </nav>
+
+    <div class="mt-6 max-w-md" data-chain-filter>
+      <label
+        class="text-subtle mb-1.5 block text-xs font-semibold tracking-wide uppercase"
+        for="eo-q"
+      >
+        Find an item
+      </label>
+      <input
+        id="eo-q"
+        type="search"
+        class="field"
+        placeholder="chicken, wrap, latte…"
+        autocomplete="off"
+        enterkeyhint="search"
+      />
+      <p class="text-subtle mt-1.5 text-xs" data-filter-status role="status" aria-live="polite" />
+    </div>
 
     <div class="mt-12 grid gap-10">
       {chains.map((c) => (
@@ -90,7 +108,11 @@ const jsonLd = [
               </thead>
               <tbody class="tabular">
                 {c.items.map((it, i) => (
-                  <tr class="border-line border-t">
+                  <tr
+                    class="border-line border-t"
+                    data-item-row
+                    data-search={`${it.name} ${c.name}`.toLowerCase()}
+                  >
                     <td class="px-3 py-2.5 align-middle">
                       <input
                         type="checkbox"
@@ -223,6 +245,41 @@ const jsonLd = [
       });
     }
   }
+  // Find an item: hide rows that do not match, and whole chains with nothing left.
+  function bindFilter() {
+    const box = document.querySelector<HTMLElement>('[data-chain-filter]');
+    const input = box?.querySelector<HTMLInputElement>('input');
+    if (!box || !input || box.dataset.bound) return;
+    box.dataset.bound = '1';
+    const status = box.querySelector<HTMLElement>('[data-filter-status]')!;
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-item-row]')];
+    const sections = [...document.querySelectorAll<HTMLElement>('section[id][aria-labelledby]')];
+    const apply = () => {
+      const q = input.value.trim().toLowerCase();
+      let shown = 0;
+      for (const r of rows) {
+        const hit = !q || (r.dataset.search ?? '').includes(q);
+        r.hidden = !hit;
+        if (hit) shown += 1;
+      }
+      for (const s of sections) {
+        const any =
+          !q || [...s.querySelectorAll<HTMLElement>('[data-item-row]')].some((r) => !r.hidden);
+        s.hidden = !any;
+        document
+          .querySelector<HTMLElement>(`[data-chain-chip="${s.id}"]`)
+          ?.classList.toggle('opacity-40', !any);
+      }
+      status.textContent = q
+        ? `${shown} item${shown === 1 ? '' : 's'} match “${input.value.trim()}”`
+        : '';
+    };
+    input.addEventListener('input', apply);
+  }
   bind();
-  document.addEventListener('astro:page-load', bind);
+  bindFilter();
+  document.addEventListener('astro:page-load', () => {
+    bind();
+    bindFilter();
+  });
 </script>

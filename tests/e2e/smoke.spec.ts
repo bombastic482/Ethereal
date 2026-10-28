@@ -247,3 +247,17 @@ test('eating-out page builds an order from ticked items and logs it to Today', a
     await expect(page.getByText(new RegExp(n.slice(0, 10))).first()).toBeVisible();
   }
 });
+
+test('eating-out page filters items and chains as you type', async ({ page }) => {
+  await page.goto('/eating-out/');
+  const q = page.getByRole('searchbox', { name: 'Find an item' });
+  await q.fill('latte');
+  await expect(page.getByRole('status').filter({ hasText: /items? match “latte”/ })).toBeVisible();
+  await expect(page.locator('section#chipotle')).toBeHidden();
+  await expect(page.locator('section#starbucks')).toBeVisible();
+  await expect(page.locator('section#starbucks [data-item-row]:visible').first()).toContainText(
+    /Latte/,
+  );
+  await q.fill('');
+  await expect(page.locator('section#chipotle')).toBeVisible();
+});
