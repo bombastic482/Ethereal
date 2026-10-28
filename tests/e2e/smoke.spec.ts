@@ -137,3 +137,18 @@ test('first-run tour shows once on Today and can be completed', async ({ page })
   await page.reload();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
+
+test('command palette jumps to pages and logs a food', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
+  await page.goto('/plan/');
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog', { name: /quick launcher/i });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('combobox').fill('banana');
+  await expect(dialog.getByRole('option').first()).toContainText(/Log Banana/i);
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/today\/$/);
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+  await expect(page.getByText(/^Banana/).first()).toBeVisible();
+});

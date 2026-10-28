@@ -430,3 +430,31 @@
     transform: none;
   }
 }
+
+/* Print: the content, not the chrome. */
+@media print {
+  header,
+  footer,
+  nav,
+  .tabbar,
+  .btn,
+  button {
+    display: none !important;
+  }
+  body::before {
+    display: none;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .surface,
+  .surface-muted {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+  main {
+    padding-bottom: 0 !important;
+  }
+}

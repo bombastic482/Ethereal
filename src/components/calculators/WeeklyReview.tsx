@@ -129,6 +129,38 @@ export default function WeeklyReview() {
     haptic();
   };
 
+  const [copied, setCopied] = useState(false);
+  const copySummary = async () => {
+    const lines = [
+      `Ethereal weekly review · ${fmtShort(start)} – ${fmtShort(end)}`,
+      weekChange === null
+        ? ''
+        : `Trend change: ${weekChange > 0 ? '+' : ''}${imperial ? `${round(kgToLb(weekChange), 1)} lb` : `${weekChange} kg`}`,
+      `Days logged: ${logged.length}/7 · Weigh-ins: ${weighIns}`,
+      avg((x) => x.s.eaten.kcal) === null
+        ? ''
+        : `Average calories: ${avg((x) => x.s.eaten.kcal)}${t ? ` (target ${t.kcal})` : ''}`,
+      avg((x) => x.s.eaten.protein) === null
+        ? ''
+        : `Average protein: ${avg((x) => x.s.eaten.protein)} g${t ? ` (target ${t.protein} g)` : ''}`,
+      adherence === null ? '' : `Days on target: ${adherence}%`,
+      report && report.status !== 'insufficient-data'
+        ? `Decision: ${report.headline}. ${report.detail}`
+        : '',
+      ...insights.map((i) => `• ${i.title}. ${i.detail}`),
+      wentWell ? `What went well: ${wentWell}` : '',
+      change ? `One thing to change: ${change}` : '',
+    ].filter(Boolean);
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+  const fmtShort = (iso: string) =>
+    new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   const fmt = (iso: string) =>
     new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   const w = (kg: number) => formatWeight(kg, profile.units, 1);
@@ -158,9 +190,26 @@ export default function WeeklyReview() {
             ›
           </button>
         </div>
-        <span class="chip">
-          {logged.length}/7 days logged · {weighIns} weigh-ins
-        </span>
+        <div class="flex items-center gap-2">
+          <span class="chip">
+            {logged.length}/7 days logged · {weighIns} weigh-ins
+          </span>
+          <button
+            type="button"
+            class="btn btn-secondary h-9 px-3 text-sm"
+            onClick={copySummary}
+            aria-live="polite"
+          >
+            <Icon name={copied ? 'check' : 'copy'} size={14} /> {copied ? 'Copied' : 'Copy summary'}
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary h-9 px-3 text-sm"
+            onClick={() => window.print()}
+          >
+            Print
+          </button>
+        </div>
       </div>
 
       {logged.length === 0 && weighIns === 0 ? (

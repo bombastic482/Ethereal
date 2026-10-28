@@ -1,4 +1,5 @@
 ---
+import CommandPalette from '@/components/CommandPalette';
 import HeaderCta from '@/components/HeaderCta';
 import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
@@ -43,6 +44,15 @@ const isActive = (href: string) =>
 
     <div class="flex items-center gap-2">
       <HeaderCta client:idle />
+      <button
+        type="button"
+        id="palette-btn"
+        class="btn btn-ghost hidden h-10 w-10 rounded-full p-0 md:inline-flex"
+        aria-label="Quick launcher (⌘K)"
+        title="Quick launcher (⌘K)"
+      >
+        <Icon name="spark" size={18} />
+      </button>
       <ThemeToggle />
       <button
         type="button"
@@ -73,6 +83,7 @@ const isActive = (href: string) =>
       <HeaderCta client:idle compact />
     </div>
   </nav>
+  <CommandPalette client:idle />
 </header>
 
 <script>
@@ -89,8 +100,16 @@ const isActive = (href: string) =>
       toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
     });
   }
+  function bindPalette() {
+    const b = document.getElementById('palette-btn');
+    if (!b || b.dataset.bound) return;
+    b.dataset.bound = '1';
+    b.addEventListener('click', () => window.dispatchEvent(new Event('ethereal:palette')));
+  }
   bindMenu();
+  bindPalette();
   document.addEventListener('astro:page-load', () => {
+    bindPalette();
     bindMenu();
     // Close the mobile menu after navigating.
     const nav = document.getElementById('mobile-nav');
