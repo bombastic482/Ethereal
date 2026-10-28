@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { shift } from '@/lib/calc/streaks';
-import { planDay, shoppingListText, SLOTS, type DayPlan } from '@/lib/day-plan';
+import {
+  planDay,
+  planWeek,
+  shoppingListText,
+  SLOTS,
+  weekShoppingText,
+  type DayPlan,
+} from '@/lib/day-plan';
 import { prefsStore } from '@/lib/food-store';
 import { haptic } from '@/lib/fx';
 import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
@@ -41,6 +48,10 @@ function DayPlannerInner() {
   const [day, setDay] = useState<DayPlan | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [days, setDays] = useState(1);
+  const [mode, setMode] = useState<'day' | 'week'>('day');
+  const [repeatBreakfast, setRepeatBreakfast] = useState(true);
+  const [week, setWeek] = useState<DayPlan[]>([]);
+  const [weekSeed, setWeekSeed] = useState<string[]>([]);
 
   const summary = useMemo(() => {
     try {
@@ -151,10 +162,7 @@ function DayPlannerInner() {
     }
     setStatus('Saved every recipe to your meals (Today → Add → Meals).');
   };
-  const copyList = async () => {
-    if (!day) return;
-    const text = shoppingListText(day, days);
-    const label = `Shopping list for ${days} day${days === 1 ? '' : 's'}`;
+  const shareText = async (label: string, text: string) => {
     // Phones get the share sheet (Notes, Messages, a shopping app); desktops get the clipboard.
     if (typeof navigator.share === 'function' && /Mobi|Android/i.test(navigator.userAgent)) {
       try {
@@ -172,6 +180,65 @@ function DayPlannerInner() {
       setStatus(text);
     }
   };
+  const copyList = () =>
+    day &&
+    shareText(`Shopping list for ${days} day${days === 1 ? '' : 's'}`, shoppingListText(day, days));
+
+  // Week mode: seven varied days starting tomorrow (today if nothing is logged yet).
+  const weekStart = todayIso();
+  const weekDates = week.map((_, i) => shift(weekStart, i + 1));
+  const buildWeek = (opts: {
+    quick?: boolean;
+    noSnack?: boolean;
+    repeat?: boolean;
+    exclude?: string[];
+  }) =>
+    planWeek(allRecipes(), {
+      kcal: targetKcal,
+      protein: targetProtein,
+      diet: prefs.diet,
+      ...((opts.quick ?? quick) ? { maxMinutes: 15 } : {}),
+      ...((opts.noSnack ?? noSnack) ? { skip: ['snack' as const] } : {}),
+      repeatBreakfast: opts.repeat ?? repeatBreakfast,
+      exclude: opts.exclude ?? weekSeed,
+    });
+  useEffect(() => {
+    if (!ready || mode !== 'week') return;
+    setWeek(buildWeek({}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, mode, targetKcal, targetProtein, prefs.diet, quick, noSnack, repeatBreakfast]);
+  const reshuffleWeek = () => {
+    // Seed the next week with this week's dinners excluded, so it looks different.
+    const seed = week.map((d) => d.slots.dinner?.id).filter((x): x is string => !!x);
+    const next = buildWeek({ exclude: seed });
+    setWeekSeed(next.length === week.length ? seed : []);
+    setWeek(next.length ? next : buildWeek({ exclude: [] }));
+    setStatus(null);
+    haptic();
+  };
+  const logDay = (plan: DayPlan, date: string) => {
+    let n = 0;
+    const m = new Date();
+    for (const s of SLOTS) {
+      const r = plan.slots[s];
+      if (r) n += logRecipe(r, date, s, 1, m.getHours() * 60 + m.getMinutes());
+    }
+    return n;
+  };
+  const logWeek = () => {
+    let n = 0;
+    week.forEach((p, i) => {
+      n += logDay(p, weekDates[i]!);
+    });
+    haptic([15, 40, 15]);
+    setStatus(`Logged ${n} items across ${week.length} days, starting tomorrow.`);
+  };
+  const fmtDay = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
 
   if (!ready) {
     return (
@@ -206,13 +273,28 @@ function DayPlannerInner() {
             any slot, lock what you like, then log the lot.
           </p>
         </div>
-        <button
-          type="button"
-          class="btn btn-ghost border-line h-9 border px-3 text-xs"
-          onClick={shuffle}
-        >
-          <Icon name="reset" size={14} /> Shuffle
-        </button>
+        <div class="flex items-center gap-2">
+          <Segmented
+            name="plan-mode"
+            options={[
+              { value: 'day', label: 'One day' },
+              { value: 'week', label: 'Week' },
+            ]}
+            value={mode}
+            onChange={(v) => {
+              setMode(v);
+              setStatus(null);
+            }}
+            class="w-44"
+          />
+          <button
+            type="button"
+            class="btn btn-ghost border-line h-9 border px-3 text-xs"
+            onClick={mode === 'day' ? shuffle : reshuffleWeek}
+          >
+            <Icon name="reset" size={14} /> Shuffle
+          </button>
+        </div>
       </header>
 
       <div class="flex flex-wrap gap-2">
@@ -232,128 +314,200 @@ function DayPlannerInner() {
         >
           No snack
         </button>
+        {mode === 'week' && (
+          <button
+            type="button"
+            class={`btn h-9 px-3 text-xs ${repeatBreakfast ? 'btn-primary' : 'btn-ghost border-line border'}`}
+            aria-pressed={repeatBreakfast}
+            onClick={() => setRepeatBreakfast((v) => !v)}
+          >
+            Same breakfast daily
+          </button>
+        )}
       </div>
 
-      <ul class="grid gap-3 sm:grid-cols-2">
-        {SLOTS.filter((s) => day.slots[s]).map((slot) => {
-          const r = day.slots[slot]!;
-          const locked = locks.has(slot);
-          return (
-            <li key={slot} class="border-line flex flex-col gap-2 rounded-2xl border p-4">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-                  {LABEL[slot]}
-                </span>
-                <span class="text-subtle tabular text-xs">{r.minutes} min</span>
-              </div>
-              <a
-                class="font-semibold tracking-tight hover:underline"
-                href={withBase(`/recipes/#${r.id}`)}
+      {mode === 'week' && (
+        <div class="grid gap-3">
+          <ol class="grid gap-2" aria-label="Planned week">
+            {week.map((p, i) => (
+              <li
+                key={weekDates[i]}
+                class="border-line grid gap-2 rounded-2xl border p-3 sm:grid-cols-[7rem_1fr_auto] sm:items-center"
               >
-                {r.name}
-              </a>
-              <p class="text-muted text-xs">
-                <span class="tabular">{Math.round(r.totals.kcal)}</span> kcal · P{' '}
-                <span class="tabular">{Math.round(r.totals.protein)}</span> g · C{' '}
-                <span class="tabular">{Math.round(r.totals.carbs)}</span> g · F{' '}
-                <span class="tabular">{Math.round(r.totals.fat)}</span> g
-              </p>
-              <div class="mt-auto flex gap-2 pt-1">
-                <button
-                  type="button"
-                  class={`btn h-8 px-3 text-xs ${locked ? 'btn-primary' : 'btn-ghost border-line border'}`}
-                  aria-pressed={locked}
-                  aria-label={`${locked ? 'Unlock' : 'Lock'} ${LABEL[slot].toLowerCase()}`}
-                  onClick={() => toggleLock(slot)}
-                >
-                  <Icon name="lock" size={13} /> {locked ? 'Locked' : 'Lock'}
-                </button>
+                <div>
+                  <p class="font-semibold">{fmtDay(weekDates[i]!)}</p>
+                  <p class="text-subtle tabular text-xs">
+                    {Math.round(p.totals.kcal)} kcal · P {Math.round(p.totals.protein)} g
+                  </p>
+                </div>
+                <ul class="text-muted grid gap-0.5 text-xs sm:grid-cols-2">
+                  {SLOTS.filter((s) => p.slots[s]).map((s) => (
+                    <li key={s} class="truncate">
+                      <span class="text-subtle">{LABEL[s]}:</span> {p.slots[s]!.name}
+                    </li>
+                  ))}
+                </ul>
                 <button
                   type="button"
                   class="btn btn-ghost border-line h-8 border px-3 text-xs"
-                  aria-label={`Another ${LABEL[slot].toLowerCase()}`}
-                  disabled={locked}
-                  onClick={() => reroll(slot)}
+                  aria-label={`Log ${fmtDay(weekDates[i]!)}`}
+                  onClick={() => {
+                    const n = logDay(p, weekDates[i]!);
+                    haptic();
+                    setStatus(`Logged ${n} items for ${fmtDay(weekDates[i]!)}.`);
+                  }}
                 >
-                  <Icon name="reset" size={13} /> Another
+                  Log day
                 </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              </li>
+            ))}
+          </ol>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" class="btn btn-primary h-10 px-4 text-sm" onClick={logWeek}>
+              Log the whole week
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary h-10 px-4 text-sm"
+              onClick={() =>
+                shareText(`Shopping list for ${week.length} days`, weekShoppingText(week))
+              }
+            >
+              <Icon name="copy" size={14} /> Copy week shopping list
+            </button>
+          </div>
+          {status && (
+            <p class="text-brand-700 dark:text-brand-300 text-sm whitespace-pre-line" role="status">
+              {status}
+            </p>
+          )}
+        </div>
+      )}
 
-      <div
-        class="bg-muted flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm"
-        role="status"
-        aria-live="polite"
-      >
-        <span>
-          <span class="tabular font-semibold">{kcal.toLocaleString('en-US')}</span> kcal
-          <span class="text-subtle">
-            {' '}
-            ({day.kcalDelta > 0 ? '+' : ''}
-            {day.kcalDelta} vs target)
-          </span>
-        </span>
-        <span>
-          <span class="tabular font-semibold">{protein}</span> g protein
-          <span class={day.proteinMet ? 'text-brand-700 dark:text-brand-300' : 'text-subtle'}>
-            {' '}
-            {day.proteinMet ? '· target met' : `· ${targetProtein - protein} g short`}
-          </span>
-        </span>
-        <span class="text-subtle">
-          C {Math.round(day.totals.carbs)} g · F {Math.round(day.totals.fat)} g · Fibre{' '}
-          {Math.round(day.totals.fibre)} g
-        </span>
-      </div>
+      {mode === 'day' && (
+        <>
+          <ul class="grid gap-3 sm:grid-cols-2">
+            {SLOTS.filter((s) => day.slots[s]).map((slot) => {
+              const r = day.slots[slot]!;
+              const locked = locks.has(slot);
+              return (
+                <li key={slot} class="border-line flex flex-col gap-2 rounded-2xl border p-4">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
+                      {LABEL[slot]}
+                    </span>
+                    <span class="text-subtle tabular text-xs">{r.minutes} min</span>
+                  </div>
+                  <a
+                    class="font-semibold tracking-tight hover:underline"
+                    href={withBase(`/recipes/#${r.id}`)}
+                  >
+                    {r.name}
+                  </a>
+                  <p class="text-muted text-xs">
+                    <span class="tabular">{Math.round(r.totals.kcal)}</span> kcal · P{' '}
+                    <span class="tabular">{Math.round(r.totals.protein)}</span> g · C{' '}
+                    <span class="tabular">{Math.round(r.totals.carbs)}</span> g · F{' '}
+                    <span class="tabular">{Math.round(r.totals.fat)}</span> g
+                  </p>
+                  <div class="mt-auto flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      class={`btn h-8 px-3 text-xs ${locked ? 'btn-primary' : 'btn-ghost border-line border'}`}
+                      aria-pressed={locked}
+                      aria-label={`${locked ? 'Unlock' : 'Lock'} ${LABEL[slot].toLowerCase()}`}
+                      onClick={() => toggleLock(slot)}
+                    >
+                      <Icon name="lock" size={13} /> {locked ? 'Locked' : 'Lock'}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost border-line h-8 border px-3 text-xs"
+                      aria-label={`Another ${LABEL[slot].toLowerCase()}`}
+                      disabled={locked}
+                      onClick={() => reroll(slot)}
+                    >
+                      <Icon name="reset" size={13} /> Another
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          class="btn btn-primary h-10 px-4 text-sm"
-          onClick={() => logAll(todayIso())}
-        >
-          Log the day to Today
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary h-10 px-4 text-sm"
-          onClick={() => logAll(shift(todayIso(), 1))}
-        >
-          Log for tomorrow
-        </button>
-        <button
-          type="button"
-          class="btn btn-ghost border-line h-10 border px-3 text-sm"
-          onClick={saveAll}
-        >
-          <Icon name="copy" size={14} /> Save as my meals
-        </button>
-      </div>
+          <div
+            class="bg-muted flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm"
+            role="status"
+            aria-live="polite"
+          >
+            <span>
+              <span class="tabular font-semibold">{kcal.toLocaleString('en-US')}</span> kcal
+              <span class="text-subtle">
+                {' '}
+                ({day.kcalDelta > 0 ? '+' : ''}
+                {day.kcalDelta} vs target)
+              </span>
+            </span>
+            <span>
+              <span class="tabular font-semibold">{protein}</span> g protein
+              <span class={day.proteinMet ? 'text-brand-700 dark:text-brand-300' : 'text-subtle'}>
+                {' '}
+                {day.proteinMet ? '· target met' : `· ${targetProtein - protein} g short`}
+              </span>
+            </span>
+            <span class="text-subtle">
+              C {Math.round(day.totals.carbs)} g · F {Math.round(day.totals.fat)} g · Fibre{' '}
+              {Math.round(day.totals.fibre)} g
+            </span>
+          </div>
 
-      <div class="border-line flex flex-wrap items-end gap-3 border-t pt-4">
-        <Segmented
-          name="shop-days"
-          label="Shopping list"
-          options={[
-            { value: '1', label: '1 day' },
-            { value: '3', label: '3 days' },
-            { value: '7', label: '7 days' },
-          ]}
-          value={String(days)}
-          onChange={(v) => setDays(Number(v))}
-          class="min-w-[16rem]"
-        />
-        <button type="button" class="btn btn-secondary h-10 px-4 text-sm" onClick={copyList}>
-          <Icon name="copy" size={14} /> Copy shopping list
-        </button>
-      </div>
-      {status && (
-        <p class="text-brand-700 dark:text-brand-300 text-sm whitespace-pre-line" role="status">
-          {status}
-        </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              class="btn btn-primary h-10 px-4 text-sm"
+              onClick={() => logAll(todayIso())}
+            >
+              Log the day to Today
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary h-10 px-4 text-sm"
+              onClick={() => logAll(shift(todayIso(), 1))}
+            >
+              Log for tomorrow
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost border-line h-10 border px-3 text-sm"
+              onClick={saveAll}
+            >
+              <Icon name="copy" size={14} /> Save as my meals
+            </button>
+          </div>
+
+          <div class="border-line flex flex-wrap items-end gap-3 border-t pt-4">
+            <Segmented
+              name="shop-days"
+              label="Shopping list"
+              options={[
+                { value: '1', label: '1 day' },
+                { value: '3', label: '3 days' },
+                { value: '7', label: '7 days' },
+              ]}
+              value={String(days)}
+              onChange={(v) => setDays(Number(v))}
+              class="min-w-[16rem]"
+            />
+            <button type="button" class="btn btn-secondary h-10 px-4 text-sm" onClick={copyList}>
+              <Icon name="copy" size={14} /> Copy shopping list
+            </button>
+          </div>
+          {status && (
+            <p class="text-brand-700 dark:text-brand-300 text-sm whitespace-pre-line" role="status">
+              {status}
+            </p>
+          )}
+        </>
       )}
     </section>
   );

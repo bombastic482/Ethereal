@@ -63,3 +63,29 @@ describe('day planner', () => {
     expect(shoppingListText(p, 3)).toMatch(/^Shopping list for 3 days\n- /);
   });
 });
+
+describe('week planner', () => {
+  it('plans seven varied days near target, optionally repeating breakfast', async () => {
+    const { planWeek, shoppingListForDays, weekShoppingText } = await import('../day-plan');
+    const week = planWeek(allRecipes(), { kcal: 1800, protein: 130, diet: 'omnivore' });
+    expect(week).toHaveLength(7);
+    const dinners = week.map((d) => d.slots.dinner!.id);
+    expect(new Set(dinners).size).toBe(7); // 21 dinners available: no repeats needed
+    for (const d of week) expect(Math.abs(d.kcalDelta)).toBeLessThanOrEqual(120);
+    const same = planWeek(allRecipes(), {
+      kcal: 1800,
+      protein: 130,
+      diet: 'omnivore',
+      repeatBreakfast: true,
+    });
+    expect(new Set(same.map((d) => d.slots.breakfast!.id)).size).toBe(1);
+    const list = shoppingListForDays(week);
+    expect(list.length).toBeGreaterThan(20);
+    expect(weekShoppingText(week)).toMatch(/^Shopping list for 7 days\n- /);
+  });
+  it('falls back to repeats when the pool is thin', async () => {
+    const { planWeek } = await import('../day-plan');
+    const vegan = planWeek(allRecipes(), { kcal: 1700, protein: 110, diet: 'vegan', days: 7 });
+    expect(vegan.length).toBe(7);
+  });
+});

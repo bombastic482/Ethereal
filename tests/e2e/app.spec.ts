@@ -112,6 +112,15 @@ test.describe('day planner', () => {
     await planner.getByRole('button', { name: 'Copy shopping list' }).click();
     await expect(planner.getByRole('status').last()).toContainText(/Shopping list/);
 
+    // Week mode: seven dated days, each loggable, with a merged list.
+    await planner.getByRole('radio', { name: 'Week' }).check();
+    const weekRows = planner.getByRole('button', { name: /^Log (Mon|Tue|Wed|Thu|Fri|Sat|Sun)/ });
+    await expect(weekRows).toHaveCount(7);
+    await expect(planner.getByRole('list', { name: 'Planned week' })).toContainText(/Breakfast:/);
+    await planner.getByRole('button', { name: 'Copy week shopping list' }).click();
+    await expect(planner.getByRole('status').last()).toContainText(/Shopping list for 7 days/);
+    await planner.getByRole('radio', { name: 'One day' }).check();
+
     await planner.getByRole('button', { name: 'Log the day to Today' }).click();
     await expect(planner.getByRole('status').last()).toContainText(/Logged \d+ items to today/);
     await ready(page, '/today/');

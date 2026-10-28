@@ -132,3 +132,63 @@ export function shoppingListText(plan: DayPlan, days = 1): string {
   const head = days === 1 ? 'Shopping list for one day' : `Shopping list for ${days} days`;
   return [head, ...shoppingList(plan, days).map((l) => `- ${l.name}: ${l.grams} g`)].join('\n');
 }
+
+export interface WeekPlanInput extends Omit<DayPlanInput, 'locked' | 'exclude'> {
+  days?: number;
+  /** Keep the same breakfast every day (most people do). */
+  repeatBreakfast?: boolean;
+  /** Recipe ids to avoid for the whole week. */
+  exclude?: string[];
+}
+
+/**
+ * Plans several days in a row with variety: each day avoids the recipes used on earlier days
+ * until the pool runs thin, then recipes may repeat. Breakfast can be pinned across the week.
+ */
+export function planWeek(recipes: Recipe[], input: WeekPlanInput): DayPlan[] {
+  const days = input.days ?? 7;
+  const out: DayPlan[] = [];
+  const used = new Set<string>(input.exclude ?? []);
+  let breakfast: string | undefined;
+  for (let i = 0; i < days; i++) {
+    const base: DayPlanInput = {
+      kcal: input.kcal,
+      protein: input.protein,
+      diet: input.diet,
+      ...(input.maxMinutes !== undefined ? { maxMinutes: input.maxMinutes } : {}),
+      ...(input.skip ? { skip: input.skip } : {}),
+      ...(breakfast ? { locked: { breakfast } } : {}),
+    };
+    // Prefer unused recipes; if that leaves nothing workable, allow repeats.
+    const plan =
+      planDay(recipes, { ...base, exclude: [...used] }) ??
+      planDay(recipes, { ...base, exclude: input.exclude ?? [] });
+    if (!plan) break;
+    out.push(plan);
+    for (const r of Object.values(plan.slots)) if (r) used.add(r.id);
+    if (input.repeatBreakfast && !breakfast) breakfast = plan.slots.breakfast?.id;
+    if (breakfast) used.delete(breakfast);
+  }
+  return out;
+}
+
+/** Shopping list across several planned days, merged by ingredient. */
+export function shoppingListForDays(plans: DayPlan[]): ShoppingLine[] {
+  const byName = new Map<string, ShoppingLine>();
+  for (const p of plans) {
+    for (const line of shoppingList(p, 1)) {
+      const cur = byName.get(line.name) ?? { name: line.name, grams: 0, uses: [] };
+      cur.grams += line.grams;
+      for (const u of line.uses) if (!cur.uses.includes(u)) cur.uses.push(u);
+      byName.set(line.name, cur);
+    }
+  }
+  return [...byName.values()].sort((a, b) => b.grams - a.grams);
+}
+
+export function weekShoppingText(plans: DayPlan[]): string {
+  return [
+    `Shopping list for ${plans.length} day${plans.length === 1 ? '' : 's'}`,
+    ...shoppingListForDays(plans).map((l) => `- ${l.name}: ${l.grams} g`),
+  ].join('\n');
+}
