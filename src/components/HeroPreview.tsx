@@ -12,14 +12,28 @@ export default function HeroPreview() {
       return;
     }
     let raf = 0;
+    let last = -1;
     const start = performance.now();
     const loop = (now: number) => {
       const s = ((now - start) / 9000) % 1;
-      setT(0.25 + 0.55 * (0.5 - 0.5 * Math.cos(s * Math.PI * 2)));
+      const next = 0.25 + 0.55 * (0.5 - 0.5 * Math.cos(s * Math.PI * 2));
+      // Re-render only when the ring would visibly move (~1/150th), not 60 times a second.
+      if (Math.abs(next - last) > 0.004) {
+        last = next;
+        setT(next);
+      }
       raf = requestAnimationFrame(loop);
     };
+    const onVis = () => {
+      cancelAnimationFrame(raf);
+      if (!document.hidden) raf = requestAnimationFrame(loop);
+    };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, []);
   const target = 1840;
   const eaten = Math.round(target * t);

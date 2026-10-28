@@ -38,7 +38,7 @@ export function Segmented<T extends string>({
           return (
             <label
               key={o.value}
-              class={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl px-2 py-2 text-center text-sm font-medium transition select-none ${
+              class={`relative flex cursor-pointer flex-col items-center justify-center rounded-xl px-2 py-2 text-center text-sm font-medium transition select-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--ring)] has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-[var(--bg-muted)] ${
                 active ? 'bg-elevated text-fg shadow-soft' : 'text-muted hover:text-fg'
               }`}
             >
