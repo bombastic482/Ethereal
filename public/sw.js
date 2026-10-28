@@ -1,5 +1,5 @@
 /* Ethereal service worker: offline-first for hashed assets, network-first for pages. */
-const VERSION = 'v4';
+const VERSION = 'v5';
 const ASSET_CACHE = `ethereal-assets-${VERSION}`;
 const PAGE_CACHE = `ethereal-pages-${VERSION}`;
 const scopePath = new URL(self.registration.scope).pathname; // "/" or "/Ethereal/"
@@ -14,7 +14,7 @@ self.addEventListener('install', (event) => {
           .addAll([
             OFFLINE_URL,
             scopePath,
-            ...['today/', 'plan/', 'track/', 'review/', 'settings/', 'recipes/'].map(
+            ...['today/', 'plan/', 'track/', 'review/', 'settings/', 'recipes/', 'eating-out/'].map(
               (p) => `${scopePath}${p}`,
             ),
           ])

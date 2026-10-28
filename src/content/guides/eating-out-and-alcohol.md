@@ -27,7 +27,7 @@ Banking has a limit. Eating 1,200 calories all week to afford a 4,000-calorie Sa
 
 Restaurant food is designed to taste good, not to be low in calories, and portions are often double what you would serve at home. You do not need to order a side salad to survive. You need a few defaults.
 
-- **Look at the menu before you go.** Deciding while hungry, with the smell of fries in the air, is the worst possible moment. Pick two options in advance.
+- **Look at the menu before you go.** Deciding while hungry, with the smell of fries in the air, is the worst possible moment. Pick two options in advance. For the big chains, the [eating-out page](/eating-out/) has every menu item ranked by protein per calorie, so the decision is already made; tick what you plan to order and log it before you sit down.
 - **Anchor on protein.** Grilled fish, steak, chicken, or a legume-based dish. Protein keeps you full and is the hardest thing to overeat. Hitting your [protein calculator](/tools/protein/) target still matters on a Saturday.
 - **Watch the invisible calories.** Oil, butter, cream sauces, and dressings add hundreds of calories without adding volume. Ask for sauces on the side, or just eat less of them.
 - **Choose one indulgence.** Bread, a drink, dessert, fries: pick the one you actually want and skip the ones you would eat out of habit.
