@@ -166,11 +166,15 @@ function TodayScreenInner() {
   }, [date, today]);
   const [adding, setAdding] = useState<Meal | null>(null);
   const [focusRecipe, setFocusRecipe] = useState<string | null>(null);
-  // Deep link from the recipes page: /today/#recipe=<id> opens the sheet on that recipe.
+  const [focusFood, setFocusFood] = useState<string | null>(null);
+  // Deep links: /today/#recipe=<id> opens the sheet on that recipe; /today/#food=<id> opens the
+  // portion picker for that database food (used by the eating-out page).
   useEffect(() => {
-    const m = /#recipe=([a-z0-9-]+)/.exec(location.hash);
-    if (!m) return;
-    setFocusRecipe(m[1]!);
+    const r = /#recipe=([a-z0-9-]+)/.exec(location.hash);
+    const f = /#food=([a-z0-9-]+)/.exec(location.hash);
+    if (!r && !f) return;
+    if (r) setFocusRecipe(r[1]!);
+    if (f) setFocusFood(f[1]!);
     setAdding(mealForTime(new Date().getHours()));
     history.replaceState(history.state, '', location.pathname + location.search);
   }, []);
@@ -697,9 +701,11 @@ function TodayScreenInner() {
           diet={prefs.diet}
           remainingKcal={day.remaining.kcal}
           focusRecipe={focusRecipe}
+          focusFood={focusFood}
           onClose={() => {
             setAdding(null);
             setFocusRecipe(null);
+            setFocusFood(null);
           }}
         />
       )}
@@ -825,6 +831,7 @@ function AddFoodSheet({
   diet,
   remainingKcal,
   focusRecipe,
+  focusFood,
   onClose,
 }: {
   date: string;
@@ -832,6 +839,7 @@ function AddFoodSheet({
   diet: Diet;
   remainingKcal: number;
   focusRecipe: string | null;
+  focusFood: string | null;
   onClose: () => void;
 }) {
   const [tab, setTab] = useState<Tab>(focusRecipe ? 'meals' : 'search');
@@ -841,6 +849,18 @@ function AddFoodSheet({
   const [remoteState, setRemoteState] = useState<'idle' | 'loading' | 'error' | 'offline'>('idle');
   const [picked, setPicked] = useState<Candidate | null>(null);
   const [diary] = diaryStore.use();
+  // Deep-linked food: pick it as soon as the database is in.
+  useEffect(() => {
+    if (!focusFood) return;
+    let live = true;
+    loadFoods().then(() => {
+      const f = foodById(focusFood);
+      if (live && f) setPicked(fromFood(f));
+    });
+    return () => {
+      live = false;
+    };
+  }, [focusFood]);
   const [barcodeText, setBarcodeText] = useState('');
   const [scanMsg, setScanMsg] = useState<string | null>(null);
 

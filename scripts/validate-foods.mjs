@@ -34,7 +34,10 @@ for (const f of files) {
     for (const k of ['kcal', 'protein', 'carbs', 'fat', 'fibre'])
       if (typeof n[k] !== 'number' || n[k] < 0) bad(`bad ${k}`);
     if (n.kcal > 905 || n.protein > 100 || n.carbs > 100 || n.fat > 100) bad('implausible value');
-    const est = 4 * n.protein + 4 * n.carbs + 9 * n.fat;
+    // UK/EU labels count fibre at 2 kcal/g, US labels at 0; accept anything in that range.
+    const estLow = 4 * n.protein + 4 * n.carbs + 9 * n.fat;
+    const estHigh = estLow + 2 * (n.fibre ?? 0);
+    const est = n.kcal < estLow ? estLow : n.kcal > estHigh ? estHigh : n.kcal;
     const alcohol =
       /beer|wine|lager|cider|vodka|gin|whisky|rum|spirit|prosecco|champagne|liqueur|cocktail|ale\b/i.test(
         x.name,

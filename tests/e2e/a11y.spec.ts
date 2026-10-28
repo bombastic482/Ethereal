@@ -19,6 +19,7 @@ const PAGES = [
   '/settings/',
   '/about/',
   '/changelog/',
+  '/eating-out/',
   '/privacy/',
 ];
 

@@ -31,6 +31,12 @@ const PAGES: Array<{ label: string; href: string; icon: IconName; hint: string }
     hint: 'High-protein meals built from the database, logged in a tap',
   },
   {
+    label: 'Eating out',
+    href: '/eating-out/',
+    icon: 'flame',
+    hint: 'The leanest order at 20 chains, logged in a tap',
+  },
+  {
     label: 'Plan a day',
     href: '/plan/#dayplan-h',
     icon: 'calendar',

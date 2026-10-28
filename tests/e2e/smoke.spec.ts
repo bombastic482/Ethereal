@@ -203,3 +203,20 @@ test('each recipe has its own page with structured data and a log link', async (
   await expect(first).toHaveText(String(base * 2));
   await expect(page.getByText(/Scaled for 2 servings/)).toBeVisible();
 });
+
+test('eating-out page ranks chain items and deep-links a food into Today', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
+  await page.goto('/eating-out/');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/leanest order/);
+  const mcd = page.getByRole('region', { name: /McDonald's menu items/ });
+  await expect(mcd).toBeVisible();
+  const firstLog = mcd.getByRole('link', { name: /^Log .* on Today$/ }).first();
+  const name = (await firstLog.getAttribute('aria-label'))!.replace(/^Log (.*) from .*$/, '$1');
+  await firstLog.click();
+  await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('heading', { name: new RegExp(name.slice(0, 12)) })).toBeVisible();
+  await dialog.getByRole('button', { name: /^Add \d+ g$/ }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByText(new RegExp(name.slice(0, 12))).first()).toBeVisible();
+});
