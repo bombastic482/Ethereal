@@ -124,6 +124,42 @@ describe('nutrition', () => {
     expect(vegan.map((x) => x.food.id)).toEqual(['tofu']);
     expect(suggestFoods({ kcal: 50, protein: 40, carbs: 0, fat: 0, fibre: 0 }, foods)).toEqual([]);
   });
+  it('leaves chain, branded and takeaway items out of whole-food suggestions', () => {
+    const foods = [
+      {
+        id: 'nuggets',
+        name: 'Grilled Nuggets (Chick-fil-A)',
+        category: 'Fast food & takeaway',
+        per100g: { kcal: 115, protein: 22, carbs: 1, fat: 2.5 },
+        servings: [{ label: '8 count', grams: 113 }],
+        veg: 'no' as const,
+      },
+      {
+        id: 'bar',
+        name: 'Protein bar (Grenade)',
+        category: 'Snacks & sweets',
+        per100g: { kcal: 370, protein: 33, carbs: 25, fat: 15 },
+        servings: [{ label: 'bar', grams: 60 }],
+        veg: 'vegetarian' as const,
+      },
+      ...['a', 'b', 'c', 'd', 'e'].map((k) => ({
+        id: `fish-${k}`,
+        name: `White fish ${k}, baked`,
+        category: `Fish ${k}`,
+        per100g: { kcal: 100, protein: 22, carbs: 0, fat: 1 },
+        servings: [{ label: 'fillet', grams: 120 }],
+        veg: 'no' as const,
+      })),
+    ];
+    const ids = suggestFoods(
+      { kcal: 600, protein: 40, carbs: 50, fat: 20, fibre: 10 },
+      foods,
+      'omnivore',
+    ).map((x) => x.food.id);
+    expect(ids).not.toContain('nuggets');
+    expect(ids).not.toContain('bar');
+    expect(ids.length).toBeGreaterThan(0);
+  });
 });
 
 describe('exercise', () => {

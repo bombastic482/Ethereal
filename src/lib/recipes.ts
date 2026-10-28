@@ -143,3 +143,41 @@ export const RECIPE_MEALS: Array<{ value: RecipeMeal | 'all'; label: string }> =
   { value: 'dinner', label: 'Dinner' },
   { value: 'snack', label: 'Snacks' },
 ];
+
+export interface IdeaInput {
+  slot: FoodEntry['meal'];
+  diet: Diet;
+  remainingKcal: number;
+  remainingProtein: number;
+  /** Ids to skip (already shown or logged today). */
+  exclude?: string[];
+}
+
+/**
+ * One recipe for the coming meal that fits what is left today. Prefers covering the remaining
+ * protein, then landing near (but under) the remaining calories. Falls back to a snack when
+ * nothing in the slot fits; null when there is too little room for anything.
+ */
+export function suggestRecipe(recipes: Recipe[], input: IdeaInput): ResolvedRecipe | null {
+  if (input.remainingKcal < 120) return null;
+  const skip = new Set(input.exclude ?? []);
+  const pick = (meal: RecipeMeal): ResolvedRecipe | null => {
+    let best: ResolvedRecipe | null = null;
+    let bestScore = -Infinity;
+    for (const r of recipes) {
+      if (r.meal !== meal || skip.has(r.id) || !suitsDiet(r.diet, input.diet)) continue;
+      const res = resolveRecipe(r);
+      if (!res || res.totals.kcal > input.remainingKcal) continue;
+      const proteinCovered = Math.min(res.totals.protein, Math.max(input.remainingProtein, 0));
+      const slack = input.remainingKcal - res.totals.kcal;
+      // 1 g of protein covered is worth about 25 kcal of slack; leaving a little room is fine.
+      const score = proteinCovered * 25 - Math.max(slack - 100, 0) * 0.6 - r.minutes;
+      if (score > bestScore) {
+        best = res;
+        bestScore = score;
+      }
+    }
+    return best;
+  };
+  return pick(input.slot) ?? (input.slot === 'snack' ? null : pick('snack'));
+}

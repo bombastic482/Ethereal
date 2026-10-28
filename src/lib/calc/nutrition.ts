@@ -184,7 +184,8 @@ export function suggestFoods(
   // Whole foods people actually snack on: skip raw/uncooked items, dry goods and supplements.
   const edible = (f: SuggestFood) =>
     !/\b(raw|uncooked|dry|powder|flour|oil)\b/i.test(f.name) &&
-    !/supplement/i.test(f.category ?? '');
+    !/supplement|fast food|takeaway|ready meal|sweets|drinks/i.test(f.category ?? '') &&
+    !/\([^)]*\)\s*$/.test(f.name); // "(Brand)" suffix: chain and branded items
   let allowed = foods.filter((f) => dietOk(f) && edible(f));
   if (allowed.length < 5) allowed = foods.filter(dietOk);
   const proteinShort = remaining.protein > 15;

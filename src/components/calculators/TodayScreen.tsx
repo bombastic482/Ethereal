@@ -47,6 +47,7 @@ import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { confetti, haptic, onSwipe } from '@/lib/fx';
 import { StarterRecipes } from './StarterRecipes';
+import { RecipeIdea } from './RecipeIdea';
 import { withBase } from '@/lib/url';
 import { Bar } from '../ui/Bar';
 import { BarcodeScanner } from '../ui/BarcodeScanner';
@@ -435,6 +436,16 @@ function TodayScreenInner() {
             ))}
           </ul>
         </section>
+      )}
+
+      {date === today && dbReady && (
+        <RecipeIdea
+          date={date}
+          diet={prefs.diet}
+          remainingKcal={day.remaining.kcal}
+          remainingProtein={day.remaining.protein}
+          loggedIds={dayFood.map((e) => e.foodId ?? '')}
+        />
       )}
 
       {/* Exercise + water */}

@@ -62,3 +62,47 @@ describe('starter recipes', () => {
     expect(diaryStore.get().meals?.filter((m) => m.id === m1.id)).toHaveLength(1);
   });
 });
+
+describe('recipe idea for the next meal', () => {
+  it('fits the remaining calories and prefers protein', async () => {
+    const { suggestRecipe, allRecipes } = await import('../recipes');
+    const r = suggestRecipe(allRecipes(), {
+      slot: 'dinner',
+      diet: 'omnivore',
+      remainingKcal: 700,
+      remainingProtein: 60,
+    });
+    expect(r).not.toBeNull();
+    expect(r!.meal).toBe('dinner');
+    expect(r!.totals.kcal).toBeLessThanOrEqual(700);
+    expect(r!.totals.protein).toBeGreaterThan(45);
+  });
+  it('falls back to a snack when the slot does not fit, respects diet and exclusions', async () => {
+    const { suggestRecipe, allRecipes } = await import('../recipes');
+    const small = suggestRecipe(allRecipes(), {
+      slot: 'dinner',
+      diet: 'vegan',
+      remainingKcal: 220,
+      remainingProtein: 20,
+    });
+    expect(small).not.toBeNull();
+    expect(small!.meal).toBe('snack');
+    expect(small!.diet).toBe('vegan');
+    const again = suggestRecipe(allRecipes(), {
+      slot: 'dinner',
+      diet: 'vegan',
+      remainingKcal: 220,
+      remainingProtein: 20,
+      exclude: [small!.id],
+    });
+    expect(again?.id).not.toBe(small!.id);
+    expect(
+      suggestRecipe(allRecipes(), {
+        slot: 'lunch',
+        diet: 'omnivore',
+        remainingKcal: 80,
+        remainingProtein: 10,
+      }),
+    ).toBeNull();
+  });
+});

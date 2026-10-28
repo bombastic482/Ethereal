@@ -148,12 +148,29 @@ test.describe('saved meals and sharing', () => {
     // Deep link from the public recipes page opens the sheet on that recipe.
     await ready(page, '/recipes/');
     await expect(page.getByRole('heading', { level: 1 })).toContainText(/meals that make/);
-    await page.getByRole('link', { name: 'Log Greek yogurt berry bowl on Today' }).click();
+    await page.getByRole('link', { name: 'Log it: Greek yogurt berry bowl, on Today' }).click();
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     const sheet = page.getByRole('dialog');
     await expect(sheet.getByRole('button', { name: 'Log Greek yogurt berry bowl' })).toBeVisible();
     await sheet.getByRole('button', { name: 'Log Greek yogurt berry bowl' }).click();
     await expect(page.getByText(/blueberr/i).first()).toBeVisible();
+  });
+
+  test('Today offers a recipe idea that fits, which can be shuffled and logged', async ({
+    page,
+  }) => {
+    await ready(page, '/today/');
+    const idea = page.getByRole('region', { name: 'Recipe idea' });
+    await expect(idea).toBeVisible();
+    const first = await idea.getByRole('heading', { level: 2 }).textContent();
+    await idea.getByRole('button', { name: 'Show another recipe idea' }).click();
+    await expect(idea.getByRole('heading', { level: 2 })).not.toHaveText(first!);
+    const name = (await idea.getByRole('heading', { level: 2 }).textContent())!;
+    await idea.getByRole('button', { name: `Log it: ${name}` }).click();
+    await expect(idea.getByRole('status')).toContainText(`Logged ${name}`);
+    // Once eaten, the same idea is not offered again and the diary has its ingredients.
+    await expect(idea.getByRole('heading', { level: 2 })).not.toHaveText(name);
+    await expect(page.getByRole('button', { name: /^Delete / }).first()).toBeVisible();
   });
 
   test('tracker offers a share card once there is a trend', async ({ page }) => {
