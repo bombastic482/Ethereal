@@ -45,7 +45,12 @@ const PAGES: Array<{ label: string; href: string; icon: IconName; hint: string }
 ];
 
 /** ⌘K / Ctrl+K launcher: jump anywhere, or type a food and log it to today without leaving the page. */
-export default function CommandPalette() {
+interface Props {
+  /** Guide articles, injected at build time so the launcher can search them offline. */
+  guides?: Array<{ label: string; href: string; hint: string }>;
+}
+
+export default function CommandPalette({ guides = [] }: Props) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
@@ -105,6 +110,19 @@ export default function CommandPalette() {
       icon: t.icon,
       run: () => go(`/tools/${t.slug}/`),
     }));
+    const guideCmds: Cmd[] =
+      n.length >= 2
+        ? guides
+            .filter((g) => `${g.label} ${g.hint}`.toLowerCase().includes(n))
+            .slice(0, 5)
+            .map((g) => ({
+              id: `g-${g.href}`,
+              label: g.label,
+              hint: `Guide · ${g.hint}`,
+              icon: 'spark' as const,
+              run: () => go(g.href),
+            }))
+        : [];
     const foodCmds: Cmd[] =
       n.length >= 2
         ? searchFoods(q, 6).map((f) => {
@@ -158,9 +176,10 @@ export default function CommandPalette() {
       ...foodCmds,
       ...pages.slice(0, n ? 7 : 5),
       ...tools.slice(0, n ? 8 : 3),
+      ...guideCmds,
       ...theme,
-    ].slice(0, 14);
-  }, [q, foods]);
+    ].slice(0, 16);
+  }, [q, foods, guides]);
 
   useEffect(() => setSel(0), [q]);
   useEffect(() => {

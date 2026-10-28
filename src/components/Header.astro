@@ -5,6 +5,12 @@ import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
 import { NAV, SITE } from '@/lib/site';
 import ThemeToggle from './ThemeToggle.astro';
+import { getCollection } from 'astro:content';
+
+// Guides are searchable from the quick launcher; only title and path travel to the client.
+const guideLinks = (await getCollection('guides', ({ data }) => !data.draft))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title))
+  .map((g) => ({ label: g.data.title, href: `/guides/${g.id}/`, hint: g.data.category }));
 
 const current = Astro.url.pathname;
 const isActive = (href: string) =>
@@ -83,7 +89,7 @@ const isActive = (href: string) =>
       <HeaderCta client:idle compact />
     </div>
   </nav>
-  <CommandPalette client:idle />
+  <CommandPalette client:idle guides={guideLinks} />
 </header>
 
 <script>

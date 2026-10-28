@@ -151,6 +151,8 @@ test('command palette jumps to pages and logs a food', async ({ page }) => {
     await page.keyboard.press('ControlOrMeta+k');
     await expect(dialog).toBeVisible({ timeout: 500 });
   }).toPass({ timeout: 10_000 });
+  await dialog.getByRole('combobox').fill('plateau');
+  await expect(dialog.getByRole('option', { name: /plateaus/i })).toBeVisible();
   await dialog.getByRole('combobox').fill('banana');
   await expect(dialog.getByRole('option').first()).toContainText(/Log Banana/i);
   await page.keyboard.press('Enter');
