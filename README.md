@@ -1,17 +1,15 @@
 # Ethereal — Weight loss, done properly.
 
-Free, science-backed weight-loss planning that runs entirely in your browser.
+Free, science-backed weight-loss planning that runs entirely in your browser. Live at **https://bombastic482.github.io/Ethereal/**.
 
-- **A food diary** (`/today/`): calorie ring, macro bars, four meals, built-in offline food database, Open Food Facts search and barcode scanning, quick add, custom foods, exercise (MET), water, copy-yesterday, favourites and "what to eat next" suggestions.
-- **Saved meals and a shareable progress card**: log a whole meal in one tap; render your trend as an image for the share sheet.
-- **A food diary** (`/today/`): calorie ring, macro bars, four meals, a built-in offline food database, Open Food Facts search and barcode scanning, quick add, custom foods, exercise (MET-based), water, copy-yesterday, favourites and "what to eat next" suggestions.
-- **A personal plan** (`/start/` → `/plan/`): calories, protein, macros and a realistic goal date from your stats, in three steps.
-- **A weight tracker** (`/track/`): daily weigh-ins, an exponentially-smoothed trend line, weekly averages, waist and notes.
-- **Streaks, milestones and a weekly report** on the plan page.
-- **Streaks, milestones and a weekly report** on the plan page.
-- **A two-week check**: compares your measured trend with the plan and recommends a specific calorie adjustment (capped, never below safe floors), which you can apply with one click.
+- **A food diary** (`/today/`): calorie ring, macro bars, four meals, a 1,500+ item offline food database (generic foods, world cuisines, brands and chains), Open Food Facts search and barcode scanning, "type what you ate" natural-language entry, quick add, custom foods, saved meals, exercise (MET-based), steps, water, copy-yesterday, favourites and "what to eat next" suggestions.
+- **68 starter recipes** (`/recipes/`): high-protein meals and snacks built from database foods, with calories and macros computed from the same rows as the diary. Filter by meal, time and diet, see what fits the calories you have left, log in one tap or save as your own meal.
+- **A personal plan** (`/start/` → `/plan/`): calories, protein, macros and a realistic goal date from your stats, in three steps; a measured expenditure estimate once you have logged a few weeks; pattern insights (weekend drift, protein hit rate, consistency).
+- **A weight tracker** (`/track/`): daily weigh-ins, an exponentially-smoothed trend line, weekly averages, waist, hips, chest, arm and thigh, notes, progress photos (stored in IndexedDB) and a shareable progress card.
+- **A weekly review** (`/review/`): the week in numbers, next week's decision applied in one tap, patterns, and a two-line reflection saved per week.
+- **A two-week check**: compares your measured trend with the plan and recommends a specific calorie adjustment (capped, never below safe floors), applied with one click.
 - **Eight calculators** (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water) sharing one profile.
-- **Twelve evidence-based guides**, installable as an app, works offline, exports/imports backups, shares a plan between devices via a link.
+- **Eighteen evidence-based guides**, a quick launcher (⌘K), a first-run tour, calendar reminders (.ics), installable as an app, works offline, exports/imports full backups (plan, weigh-ins, diary, preferences, reflections), shares a plan between devices via a link.
 - **An identity of its own**: warm paper and ink, moss and apricot, serif numerals, paper grain, warm-charcoal dark mode.
 - **No account, no server, no tracking.** Nothing you enter ever leaves your device.
 
@@ -19,7 +17,7 @@ Free, science-backed weight-loss planning that runs entirely in your browser.
 
 ## Why this stack
 
-- **Fast.** Static HTML with ~20 KB of gzipped JavaScript on the heaviest page. Fonts are self-hosted and subset; no third-party requests at all.
+- **Fast.** Static HTML; the diary ships about 10 KB of gzipped JavaScript and loads the food database lazily in chunks. Fonts are self-hosted and subset; no third-party requests at all.
 - **Free to run.** No server, no database. Deploys to GitHub Pages, Cloudflare Pages, Vercel or Netlify on their free tiers.
 - **Private.** Inputs are saved in `localStorage` so every calculator pre-fills. Nothing is ever sent anywhere.
 - **Correct.** Every calculation lives in `src/lib/calc/` as pure functions with unit tests, separate from the UI.
@@ -30,7 +28,7 @@ Free, science-backed weight-loss planning that runs entirely in your browser.
 ```bash
 npm install
 npm run dev        # http://localhost:4321
-npm run verify     # astro check + unit tests + production build
+npm run verify     # data validators + astro check + unit tests + production build
 npm run test:e2e   # Playwright against the built site (run `npm run build` first)
 npm run format     # Prettier
 npm run og         # regenerate public/og.png and icons from scripts/og.mjs
@@ -72,12 +70,11 @@ src/
   lib/log.ts         weigh-in log
   lib/backup.ts      export / import / share-link
   lib/calc/trend.ts  smoothed trend, slope, progress assessment and adjustment
-  lib/calc/nutrition.ts, exercise.ts, streaks.ts  diary maths
+  lib/calc/nutrition.ts, exercise.ts, streaks.ts, expenditure.ts, insights.ts  diary maths
   lib/food-store.ts  food/exercise diary; lib/foods.ts local DB search; lib/off.ts Open Food Facts client
-  data/foods-*.json  built-in food database
-  lib/calc/nutrition.ts, exercise.ts, streaks.ts  diary maths
-  lib/food-store.ts  food/exercise diary; lib/foods.ts local DB search; lib/off.ts Open Food Facts client
-  data/foods-*.json  built-in food database
+  lib/recipes.ts     starter recipes resolved against the database; lib/quick-parse.ts natural-language entry
+  data/foods-*.json  built-in food database (six lazy chunks); data/recipes.json starter recipes
+  scripts/validate-foods.mjs, validate-recipes.mjs  data validators, run in CI
   lib/tools.ts       tool registry (nav, cards, sitemap)
   components/ui/     Preact primitives (inputs, gauge, charts, callouts)
   components/calculators/  one island per tool, plus Onboarding, PlanDashboard, WeightTracker, DataManager
