@@ -22,6 +22,23 @@ describe('food database search', () => {
     expect(r[0]!.name.toLowerCase()).toContain('chicken breast');
     expect(searchFoods('greek yogurt')[0]!.name.toLowerCase()).toMatch(/yogurt|yoghurt/);
   });
+  it('puts everyday staples before dishes, raw variants and brands', () => {
+    expect(searchFoods('chicken')[0]!.id).toBe('chicken-breast-cooked');
+    expect(searchFoods('egg')[0]!.id).toMatch(/^egg-(whole-raw|boiled)$/);
+    expect(searchFoods('yogurt')[0]!.id).toMatch(/^yogurt-greek-0|^yogurt-natural/);
+    expect(searchFoods('rice')[0]!.id).toBe('rice-white-cooked');
+    expect(searchFoods('oats')[0]!.id).toBe('oats-rolled');
+    const brandedFirst = searchFoods('coffee')
+      .slice(0, 3)
+      .some((f) => /\([A-Z][^)]*\)\s*$/.test(f.name));
+    expect(brandedFirst).toBe(false);
+  });
+  it('understands aliases people type', () => {
+    expect(searchFoods('coke')[0]!.id).toBe('coca-cola-classic');
+    expect(searchFoods('yoghurt').length).toBeGreaterThan(5);
+    expect(searchFoods('prawn').length).toBeGreaterThan(0);
+    expect(searchFoods('courgette').some((f) => /courgette|zucchini/i.test(f.name))).toBe(true);
+  });
   it('is tolerant of case, accents and partial words', () => {
     expect(searchFoods('CHICK').length).toBeGreaterThan(0);
     expect(searchFoods('chèése').some((f) => /cheese/i.test(f.name))).toBe(true);

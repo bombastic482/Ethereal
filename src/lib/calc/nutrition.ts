@@ -185,7 +185,7 @@ export function suggestFoods(
   const edible = (f: SuggestFood) =>
     !/\b(raw|uncooked|dry|powder|flour|oil)\b/i.test(f.name) &&
     !/supplement|fast food|takeaway|ready meal|sweets|drinks/i.test(f.category ?? '') &&
-    !/\([^)]*\)\s*$/.test(f.name); // "(Brand)" suffix: chain and branded items
+    !/\([A-Z][^)]*\)\s*$/.test(f.name); // "(Brand)" suffix: chain and branded items
   let allowed = foods.filter((f) => dietOk(f) && edible(f));
   if (allowed.length < 5) allowed = foods.filter(dietOk);
   const proteinShort = remaining.protein > 15;
