@@ -467,7 +467,7 @@ function DataManagerInner() {
           <h3 class="font-semibold">Tour</h3>
 
           <p class="text-muted mt-1 text-sm">
-            Three cards that explain how Ethereal works. Shown once on Today.
+            Four cards that explain how Ethereal works. Shown once on Today.
           </p>
 
           <button
