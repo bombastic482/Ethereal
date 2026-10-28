@@ -128,7 +128,7 @@ const jsonLd = [
                 class="text-brand-700 dark:text-brand-300 text-sm font-semibold"
                 href={withBase('/recipes/')}
               >
-                All 68 →
+                All {builtRecipes.length} →
               </a>
             </div>
             <ul class="mt-4 grid gap-3 sm:grid-cols-3">
@@ -170,7 +170,7 @@ const jsonLd = [
               Build a plan
             </a>
             <a href={withBase('/recipes/')} class="btn btn-ghost border-line border text-sm">
-              Browse 68 recipes
+              Browse {builtRecipes.length} recipes
             </a>
           </div>
         </aside>

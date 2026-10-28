@@ -11,6 +11,11 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
     text: 'Type what you ate in plain words, scan a barcode, or search 1,500+ foods that work offline. The ring shows what is left.',
   },
   {
+    icon: 'egg',
+    title: 'Never wonder what to cook',
+    text: '68 recipes built from the same database. Today suggests one that fits what you have left, and the planner builds a whole day or week that lands on your numbers, shopping list included.',
+  },
+  {
     icon: 'scale',
     title: 'Weigh in, ignore the noise',
     text: 'Daily weigh-ins are smoothed into a trend. A salty dinner will never look like failure again.',

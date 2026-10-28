@@ -1,5 +1,6 @@
 ---
 import { withBase } from '@/lib/url';
+import { builtRecipes } from '@/lib/recipes-build';
 import Base from '@/layouts/Base.astro';
 ---
 
@@ -95,9 +96,9 @@ import Base from '@/layouts/Base.astro';
           <tr>
             <td>Recipes and day planner</td>
             <td>
-              68 recipes assembled from database rows, so totals are the ingredient sums; the day
-              planner searches every breakfast–lunch–dinner–snack combination for the one closest to
-              your calorie target with protein covered
+              {builtRecipes.length} recipes assembled from database rows, so totals are the
+              ingredient sums; the day planner searches every breakfast–lunch–dinner–snack
+              combination for the one closest to your calorie target with protein covered
             </td>
             <td>
               Meals carry 25 g+ protein, snacks 10 g+; over-shooting calories is penalised more than

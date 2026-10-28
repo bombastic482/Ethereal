@@ -133,6 +133,8 @@ test('first-run tour shows once on Today and can be completed', async ({ page })
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('heading', { name: /log in seconds/i })).toBeVisible();
   await dialog.getByRole('button', { name: /next/i }).click();
+  await expect(dialog.getByRole('heading', { name: /never wonder what to cook/i })).toBeVisible();
+  await dialog.getByRole('button', { name: /next/i }).click();
   await dialog.getByRole('button', { name: /next/i }).click();
   await expect(dialog.getByRole('link', { name: /build my plan/i })).toBeVisible();
   await dialog.getByRole('button', { name: /skip tour/i }).click();

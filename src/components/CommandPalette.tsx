@@ -28,7 +28,7 @@ const PAGES: Array<{ label: string; href: string; icon: IconName; hint: string }
     label: 'Starter recipes',
     href: '/recipes/',
     icon: 'egg',
-    hint: '68 high-protein meals, log in a tap',
+    hint: 'High-protein meals built from the database, logged in a tap',
   },
   {
     label: 'Plan a day',

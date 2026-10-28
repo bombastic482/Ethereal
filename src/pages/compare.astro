@@ -2,6 +2,7 @@
 import { Icon } from '@/components/ui/Icon';
 import Base from '@/layouts/Base.astro';
 import { withBase } from '@/lib/url';
+import { builtRecipes } from '@/lib/recipes-build';
 
 const rows: Array<[string, string, string, string, string]> = [
   [
@@ -28,7 +29,7 @@ const rows: Array<[string, string, string, string, string]> = [
   ['Import your history from another app', 'Yes, from their CSV exports', 'No', 'No', 'Partly'],
   [
     'Recipes and a day/week planner that hit your targets',
-    'Yes, 68 recipes, free',
+    `Yes, ${builtRecipes.length} recipes, free`,
     'Recipes only',
     'Recipes only',
     'No',
