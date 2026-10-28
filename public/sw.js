@@ -29,6 +29,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+/** Keeps a cache to its newest `max` entries (insertion order is oldest first). */
+async function trim(cache, max) {
+  const keys = await cache.keys();
+  if (keys.length <= max) return;
+  await Promise.all(keys.slice(0, keys.length - max).map((k) => cache.delete(k)));
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -42,7 +49,10 @@ self.addEventListener('fetch', (event) => {
         const hit = await cache.match(request);
         if (hit) return hit;
         const res = await fetch(request);
-        if (res.ok) cache.put(request, res.clone());
+        if (res.ok) {
+          await cache.put(request, res.clone());
+          trim(cache, 160); // old deploys' hashed files would otherwise pile up forever
+        }
         return res;
       }),
     );

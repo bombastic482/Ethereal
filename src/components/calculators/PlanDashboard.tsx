@@ -205,8 +205,12 @@ function PlanDashboardInner() {
   const goalDate = summary?.timeline?.goalDate ?? null;
   const weeksLeft = summary?.timeline?.weeksToGoal ?? null;
 
+  // Default weigh-in value: today's entry, else the last real weigh-in, else the profile. Never
+  // the smoothed trend: logging the trend would feed the smoother its own output and flatten it.
+  const lastRaw =
+    todayEntry?.weightKg ?? log.entries[log.entries.length - 1]?.weightKg ?? profile.weightKg;
   const quickSave = () => {
-    const kg = imperial ? lbToKg(quick ?? kgToLb(latestTrend)) : (quick ?? latestTrend);
+    const kg = imperial ? lbToKg(quick ?? kgToLb(lastRaw)) : (quick ?? lastRaw);
     upsertEntry({ date: today, weightKg: round(kg, 2) });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -358,12 +362,7 @@ function PlanDashboardInner() {
             <NumberField
               id="quick-weight"
               label={todayEntry ? 'Update today' : 'Weight'}
-              value={
-                quick ??
-                (imperial
-                  ? kgToLb(todayEntry?.weightKg ?? latestTrend)
-                  : (todayEntry?.weightKg ?? latestTrend))
-              }
+              value={quick ?? (imperial ? kgToLb(lastRaw) : lastRaw)}
               min={imperial ? 55 : 25}
               max={imperial ? 880 : 400}
               step={0.1}

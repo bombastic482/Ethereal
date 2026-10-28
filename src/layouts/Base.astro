@@ -75,6 +75,11 @@ const { class: cls, ...seo } = Astro.props;
         ev.newDocument.documentElement.dataset.theme =
           document.documentElement.dataset.theme ?? 'light';
       });
+      // The install prompt often fires before the settings island hydrates; keep it for later.
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        (window as unknown as { __installPrompt?: Event }).__installPrompt = e;
+      });
       if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
         const base = import.meta.env.BASE_URL.endsWith('/')
           ? import.meta.env.BASE_URL

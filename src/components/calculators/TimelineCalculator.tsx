@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { calculateCalorieTarget } from '@/lib/calc/energy';
 import { humaniseWeeks, projectTimeline } from '@/lib/calc/timeline';
 import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/units';
+import { planStore } from '@/lib/plan';
 import { resetProfile, useProfile } from '@/lib/profile';
 import { CalculatorShell } from '../ui/CalculatorShell';
 import { Callout } from '../ui/Callout';
@@ -15,8 +16,17 @@ import { Stat } from '../ui/Stat';
 export default function TimelineCalculator() {
   const [profile, update] = useProfile();
   const imperial = profile.units === 'imperial';
-  const goalKg = profile.goalWeightKg ?? round(profile.weightKg * 0.9, 1);
+  const [plan] = planStore.use();
+  // One goal weight across the site: the plan's when a plan exists, else the tool's own.
+  const goalKg =
+    (plan.active ? plan.goalWeightKg : undefined) ??
+    profile.goalWeightKg ??
+    round(profile.weightKg * 0.9, 1);
   const [intake, setIntake] = useState<number | null>(null);
+  const setGoal = (goalWeightKg: number) => {
+    update({ goalWeightKg });
+    if (plan.active) planStore.patch({ goalWeightKg });
+  };
 
   const suggested = useMemo(() => {
     try {
@@ -75,7 +85,7 @@ export default function TimelineCalculator() {
               max={880}
               step={0.5}
               suffix="lb"
-              onChange={(lb) => update({ goalWeightKg: lbToKg(lb) })}
+              onChange={(lb) => setGoal(lbToKg(lb))}
             />
           ) : (
             <NumberField
@@ -86,7 +96,7 @@ export default function TimelineCalculator() {
               max={400}
               step={0.1}
               suffix="kg"
-              onChange={(goalWeightKg) => update({ goalWeightKg })}
+              onChange={(goalWeightKg) => setGoal(goalWeightKg)}
             />
           )}
           <RangeField

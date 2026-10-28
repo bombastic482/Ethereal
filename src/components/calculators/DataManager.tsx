@@ -49,6 +49,8 @@ function DataManagerInner() {
       setInstall(e as InstallPromptEvent);
     };
     const onInstalled = () => setInstalled(true);
+    const early = (window as unknown as { __installPrompt?: InstallPromptEvent }).__installPrompt;
+    if (early) setInstall(early);
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
     if (window.matchMedia('(display-mode: standalone)').matches) setInstalled(true);
