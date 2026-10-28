@@ -237,9 +237,14 @@ export default function PlanDashboard() {
               : `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}, ${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`}
           </h2>
         </div>
-        <a href={withBase('/start/')} class="btn btn-secondary text-sm">
-          Edit plan
-        </a>
+        <div class="flex gap-2">
+          <a href={withBase('/review/')} class="btn btn-secondary text-sm">
+            <Icon name="calendar" size={16} /> Weekly review
+          </a>
+          <a href={withBase('/start/')} class="btn btn-secondary text-sm">
+            Edit plan
+          </a>
+        </div>
       </div>
 
       {plan.goal !== 'maintain' && (

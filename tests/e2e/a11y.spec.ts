@@ -4,6 +4,8 @@ import { expect, test } from '@playwright/test';
 const PAGES = [
   '/',
   '/today/',
+  '/review/',
+  '/compare/',
   '/tools/',
   '/tools/calories/',
   '/tools/timeline/',
@@ -20,6 +22,7 @@ for (const path of PAGES) {
   test(`no serious accessibility violations on ${path}`, async ({ page }) => {
     // Entrance animations leave text at partial opacity for a moment; sample the settled page.
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
     await page.goto(path);
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     const results = await new AxeBuilder({ page })

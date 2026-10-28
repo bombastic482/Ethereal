@@ -63,3 +63,13 @@ export function exerciseKcal(met: number, weightKg: number, minutes: number): nu
 export function exerciseNetKcal(met: number, weightKg: number, minutes: number): number {
   return exerciseKcal(Math.max(0, met - 1), weightKg, minutes);
 }
+
+/**
+ * Gross kcal for walking a number of steps: ~0.57 kcal per kg per km at ~1,300 steps/km (0.75 m stride),
+ * i.e. roughly 0.045 kcal per step for an 80 kg adult. Steps above a sedentary baseline (3,000) count
+ * toward activity; routine steps are already inside the activity multiplier.
+ */
+export function stepsKcal(steps: number, weightKg: number, baseline = 3000): number {
+  const extra = Math.max(0, steps - baseline);
+  return round((extra / 1300) * 0.57 * weightKg);
+}

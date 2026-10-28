@@ -13,8 +13,11 @@ import foodsA from '@/data/foods-a.json';
 import foodsB from '@/data/foods-b.json';
 import foodsC from '@/data/foods-c.json';
 import foodsD from '@/data/foods-d.json';
+import foodsE from '@/data/foods-e.json';
+import foodsF from '@/data/foods-f.json';
 
-const foodCount = foodsA.length + foodsB.length + foodsC.length + foodsD.length;
+const foodCount =
+  foodsA.length + foodsB.length + foodsC.length + foodsD.length + foodsE.length + foodsF.length;
 const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
 
 const heroArt = ['hero.webp', 'hero.png', 'hero.jpg'].find((f) =>

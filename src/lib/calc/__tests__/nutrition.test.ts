@@ -8,7 +8,7 @@ import {
   summariseDay,
   type FoodEntry,
 } from '../nutrition';
-import { ACTIVITIES, activity, exerciseKcal, exerciseNetKcal } from '../exercise';
+import { ACTIVITIES, activity, exerciseKcal, exerciseNetKcal, stepsKcal } from '../exercise';
 import { currentStreak, longestStreak, shift, weightMilestones } from '../streaks';
 
 const egg: FoodEntry = {
@@ -133,6 +133,11 @@ describe('exercise', () => {
     expect(exerciseKcal(0, 80, 30)).toBe(0);
     expect(activity('jog')?.met).toBe(8.3);
     expect(new Set(ACTIVITIES.map((a) => a.key)).size).toBe(ACTIVITIES.length);
+  });
+  it('converts steps above baseline to kcal', () => {
+    expect(stepsKcal(3000, 80)).toBe(0);
+    expect(stepsKcal(10000, 80)).toBe(246);
+    expect(stepsKcal(0, 80)).toBe(0);
   });
 });
 

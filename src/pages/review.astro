@@ -1,0 +1,15 @@
+---
+import WeeklyReview from '@/components/calculators/WeeklyReview';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Weekly Review"
+  description="Your week in numbers, the patterns worth acting on, the calorie decision for next week, and a two-line reflection. All on your device."
+  path="/review/"
+  heading="Weekly review"
+  lede="Sunday night, five minutes: what happened, what it means, what changes."
+  current="review"
+>
+  <WeeklyReview client:load />
+</AppLayout>

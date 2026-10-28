@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 /** Astro removes the `ssr` attribute from an island once it has hydrated. */
 async function ready(page: Page, path: string) {
+  await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
   await page.goto(path);
   await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 }
@@ -121,4 +122,18 @@ test.describe('calculators', () => {
     await expect(results.getByText(/^200\s*g$/).first()).toBeVisible(); // carbs g
     await expect(results.getByText(/^67\s*g$/).first()).toBeVisible(); // fat g
   });
+});
+
+test('first-run tour shows once on Today and can be completed', async ({ page }) => {
+  await page.goto('/today/');
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: /log in seconds/i })).toBeVisible();
+  await dialog.getByRole('button', { name: /next/i }).click();
+  await dialog.getByRole('button', { name: /next/i }).click();
+  await expect(dialog.getByRole('link', { name: /build my plan/i })).toBeVisible();
+  await dialog.getByRole('button', { name: /skip tour/i }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 });

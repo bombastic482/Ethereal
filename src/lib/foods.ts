@@ -24,7 +24,9 @@ export function loadFoods(): Promise<Food[]> {
     import('@/data/foods-b.json'),
     import('@/data/foods-c.json'),
     import('@/data/foods-d.json'),
-  ]).then(([a, b, c, d]) => {
+    import('@/data/foods-e.json'),
+    import('@/data/foods-f.json'),
+  ]).then(([a, b, c, d, e, f]) => {
     FOODS = [
       ...(a.default as Food[]),
       ...(b.default as Food[]),

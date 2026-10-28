@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { ACTIVITIES, exerciseKcal } from '@/lib/calc/exercise';
+import { ACTIVITIES, exerciseKcal, stepsKcal } from '@/lib/calc/exercise';
 import {
   MEALS,
   mealForTime,
@@ -31,6 +31,7 @@ import {
   removeFood,
   saveCustomFood,
   saveMealFromEntries,
+  setSteps,
   setWater,
   toggleFavourite,
   updateFood,
@@ -157,6 +158,8 @@ export default function TodayScreen() {
     [dayFood, dayEx, targets, prefs.eatBack],
   );
   const water = diary.water[date] ?? 0;
+  const steps = diary.steps?.[date] ?? 0;
+  const stepsBurn = stepsKcal(steps, profile.weightKg);
   const streak = useMemo(
     () =>
       currentStreak(
@@ -440,6 +443,38 @@ export default function TodayScreen() {
               <Icon name="bolt" size={14} /> Add
             </button>
           </header>
+          <div class="mt-3 flex items-end gap-2">
+            <NumberField
+              id="steps-today"
+              label="Steps today"
+              value={steps}
+              min={0}
+              max={100000}
+              step={500}
+              dp={0}
+              inputMode="numeric"
+              onChange={(n) => setSteps(date, n)}
+              class="flex-1"
+              hint={
+                steps > 0
+                  ? `≈ ${stepsBurn} kcal above a 3,000-step baseline`
+                  : 'From your phone or watch. Routine steps are already in your activity level.'
+              }
+            />
+            <div class="flex gap-1 pb-6">
+              {[2000, 5000].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  class="btn btn-secondary h-[46px] px-3 text-xs"
+                  onClick={() => setSteps(date, steps + n)}
+                  aria-label={`+${n / 1000}k steps`}
+                >
+                  +{n / 1000}k
+                </button>
+              ))}
+            </div>
+          </div>
           {dayEx.length > 0 && (
             <ul class="mt-3 grid gap-1 text-sm">
               {dayEx.map((e) => (

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function ready(page: Page, path: string) {
+  await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
   await page.goto(path);
   await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 }

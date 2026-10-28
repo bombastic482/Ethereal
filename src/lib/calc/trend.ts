@@ -5,8 +5,12 @@ export interface WeighIn {
   /** ISO date, YYYY-MM-DD (local). One entry per day. */
   date: string;
   weightKg: number;
-  /** Optional waist circumference in cm. */
+  /** Optional circumferences in cm. */
   waistCm?: number;
+  hipsCm?: number;
+  chestCm?: number;
+  armCm?: number;
+  thighCm?: number;
   note?: string;
 }
 

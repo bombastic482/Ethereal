@@ -1,5 +1,6 @@
 ---
 import TodayScreen from '@/components/calculators/TodayScreen';
+import Tour from '@/components/ui/Tour';
 import AppLayout from '@/layouts/AppLayout.astro';
 ---
 
@@ -12,4 +13,5 @@ import AppLayout from '@/layouts/AppLayout.astro';
   current="today"
 >
   <TodayScreen client:load />
+  <Tour client:idle />
 </AppLayout>

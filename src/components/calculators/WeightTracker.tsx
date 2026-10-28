@@ -24,6 +24,11 @@ export default function WeightTracker() {
   const [date, setDate] = useState(today);
   const [weight, setWeight] = useState<number | null>(null);
   const [waist, setWaist] = useState<number | null>(null);
+  const [more, setMore] = useState(false);
+  const [hips, setHips] = useState<number | null>(null);
+  const [chest, setChest] = useState<number | null>(null);
+  const [arm, setArm] = useState<number | null>(null);
+  const [thigh, setThigh] = useState<number | null>(null);
   const [note, setNote] = useState('');
   const [range, setRange] = useState<Range>('90');
   const [flash, setFlash] = useState<string | null>(null);
@@ -71,10 +76,16 @@ export default function WeightTracker() {
     if (kgRaw === null) return;
     const weightKg = round(imperial ? lbToKg(kgRaw) : kgRaw, 2);
     const waistCm = waist === null ? undefined : round(imperial ? inToCm(waist) : waist, 1);
+    const cm = (v: number | null) => (v === null ? undefined : round(imperial ? inToCm(v) : v, 1));
+    const extras = { hipsCm: cm(hips), chestCm: cm(chest), armCm: cm(arm), thighCm: cm(thigh) };
+    const extraEntries = Object.fromEntries(
+      Object.entries(extras).filter(([, v]) => v !== undefined),
+    );
     upsertEntry({
       date,
       weightKg,
       ...(waistCm !== undefined ? { waistCm } : {}),
+      ...extraEntries,
       ...(note.trim() ? { note: note.trim() } : {}),
     });
     setFlash(`Saved ${w(weightKg)} for ${date}`);
@@ -142,6 +153,58 @@ export default function WeightTracker() {
               hint="At the navel, relaxed"
             />
           </div>
+          <button
+            type="button"
+            class="text-brand-700 dark:text-brand-300 justify-self-start text-sm font-semibold"
+            onClick={() => setMore((v) => !v)}
+            aria-expanded={more}
+          >
+            {more ? 'Hide' : 'Add'} more measurements
+          </button>
+          {more && (
+            <div class="grid grid-cols-2 gap-4">
+              <NumberField
+                id="tr-hips"
+                label="Hips"
+                value={hips ?? (imperial ? 36 : 92)}
+                min={imperial ? 5 : 15}
+                max={imperial ? 100 : 250}
+                step={0.5}
+                suffix={imperial ? 'in' : 'cm'}
+                onChange={setHips}
+              />
+              <NumberField
+                id="tr-chest"
+                label="Chest"
+                value={chest ?? (imperial ? 36 : 92)}
+                min={imperial ? 5 : 15}
+                max={imperial ? 100 : 250}
+                step={0.5}
+                suffix={imperial ? 'in' : 'cm'}
+                onChange={setChest}
+              />
+              <NumberField
+                id="tr-arm"
+                label="Upper arm"
+                value={arm ?? (imperial ? 36 : 92)}
+                min={imperial ? 5 : 15}
+                max={imperial ? 100 : 250}
+                step={0.5}
+                suffix={imperial ? 'in' : 'cm'}
+                onChange={setArm}
+              />
+              <NumberField
+                id="tr-thigh"
+                label="Thigh"
+                value={thigh ?? (imperial ? 36 : 92)}
+                min={imperial ? 5 : 15}
+                max={imperial ? 100 : 250}
+                step={0.5}
+                suffix={imperial ? 'in' : 'cm'}
+                onChange={setThigh}
+              />
+            </div>
+          )}
           <div>
             <label class="label" for="tr-note">
               Note (optional)
@@ -244,6 +307,59 @@ export default function WeightTracker() {
           )}
         </section>
       </div>
+
+      {entries.some((e) => e.waistCm || e.hipsCm || e.chestCm || e.armCm || e.thighCm) && (
+        <section class="surface p-5 sm:p-6" aria-label="Measurements">
+          <h3 class="font-bold tracking-tight">Measurements</h3>
+
+          <p class="text-subtle text-xs">
+            Tape measurements catch fat loss the scale hides, especially when you lift. Measure
+            relaxed, same spot, every two weeks.
+          </p>
+
+          <div class="mt-3 overflow-x-auto">
+            <table class="tabular w-full text-sm">
+              <thead>
+                <tr class="text-subtle text-left text-xs">
+                  <th class="pb-2 font-semibold">Date</th>
+
+                  {['Waist', 'Hips', 'Chest', 'Arm', 'Thigh'].map((h) => (
+                    <th key={h} class="pb-2 font-semibold">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {[...entries]
+
+                  .filter((e) => e.waistCm || e.hipsCm || e.chestCm || e.armCm || e.thighCm)
+
+                  .reverse()
+
+                  .slice(0, 12)
+
+                  .map((e) => (
+                    <tr key={e.date} class="border-line border-t">
+                      <td class="py-1.5">{fmtDate(e.date)}</td>
+
+                      {[e.waistCm, e.hipsCm, e.chestCm, e.armCm, e.thighCm].map((v, i) => (
+                        <td key={i} class="py-1.5">
+                          {v === undefined
+                            ? '—'
+                            : imperial
+                              ? `${round(cmToIn(v), 1)} in`
+                              : `${v} cm`}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {entries.length > 0 && (
         <div class="grid gap-6 lg:grid-cols-2">

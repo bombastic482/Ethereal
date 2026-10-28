@@ -33,6 +33,8 @@ export interface Diary {
   exercise: ExerciseEntry[];
   /** Glasses of water per day: { 'YYYY-MM-DD': n }. */
   water: Record<string, number>;
+  /** Steps per day: { 'YYYY-MM-DD': n }. */
+  steps?: Record<string, number>;
   customFoods: CustomFood[];
   /** Food ids (local or barcode) used recently, newest first. */
   recent: string[];
@@ -206,4 +208,9 @@ export function logSavedMeal(
 export function deleteSavedMeal(id: string): void {
   const d = diaryStore.get();
   diaryStore.set({ ...d, meals: (d.meals ?? []).filter((m) => m.id !== id) });
+}
+
+export function setSteps(date: string, steps: number): void {
+  const d = diaryStore.get();
+  diaryStore.set({ ...d, steps: { ...(d.steps ?? {}), [date]: Math.max(0, Math.round(steps)) } });
 }
