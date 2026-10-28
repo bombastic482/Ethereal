@@ -1,7 +1,12 @@
 // Validates the built-in food database: shape, unique ids, plausible values, energy consistency.
 import { readFileSync } from 'node:fs';
 
-const files = ['src/data/foods-a.json', 'src/data/foods-b.json'];
+const files = [
+  'src/data/foods-a.json',
+  'src/data/foods-b.json',
+  'src/data/foods-c.json',
+  'src/data/foods-d.json',
+];
 const VEG = new Set(['vegan', 'vegetarian', 'no']);
 const TAGS = new Set([
   'high-protein',
