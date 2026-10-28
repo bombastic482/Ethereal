@@ -29,6 +29,8 @@ function WeeklyReviewInner() {
   const [log] = logStore.use();
   const [refl, patchRefl] = reflectionStore.use();
   const today = todayIso();
+  const recentlyAdjusted =
+    plan.lastAdjustedOn !== null && daysBetween(plan.lastAdjustedOn, today) < 14;
   const [end, setEnd] = useState(today);
   const start = shift(end, -6);
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => shift(start, i)), [start]);
@@ -214,14 +216,12 @@ function WeeklyReviewInner() {
           <span class="chip">
             {logged.length}/7 days logged · {weighIns} weigh-ins
           </span>
-          <button
-            type="button"
-            class="btn btn-secondary h-9 px-3 text-sm"
-            onClick={copySummary}
-            aria-live="polite"
-          >
+          <button type="button" class="btn btn-secondary h-9 px-3 text-sm" onClick={copySummary}>
             <Icon name={copied ? 'check' : 'copy'} size={14} /> {copied ? 'Copied' : 'Copy summary'}
           </button>
+          <span class="sr-only" role="status">
+            {copied ? 'Summary copied to the clipboard' : ''}
+          </span>
           <button
             type="button"
             class="btn btn-secondary h-9 px-3 text-sm"
@@ -315,7 +315,7 @@ function WeeklyReviewInner() {
                   <p class="text-muted mt-2 text-sm leading-relaxed">
                     <strong class="text-fg">{report.headline}.</strong> {report.detail}
                   </p>
-                  {report.recommendedCalories && plan.lastAdjustedOn !== today && (
+                  {report.recommendedCalories && !recentlyAdjusted && (
                     <button
                       type="button"
                       class="btn btn-primary mt-4"

@@ -3,8 +3,12 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 interface Props {
   id: string;
   label: string;
-  value: number;
+  /** null means "not set": the field shows `placeholder` and commits nothing until typed in. */
+  value: number | null;
   onChange: (v: number) => void;
+  /** Called when the user clears a field that allows null. */
+  onClear?: () => void;
+  placeholder?: string;
   min?: number;
   max?: number;
   step?: number;
@@ -25,6 +29,8 @@ export function NumberField({
   label,
   value,
   onChange,
+  onClear,
+  placeholder,
   min,
   max,
   step = 1,
@@ -34,14 +40,15 @@ export function NumberField({
   inputMode = 'decimal',
   class: cls,
 }: Props) {
-  const [text, setText] = useState(() => String(fmt(value, dp)));
+  const show = (v: number | null) => (v === null ? '' : String(fmt(v, dp)));
+  const [text, setText] = useState(() => show(value));
   const [invalid, setInvalid] = useState(false);
   const focused = useRef(false);
 
   // Sync from props only when the field is not being edited (e.g. after a unit toggle).
   useEffect(() => {
     if (!focused.current) {
-      setText(String(fmt(value, dp)));
+      setText(show(value));
       setInvalid(false);
     }
   }, [value, dp]);
@@ -49,6 +56,11 @@ export function NumberField({
   const commit = (raw: string) => {
     setText(raw);
     const n = Number(raw.replace(',', '.'));
+    if (raw.trim() === '' && onClear) {
+      setInvalid(false);
+      onClear();
+      return;
+    }
     if (raw.trim() === '' || !Number.isFinite(n)) {
       setInvalid(true);
       return;
@@ -62,7 +74,7 @@ export function NumberField({
     focused.current = false;
     const n = Number(text.replace(',', '.'));
     if (!Number.isFinite(n) || text.trim() === '') {
-      setText(String(fmt(value, dp)));
+      setText(onClear ? '' : show(value));
       setInvalid(false);
       return;
     }
@@ -86,6 +98,7 @@ export function NumberField({
           type="number"
           inputMode={inputMode}
           value={text}
+          placeholder={placeholder}
           min={min}
           max={max}
           step={step}

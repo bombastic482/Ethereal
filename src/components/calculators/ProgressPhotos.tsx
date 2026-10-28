@@ -36,8 +36,10 @@ export default function ProgressPhotos() {
   }, []);
   useEffect(() => {
     if (photos.length >= 2) {
-      setA((v) => v ?? photos[0]!.id);
-      setB((v) => v ?? photos[photos.length - 1]!.id);
+      const has = (id: string | null) => id !== null && photos.some((p) => p.id === id);
+      // Keep a valid selection; a deleted photo falls back to first/last.
+      setA((v) => (has(v) ? v : photos[0]!.id));
+      setB((v) => (has(v) ? v : photos[photos.length - 1]!.id));
     }
   }, [photos]);
 

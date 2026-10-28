@@ -56,12 +56,12 @@ export function weightMilestones(
   const done = losing ? startKg - trendKg : trendKg - startKg;
   const list: Milestone[] = [];
   const unit = imperial ? 4.5359237 : 5; // 10 lb or 5 kg steps
-  for (let k = unit; k < total; k += unit) {
+  for (let k = unit, i = 1; k < total; k += unit, i++) {
     const label = imperial
       ? `${Math.round(k / 0.45359237)} lb ${losing ? 'lost' : 'gained'}`
       : `${Math.round(k)} kg ${losing ? 'lost' : 'gained'}`;
     list.push({
-      key: `kg-${k}`,
+      key: `${imperial ? 'lb' : 'kg'}-step-${i}`,
       label,
       detail: `${losing ? 'Down' : 'Up'} to ${(losing ? startKg - k : startKg + k).toFixed(1)} kg`,
       reached: done >= k,

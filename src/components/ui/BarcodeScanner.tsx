@@ -35,13 +35,12 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
           video: { facingMode: { ideal: 'environment' } },
           audio: false,
         });
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
+        stop = () => stream.getTracks().forEach((t) => t.stop());
+        if (cancelled) return stop();
         const el = video.current!;
         el.srcObject = stream;
         await el.play();
+        if (cancelled) return stop();
         let done = false;
         const finish = (code: string) => {
           if (done) return;
@@ -70,6 +69,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
         } else {
           setEngine('zxing');
           const { BrowserMultiFormatReader } = await import('@zxing/browser');
+          if (cancelled) return stop();
           const reader = new BrowserMultiFormatReader();
           const controls = await reader.decodeFromStream(stream, el, (result) => {
             if (result) finish(result.getText());
@@ -78,6 +78,7 @@ export function BarcodeScanner({ onDetected, onClose }: Props) {
             controls.stop();
             stream.getTracks().forEach((t) => t.stop());
           };
+          if (cancelled) stop();
         }
       } catch (e) {
         setError(

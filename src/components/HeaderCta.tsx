@@ -44,7 +44,7 @@ export default function HeaderCta({ compact = false }: { compact?: boolean }) {
     label = 'Today';
   }
   return (
-    <a href={withBase('/today/')} class={`btn btn-secondary ${cls}`} aria-label="Open today">
+    <a href={withBase('/today/')} class={`btn btn-secondary ${cls}`}>
       <Icon name="flame" size={16} />
       {label}
     </a>

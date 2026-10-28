@@ -20,10 +20,13 @@ export function ResultActions({ summary, onReset }: Props) {
   };
   return (
     <div class="flex flex-wrap gap-2">
-      <button type="button" class="btn btn-secondary text-sm" onClick={copy} aria-live="polite">
+      <button type="button" class="btn btn-secondary text-sm" onClick={copy}>
         <Icon name={copied ? 'check' : 'copy'} size={16} />
         {copied ? 'Copied' : 'Copy results'}
       </button>
+      <span class="sr-only" role="status">
+        {copied ? 'Results copied to the clipboard' : ''}
+      </span>
       <button type="button" class="btn btn-secondary text-sm" onClick={() => window.print()}>
         Print
       </button>

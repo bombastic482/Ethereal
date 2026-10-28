@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState, useRef } from 'preact/hooks';
 import { ACTIVITY_LEVELS, type Goal } from '@/lib/calc/energy';
 import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { humaniseWeeks } from '@/lib/calc/timeline';
@@ -6,7 +6,7 @@ import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/un
 import { readShareLink } from '@/lib/backup';
 import { prefsStore } from '@/lib/food-store';
 import { upsertEntry } from '@/lib/log';
-import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
+import { buildPlanSummary, planStore, todayIso, DEFAULT_PLAN } from '@/lib/plan';
 import { updateProfile, useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
@@ -42,8 +42,14 @@ function OnboardingInner() {
   }, []);
 
   // Sensible default goal weight the first time through.
+  const goalTouched = useRef(false);
   useEffect(() => {
-    if (!plan.active && plan.goalWeightKg === 70 && profile.weightKg !== 78) {
+    if (goalTouched.current) return;
+    if (
+      !plan.active &&
+      plan.goalWeightKg === DEFAULT_PLAN.goalWeightKg &&
+      profile.weightKg !== 78
+    ) {
       patchPlan({ goalWeightKg: round(profile.weightKg * 0.9, 1) });
     }
   }, [profile.weightKg]);
@@ -183,7 +189,10 @@ function OnboardingInner() {
                     max={880}
                     step={0.5}
                     suffix="lb"
-                    onChange={(lb) => patchPlan({ goalWeightKg: lbToKg(lb) })}
+                    onChange={(lb) => {
+                      goalTouched.current = true;
+                      patchPlan({ goalWeightKg: lbToKg(lb) });
+                    }}
                   />
                 ) : (
                   <NumberField
@@ -194,7 +203,10 @@ function OnboardingInner() {
                     max={400}
                     step={0.1}
                     suffix="kg"
-                    onChange={(goalWeightKg) => patchPlan({ goalWeightKg })}
+                    onChange={(goalWeightKg) => {
+                      goalTouched.current = true;
+                      patchPlan({ goalWeightKg });
+                    }}
                   />
                 )}
                 {goalInvalid && (

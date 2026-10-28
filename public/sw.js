@@ -1,5 +1,5 @@
 /* Ethereal service worker: offline-first for hashed assets, network-first for pages. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const ASSET_CACHE = `ethereal-assets-${VERSION}`;
 const PAGE_CACHE = `ethereal-pages-${VERSION}`;
 const scopePath = new URL(self.registration.scope).pathname; // "/" or "/Ethereal/"
@@ -49,13 +49,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML navigations: network-first, fall back to cache, then the offline page.
-  if (request.mode === 'navigate') {
+  // HTML pages: network-first, fall back to cache, then the offline page. Astro's client
+  // router fetches pages with a plain fetch (not mode "navigate"), so detect HTML by the
+  // Accept header too; otherwise soft navigations would get stale cached pages forever.
+  const wantsHtml =
+    request.mode === 'navigate' ||
+    request.destination === 'document' ||
+    (request.headers.get('accept') ?? '').includes('text/html');
+  if (wantsHtml) {
     event.respondWith(
       fetch(request)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy));
+          // Cache only good, final responses; a cached 404 or redirect would be served offline.
+          if (res.ok && !res.redirected) {
+            const copy = res.clone();
+            caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy));
+          }
           return res;
         })
         .catch(

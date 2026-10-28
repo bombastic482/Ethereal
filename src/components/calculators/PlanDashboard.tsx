@@ -37,6 +37,10 @@ function PlanDashboardInner() {
   const [diary] = diaryStore.use();
   const [prefs] = prefsStore.use();
   const today = todayIso();
+  // An accepted adjustment runs for two weeks before the check is offered again,
+  // otherwise the same slope would stack another cut every day.
+  const recentlyAdjusted =
+    plan.lastAdjustedOn !== null && daysBetween(plan.lastAdjustedOn, today) < 14;
   const imperial = profile.units === 'imperial';
   const [quick, setQuick] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
@@ -516,7 +520,7 @@ function PlanDashboardInner() {
               />
             </div>
           )}
-          {report.recommendedCalories && plan.lastAdjustedOn !== today && (
+          {report.recommendedCalories && !recentlyAdjusted && (
             <div class="mt-5 flex flex-wrap items-center gap-3">
               <button type="button" class="btn btn-primary" onClick={applyRecommendation}>
                 Set target to {formatNumber(report.recommendedCalories)} kcal
@@ -525,6 +529,12 @@ function PlanDashboardInner() {
                 Applies for the next two weeks, then we re-check.
               </span>
             </div>
+          )}
+          {report.recommendedCalories && recentlyAdjusted && plan.lastAdjustedOn && (
+            <p class="text-subtle mt-4 text-xs">
+              Adjusted {daysBetween(plan.lastAdjustedOn, today)} day(s) ago. The next change is
+              offered after two weeks on the new target, so one slope is not acted on twice.
+            </p>
           )}
           {plan.calorieOverride !== null && (
             <button

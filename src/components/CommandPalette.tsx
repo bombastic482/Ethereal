@@ -49,6 +49,8 @@ export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [sel, setSel] = useState(0);
+  const openRef = useRef(open);
+  openRef.current = open;
   const [foods, setFoods] = useState<Food[]>([]);
   const input = useRef<HTMLInputElement>(null);
 
@@ -57,13 +59,17 @@ export default function CommandPalette() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setOpen((v) => !v);
-      } else if (e.key === 'Escape') setOpen(false);
+      } else if (e.key === 'Escape' && openRef.current) {
+        // Top-most layer owns Escape: stop it reaching a sheet underneath.
+        e.stopPropagation();
+        setOpen(false);
+      }
     };
-    window.addEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey, true);
     const onOpen = () => setOpen(true);
     window.addEventListener('ethereal:palette', onOpen);
     return () => {
-      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keydown', onKey, true);
       window.removeEventListener('ethereal:palette', onOpen);
     };
   }, []);
@@ -157,6 +163,11 @@ export default function CommandPalette() {
   }, [q, foods]);
 
   useEffect(() => setSel(0), [q]);
+  useEffect(() => {
+    document
+      .getElementById(commands[sel] ? `cmd-${commands[sel].id}` : '')
+      ?.scrollIntoView({ block: 'nearest' });
+  }, [sel, commands]);
   if (!open) return null;
   return (
     <Layer>
@@ -204,9 +215,13 @@ export default function CommandPalette() {
           <ul id="cmd-list" role="listbox" class="max-h-[50vh] overflow-y-auto p-2">
             {commands.length === 0 && <li class="text-subtle px-3 py-4 text-sm">No matches.</li>}
             {commands.map((c, i) => (
-              <li key={c.id} id={`cmd-${c.id}`} role="option" aria-selected={i === sel}>
+              <li key={c.id}>
                 <button
                   type="button"
+                  id={`cmd-${c.id}`}
+                  role="option"
+                  aria-selected={i === sel}
+                  tabIndex={-1}
                   class={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm ${i === sel ? 'bg-muted' : 'hover:bg-muted'}`}
                   onMouseEnter={() => setSel(i)}
                   onClick={c.run}

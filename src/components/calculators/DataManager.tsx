@@ -48,10 +48,14 @@ function DataManagerInner() {
       e.preventDefault();
       setInstall(e as InstallPromptEvent);
     };
+    const onInstalled = () => setInstalled(true);
     window.addEventListener('beforeinstallprompt', onPrompt);
-    window.addEventListener('appinstalled', () => setInstalled(true));
+    window.addEventListener('appinstalled', onInstalled);
     if (window.matchMedia('(display-mode: standalone)').matches) setInstalled(true);
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
   const say = (tone: 'success' | 'warn', text: string) => {
@@ -234,7 +238,11 @@ function DataManagerInner() {
               type="file"
               accept="application/json,.json"
               class="sr-only"
-              onChange={(e) => importFile((e.target as HTMLInputElement).files?.[0])}
+              onChange={(e) => {
+                const el = e.target as HTMLInputElement;
+                importFile(el.files?.[0]);
+                el.value = ''; // so the same file can be chosen again
+              }}
             />
           </label>
           <button type="button" class="btn btn-secondary text-sm" onClick={share}>
@@ -318,7 +326,12 @@ function DataManagerInner() {
           <button
             type="button"
             class="btn btn-primary justify-self-start"
-            onClick={() => install.prompt()}
+            onClick={() => {
+              // A prompt event can be used once; drop it whatever the user chose.
+              const ev = install;
+              setInstall(null);
+              void ev.prompt().catch(() => undefined);
+            }}
           >
             <Icon name="bolt" size={16} /> Install Ethereal
           </button>

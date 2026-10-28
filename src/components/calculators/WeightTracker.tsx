@@ -72,9 +72,9 @@ function WeightTrackerInner() {
   }));
 
   const save = () => {
-    const kgRaw =
-      weight ?? (latest ? (imperial ? kgToLb(latest.weightKg) : latest.weightKg) : null);
-    if (kgRaw === null) return;
+    // Same fallback as the field shows: last entry, else the profile weight.
+    const shown = latest ? latest.weightKg : profile.weightKg;
+    const kgRaw = weight ?? (imperial ? kgToLb(shown) : shown);
     const weightKg = round(imperial ? lbToKg(kgRaw) : kgRaw, 2);
     const waistCm = waist === null ? undefined : round(imperial ? inToCm(waist) : waist, 1);
     const cm = (v: number | null) => (v === null ? undefined : round(imperial ? inToCm(v) : v, 1));
@@ -119,7 +119,7 @@ function WeightTrackerInner() {
               class="field"
               value={date}
               max={today}
-              onInput={(e) => setDate((e.target as HTMLInputElement).value || today)}
+              onChange={(e) => setDate((e.target as HTMLInputElement).value || today)}
             />
           </div>
           <div class="grid grid-cols-2 gap-4">
@@ -145,7 +145,9 @@ function WeightTrackerInner() {
             <NumberField
               id="tr-waist"
               label="Waist (optional)"
-              value={waist ?? (imperial ? 34 : 86)}
+              value={waist}
+              placeholder={imperial ? '34' : '86'}
+              onClear={() => setWaist(null)}
               min={imperial ? 15 : 40}
               max={imperial ? 100 : 250}
               step={0.5}
@@ -167,7 +169,9 @@ function WeightTrackerInner() {
               <NumberField
                 id="tr-hips"
                 label="Hips"
-                value={hips ?? (imperial ? 36 : 92)}
+                value={hips}
+                placeholder={imperial ? '36' : '92'}
+                onClear={() => setHips(null)}
                 min={imperial ? 5 : 15}
                 max={imperial ? 100 : 250}
                 step={0.5}
@@ -177,7 +181,9 @@ function WeightTrackerInner() {
               <NumberField
                 id="tr-chest"
                 label="Chest"
-                value={chest ?? (imperial ? 36 : 92)}
+                value={chest}
+                placeholder={imperial ? '36' : '92'}
+                onClear={() => setChest(null)}
                 min={imperial ? 5 : 15}
                 max={imperial ? 100 : 250}
                 step={0.5}
@@ -187,7 +193,9 @@ function WeightTrackerInner() {
               <NumberField
                 id="tr-arm"
                 label="Upper arm"
-                value={arm ?? (imperial ? 36 : 92)}
+                value={arm}
+                placeholder={imperial ? '12' : '30'}
+                onClear={() => setArm(null)}
                 min={imperial ? 5 : 15}
                 max={imperial ? 100 : 250}
                 step={0.5}
@@ -197,7 +205,9 @@ function WeightTrackerInner() {
               <NumberField
                 id="tr-thigh"
                 label="Thigh"
-                value={thigh ?? (imperial ? 36 : 92)}
+                value={thigh}
+                placeholder={imperial ? '22' : '55'}
+                onClear={() => setThigh(null)}
                 min={imperial ? 5 : 15}
                 max={imperial ? 100 : 250}
                 step={0.5}

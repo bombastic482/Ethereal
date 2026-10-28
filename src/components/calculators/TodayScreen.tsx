@@ -72,10 +72,14 @@ interface Candidate {
   barcode?: string;
 }
 
+/** Appends the 100 g option unless the food already offers it (45 foods and many labels do). */
+const withHundred = (servings: Array<{ label: string; grams: number }>) =>
+  servings.some((s) => s.grams === 100) ? servings : [...servings, { label: '100 g', grams: 100 }];
+
 const fromFood = (f: Food): Candidate => ({
   name: f.name,
   per100g: f.per100g,
-  servings: [...f.servings, { label: '100 g', grams: 100 }],
+  servings: withHundred(f.servings),
   source: 'local',
   foodId: f.id,
 });
@@ -83,12 +87,11 @@ const fromOff = (p: OffProduct): Candidate => ({
   name: p.name,
   ...(p.brand ? { brand: p.brand } : {}),
   per100g: p.per100g,
-  servings: [
-    ...(p.servingGrams
+  servings: withHundred(
+    p.servingGrams
       ? [{ label: p.servingLabel ?? `${p.servingGrams} g`, grams: p.servingGrams }]
-      : []),
-    { label: '100 g', grams: 100 },
-  ],
+      : [],
+  ),
   source: 'off',
   barcode: p.barcode,
 });
@@ -1014,7 +1017,6 @@ function AddFoodSheet({
             </>
           )}
         </div>
-        <span class="sr-only">{diet}</span>
       </div>
     </Layer>
   );

@@ -42,7 +42,7 @@ test.describe('plan and tracker', () => {
     // Header CTA now shows the calorie target (inside the menu on small screens)
     if ((page.viewportSize()?.width ?? 1280) < 768)
       await page.getByRole('button', { name: /open menu/i }).click();
-    await expect(page.getByRole('link', { name: /open today/i }).first()).toContainText('kcal');
+    await expect(page.getByRole('link', { name: /kcal (left|over)/i }).first()).toBeVisible();
 
     // Tracker shows the entry and accepts another
     await ready(page, '/track/');

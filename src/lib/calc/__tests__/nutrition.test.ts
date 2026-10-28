@@ -189,10 +189,10 @@ describe('streaks and milestones', () => {
   });
   it('builds reached milestones plus the next one', () => {
     const m = weightMilestones(92, 86.5, 80);
-    expect(m.find((x) => x.key === 'kg-5')?.reached).toBe(true);
+    expect(m.find((x) => x.key === 'kg-step-1')?.reached).toBe(true);
     expect(m.find((x) => x.key === 'pct-5')?.reached).toBe(true);
     expect(m.filter((x) => !x.reached)).toHaveLength(1);
-    expect(['kg-10', 'pct-10']).toContain(m.filter((x) => !x.reached)[0]!.key); // whichever is nearer
+    expect(['kg-step-2', 'pct-10']).toContain(m.filter((x) => !x.reached)[0]!.key); // whichever is nearer
     expect(weightMilestones(92, null, 80)).toEqual([]);
     expect(weightMilestones(80, 80, 80)).toEqual([]);
   });
