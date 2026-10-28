@@ -321,6 +321,19 @@
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
+@utility kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.05rem 0.35rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--fg-muted);
+  background: var(--bg-elevated);
+}
 @utility prose-ethereal {
   color: var(--fg);
   line-height: 1.75;

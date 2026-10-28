@@ -158,6 +158,36 @@ function TodayScreenInner() {
   }, []);
   const [exAdding, setExAdding] = useState(false);
   const [dbReady, setDbReady] = useState(false);
+  const [showKeys, setShowKeys] = useState(false);
+  // Keyboard shortcuts for desktop: only when no field or dialog has focus.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (t?.isContentEditable || document.querySelector('[role="dialog"]')) return;
+      if (e.key === 'a') {
+        e.preventDefault();
+        setAdding(mealForTime(new Date().getHours()));
+      } else if (e.key === 'w') {
+        e.preventDefault();
+        setWater(date, (diaryStore.get().water[date] ?? 0) + 1);
+        haptic();
+      } else if (e.key === 'e') {
+        e.preventDefault();
+        setExAdding(true);
+      } else if (e.key === '?') {
+        e.preventDefault();
+        setShowKeys((v) => !v);
+      } else if (e.key === 'ArrowLeft' && e.shiftKey) {
+        setDate(shift(date, -1));
+      } else if (e.key === 'ArrowRight' && e.shiftKey && date < today) {
+        setDate(shift(date, 1));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [date, today]);
   useEffect(() => {
     loadFoods().then(() => setDbReady(true));
   }, []);
@@ -282,6 +312,25 @@ function TodayScreenInner() {
         </button>
       </div>
 
+      {showKeys && (
+        <div
+          class="surface-muted hidden items-center justify-between gap-3 px-4 py-2.5 text-xs md:flex"
+          role="status"
+        >
+          <span class="text-muted">
+            <kbd class="kbd">a</kbd> add food · <kbd class="kbd">w</kbd> glass of water ·{' '}
+            <kbd class="kbd">e</kbd> exercise · <kbd class="kbd">⇧←</kbd>/<kbd class="kbd">⇧→</kbd>{' '}
+            change day · <kbd class="kbd">⌘K</kbd> launcher · <kbd class="kbd">?</kbd> hide this
+          </span>
+          <button
+            type="button"
+            class="btn btn-ghost h-7 px-2 text-xs"
+            onClick={() => setShowKeys(false)}
+          >
+            Close
+          </button>
+        </div>
+      )}
       {date === today && (
         <a
           href={withBase('/track/')}

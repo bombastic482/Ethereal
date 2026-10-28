@@ -173,6 +173,20 @@ test.describe('saved meals and sharing', () => {
     await expect(page.getByRole('button', { name: /^Delete / }).first()).toBeVisible();
   });
 
+  test('keyboard shortcuts on Today open the sheet and add water', async ({ page }) => {
+    await ready(page, '/today/');
+    await page.locator('body').click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press('?');
+    if ((page.viewportSize()?.width ?? 1280) >= 768)
+      await expect(page.getByText(/add food · /)).toBeVisible(); // the hint is desktop-only
+    await page.keyboard.press('w');
+    await expect(page.getByText(/^1 of \d+ glasses/)).toBeVisible();
+    await page.keyboard.press('a');
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
   test('tracker offers a share card once there is a trend', async ({ page }) => {
     await ready(page, '/track/');
     await page.locator('#tr-date').fill('2026-01-01');
