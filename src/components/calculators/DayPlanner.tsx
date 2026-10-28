@@ -45,7 +45,8 @@ function DayPlannerInner() {
   const [noSnack, setNoSnack] = useState(false);
   const [locks, setLocks] = useState<Set<RecipeMeal>>(new Set());
   const [excluded, setExcluded] = useState<string[]>([]);
-  const [day, setDay] = useState<DayPlan | null>(null);
+  // undefined: not computed yet (render the skeleton); null: nothing fits the targets.
+  const [day, setDay] = useState<DayPlan | null | undefined>(undefined);
   const [status, setStatus] = useState<string | null>(null);
   const [days, setDays] = useState(1);
   const [mode, setMode] = useState<'day' | 'week'>('day');
@@ -87,7 +88,7 @@ function DayPlannerInner() {
       exclude: opts.exclude ?? excluded,
     });
 
-  const lockedIds = (from: DayPlan | null, only?: Set<RecipeMeal>) => {
+  const lockedIds = (from: DayPlan | null | undefined, only?: Set<RecipeMeal>) => {
     const out: Partial<Record<RecipeMeal, string>> = {};
     if (!from) return out;
     for (const s of SLOTS) {
@@ -247,10 +248,31 @@ function DayPlannerInner() {
       month: 'short',
     });
 
-  if (!ready) {
+  if (!ready || day === undefined) {
+    // Reserve roughly the planner's final height so the page does not jump when recipes land.
     return (
-      <section class="surface p-5 sm:p-6" aria-label="Plan a day">
-        <p class="text-muted text-sm">Loading recipes…</p>
+      <section
+        class="surface grid min-h-[34rem] content-start gap-5 p-5 sm:p-6"
+        aria-label="Plan a day"
+        aria-busy="true"
+      >
+        <div>
+          <h2 class="text-lg font-bold tracking-tight">Plan a day that hits your numbers</h2>
+          <p class="text-muted mt-1 text-sm">
+            Four recipes from the starter set, chosen so the day lands on{' '}
+            <span class="tabular font-semibold">{targetKcal.toLocaleString('en-US')}</span> kcal
+            with at least <span class="tabular font-semibold">{targetProtein}</span> g protein. Swap
+            any slot, lock what you like, then log the lot.
+          </p>
+          <p class="text-subtle mt-2 text-xs" role="status">
+            Loading recipes…
+          </p>
+        </div>
+        <ul class="grid gap-3" aria-hidden="true">
+          {SLOTS.map((s) => (
+            <li key={s} class="surface-muted h-20 animate-pulse" />
+          ))}
+        </ul>
       </section>
     );
   }
