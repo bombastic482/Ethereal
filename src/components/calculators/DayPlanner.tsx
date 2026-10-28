@@ -400,7 +400,7 @@ function DayPlannerInner() {
                   </div>
                   <a
                     class="font-semibold tracking-tight hover:underline"
-                    href={withBase(`/recipes/#${r.id}`)}
+                    href={withBase(`/recipes/${r.id}/`)}
                   >
                     {r.name}
                   </a>

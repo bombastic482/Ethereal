@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState, useMemo } from 'preact/hooks';
 import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { buildShareLink, clearAllData, createBackup, logToCsv, restoreBackup } from '@/lib/backup';
+import { calculateHydration } from '@/lib/calc/hydration';
 import { diaryStore, foodCsv, prefsStore } from '@/lib/food-store';
 import { applyImport, previewImport, type ImportPreview } from '@/lib/import-csv';
 import { logStore } from '@/lib/log';
@@ -81,6 +82,23 @@ function DataManagerInner() {
       .catch(() => say('warn', 'Could not read that file.'));
   };
 
+  const suggestedGlasses = useMemo(() => {
+    try {
+      return Math.min(
+        20,
+        Math.max(
+          4,
+          calculateHydration({
+            weightKg: profile.weightKg,
+            exerciseMinutes: 0,
+            climate: 'temperate',
+          }).glasses,
+        ),
+      );
+    } catch {
+      return 8;
+    }
+  }, [profile.weightKg]);
   const [csvPreview, setCsvPreview] = useState<ImportPreview | null>(null);
   const importCsv = (file: File | undefined) => {
     if (!file) return;
@@ -221,8 +239,17 @@ function DataManagerInner() {
           dp={0}
           suffix="glasses"
           onChange={(waterGoalGlasses) => patchPrefs({ waterGoalGlasses })}
-          hint="250 ml glasses. 8 is a sensible default for most adults."
+          hint={`250 ml glasses. For your weight the hydration calculator suggests about ${suggestedGlasses}.`}
         />
+        {suggestedGlasses !== prefs.waterGoalGlasses && (
+          <button
+            type="button"
+            class="btn btn-ghost border-line -mt-2 justify-self-start border text-xs"
+            onClick={() => patchPrefs({ waterGoalGlasses: suggestedGlasses })}
+          >
+            Use {suggestedGlasses} glasses
+          </button>
+        )}
       </section>
 
       <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Your data">

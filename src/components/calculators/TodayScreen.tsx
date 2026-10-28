@@ -14,6 +14,9 @@ import {
   type Nutrients,
 } from '@/lib/calc/nutrition';
 import { currentStreak, shift } from '@/lib/calc/streaks';
+import { slopeKgPerDay, trendSeries } from '@/lib/calc/trend';
+import { formatWeight } from '@/lib/calc/units';
+import { logStore } from '@/lib/log';
 import { formatNumber, round } from '@/lib/calc/units';
 
 const OZ = 28.3495;
@@ -127,6 +130,7 @@ function TodayScreenInner() {
   const [plan] = planStore.use();
   const [diary] = diaryStore.use();
   const [prefs, patchPrefs] = prefsStore.use();
+  const [log] = logStore.use();
   const today = todayIso();
   const [date, setDate] = useState(today);
   // A tab left open past midnight should show the new day when you come back to it.
@@ -190,6 +194,18 @@ function TodayScreenInner() {
   const water = diary.water[date] ?? 0;
   const steps = diary.steps?.[date] ?? 0;
   const stepsBurn = stepsKcal(steps, profile.weightKg);
+  // Weight trend strip: closes the loop between food and the scale on the same screen.
+  const trend = useMemo(() => {
+    const series = trendSeries(log.entries);
+    const last = series[series.length - 1];
+    if (!last) return null;
+    const slope = slopeKgPerDay(series, 14);
+    return {
+      kg: last.trendKg,
+      perWeek: slope === null ? null : -slope * 7,
+      weighedToday: log.entries.some((e) => e.date === today),
+    };
+  }, [log.entries, today]);
   const streak = useMemo(
     () =>
       currentStreak(
@@ -265,6 +281,35 @@ function TodayScreenInner() {
           ›
         </button>
       </div>
+
+      {date === today && (
+        <a
+          href={withBase('/track/')}
+          class="surface-muted flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+        >
+          <span class="flex min-w-0 items-center gap-2">
+            <Icon name="scale" size={16} class="text-brand-700 dark:text-brand-300 shrink-0" />
+            {trend ? (
+              <span class="truncate">
+                <span class="font-semibold">Trend {formatWeight(trend.kg, profile.units)}</span>
+                {trend.perWeek !== null && (
+                  <span class="text-muted">
+                    {' '}
+                    · {trend.perWeek > 0 ? '↓' : '↑'}{' '}
+                    {formatWeight(Math.abs(trend.perWeek), profile.units, 2)}/wk
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span class="text-muted">No weigh-ins yet</span>
+            )}
+          </span>
+          <span class="text-brand-700 dark:text-brand-300 shrink-0 text-xs font-semibold">
+            {trend?.weighedToday ? 'Weighed in ✓' : 'Weigh in →'}
+          </span>
+          <span class="sr-only">. Opens the weight tracker.</span>
+        </a>
+      )}
 
       {/* Ring + macros */}
       <section

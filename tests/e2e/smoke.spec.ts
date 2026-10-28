@@ -181,3 +181,17 @@ test('recipes page filters by diet and time without a framework', async ({ page 
   await filters.getByRole('button', { name: '15 minutes or less' }).click();
   await expect(filters).toContainText(/68 of 68 recipes/);
 });
+
+test('each recipe has its own page with structured data and a log link', async ({ page }) => {
+  await page.goto('/recipes/shakshuka-with-feta/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Shakshuka with feta');
+  await expect(page.getByRole('heading', { name: 'Ingredients' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nutrition per serving' })).toBeVisible();
+  const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
+  expect(ld.join(' ')).toContain('"@type":"Recipe"');
+  expect(ld.join(' ')).toContain('"recipeIngredient"');
+  await expect(
+    page.getByRole('link', { name: /Log it to Today: Shakshuka with feta/ }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: /More breakfasts like this/ })).toBeVisible();
+});

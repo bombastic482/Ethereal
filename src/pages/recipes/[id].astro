@@ -1,0 +1,215 @@
+---
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { builtRecipes, DIET_LABEL, type BuiltRecipe } from '@/lib/recipes-build';
+import { SITE } from '@/lib/site';
+import { absoluteUrl, withBase } from '@/lib/url';
+
+export function getStaticPaths() {
+  return builtRecipes.map((r) => ({ params: { id: r.id }, props: { recipe: r } }));
+}
+
+const { recipe } = Astro.props as { recipe: BuiltRecipe };
+const r = recipe;
+const site = Astro.site;
+const path = `/recipes/${r.id}/`;
+const r0 = Math.round;
+const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
+const related = builtRecipes
+  .filter((x) => x.meal === r.meal && x.id !== r.id)
+  .sort((a, b) => Math.abs(a.totals.kcal - r.totals.kcal) - Math.abs(b.totals.kcal - r.totals.kcal))
+  .slice(0, 3);
+const grams = r.ingredients.reduce((s, i) => s + i.grams, 0);
+const per100 = {
+  kcal: (r.totals.kcal / grams) * 100,
+  protein: (r.totals.protein / grams) * 100,
+  carbs: (r.totals.carbs / grams) * 100,
+  fat: (r.totals.fat / grams) * 100,
+};
+const proteinPct = r0(((r.totals.protein * 4) / r.totals.kcal) * 100);
+const title = `${r.name}: ${r0(r.totals.kcal)} kcal, ${r0(r.totals.protein)} g protein`;
+const description = `${r.name} in ${r.minutes} minutes. ${r0(r.totals.kcal)} kcal, ${r0(r.totals.protein)} g protein, ${r0(r.totals.carbs)} g carbs, ${r0(r.totals.fat)} g fat per serving, computed from the Ethereal food database. Log it to your diary in one tap.`;
+const jsonLd = [
+  {
+    '@type': 'Recipe',
+    name: r.name,
+    description,
+    author: { '@type': 'Organization', name: SITE.name },
+    recipeCategory: MEAL_LABEL[r.meal],
+    recipeCuisine: 'International',
+    totalTime: `PT${r.minutes}M`,
+    recipeYield: '1 serving',
+    recipeIngredient: r.ingredients.map((it) => `${it.grams} g ${it.name}`),
+    recipeInstructions: [{ '@type': 'HowToStep', text: r.method }],
+    keywords: [...r.tags, 'weight loss', 'high protein'].join(', '),
+    ...(r.diet === 'vegan' || r.diet === 'vegetarian'
+      ? { suitableForDiet: `https://schema.org/${r.diet === 'vegan' ? 'Vegan' : 'Vegetarian'}Diet` }
+      : {}),
+    nutrition: {
+      '@type': 'NutritionInformation',
+      servingSize: '1 serving',
+      calories: `${r0(r.totals.kcal)} kcal`,
+      proteinContent: `${r0(r.totals.protein)} g`,
+      carbohydrateContent: `${r0(r.totals.carbs)} g`,
+      fatContent: `${r0(r.totals.fat)} g`,
+      fiberContent: `${r0(r.totals.fibre)} g`,
+    },
+    mainEntityOfPage: absoluteUrl(path, site),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/', site) },
+      { '@type': 'ListItem', position: 2, name: 'Recipes', item: absoluteUrl('/recipes/', site) },
+      { '@type': 'ListItem', position: 3, name: r.name, item: absoluteUrl(path, site) },
+    ],
+  },
+];
+---
+
+<Base title={title} description={description} path={path} jsonLd={jsonLd}>
+  <article class="container-page pt-10 pb-16 sm:pt-14">
+    <nav aria-label="Breadcrumb" class="text-subtle text-xs">
+      <a class="hover:text-fg" href={withBase('/')}>
+        Home
+      </a>{' '}
+      ›{' '}
+      <a class="hover:text-fg" href={withBase('/recipes/')}>
+        Recipes
+      </a>{' '}
+      ›{' '}
+      <a class="hover:text-fg" href={withBase(`/recipes/#${r.meal}`)}>
+        {MEAL_LABEL[r.meal]}s
+      </a>
+    </nav>
+    <header class="mt-4 max-w-3xl">
+      <p class="text-brand-700 dark:text-brand-300 text-sm font-semibold tracking-wide uppercase">
+        {MEAL_LABEL[r.meal]} · {r.minutes} min{DIET_LABEL[r.diet] ? ` · ${DIET_LABEL[r.diet]}` : ''}
+      </p>
+      <h1 class="font-display mt-2 text-5xl leading-[0.95] tracking-tight sm:text-6xl">{r.name}</h1>
+      <p class="text-muted mt-4 text-lg">{r.method}</p>
+      <div class="mt-6 flex flex-wrap items-center gap-2">
+        <a
+          class="btn btn-primary"
+          href={withBase(`/today/#recipe=${r.id}`)}
+          aria-label={`Log it to Today: ${r.name}`}
+        >
+          Log it to Today <Icon name="arrow" size={16} />
+        </a>
+        <a class="btn btn-secondary" href={withBase('/plan/#dayplan-h')}>
+          Plan a day around it
+        </a>
+        {r.tags.map((t) => (
+          <span class="chip">{t}</span>
+        ))}
+      </div>
+    </header>
+
+    <div class="mt-10 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+      <section class="surface p-6" aria-labelledby="ingredients-h">
+        <h2 id="ingredients-h" class="text-xl font-bold tracking-tight">
+          Ingredients
+        </h2>
+        <p class="text-subtle mt-1 text-xs">One serving. Weights are for the state named.</p>
+        <ul class="mt-4 grid gap-2">
+          {r.ingredients.map((it) => (
+            <li class="border-line flex items-baseline justify-between gap-4 border-b pb-2 text-sm last:border-0">
+              <span>{it.name}</span>
+              <span class="tabular text-subtle shrink-0">
+                {it.grams} g · {r0((it.per100g.kcal * it.grams) / 100)} kcal
+              </span>
+            </li>
+          ))}
+        </ul>
+        <h2 class="mt-8 text-xl font-bold tracking-tight">Method</h2>
+        <p class="mt-2 leading-relaxed">{r.method}</p>
+      </section>
+
+      <section class="surface p-6" aria-labelledby="nutrition-h">
+        <h2 id="nutrition-h" class="text-xl font-bold tracking-tight">
+          Nutrition per serving
+        </h2>
+        <dl class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            ['Calories', `${r0(r.totals.kcal)}`, 'kcal'],
+            ['Protein', `${r0(r.totals.protein)}`, 'g'],
+            ['Carbs', `${r0(r.totals.carbs)}`, 'g'],
+            ['Fat', `${r0(r.totals.fat)}`, 'g'],
+          ].map(([k, v, u]) => (
+            <div>
+              <dt class="text-subtle text-xs font-semibold tracking-wide uppercase">{k}</dt>
+              <dd class="font-display tabular mt-1 text-3xl">
+                {v}
+                <span class="text-subtle ml-1 text-sm">{u}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <table class="mt-6 w-full text-sm">
+          <thead>
+            <tr class="text-subtle text-left text-xs">
+              <th class="py-1 font-semibold">&nbsp;</th>
+              <th class="py-1 text-right font-semibold">Per serving</th>
+              <th class="py-1 text-right font-semibold">Per 100 g</th>
+            </tr>
+          </thead>
+          <tbody class="tabular">
+            <tr>
+              <td class="py-1">Energy</td>
+              <td class="py-1 text-right">{r0(r.totals.kcal)} kcal</td>
+              <td class="py-1 text-right">{r0(per100.kcal)} kcal</td>
+            </tr>
+            <tr>
+              <td class="py-1">Protein</td>
+              <td class="py-1 text-right">{r.totals.protein.toFixed(1)} g</td>
+              <td class="py-1 text-right">{per100.protein.toFixed(1)} g</td>
+            </tr>
+            <tr>
+              <td class="py-1">Carbohydrate</td>
+              <td class="py-1 text-right">{r.totals.carbs.toFixed(1)} g</td>
+              <td class="py-1 text-right">{per100.carbs.toFixed(1)} g</td>
+            </tr>
+            <tr>
+              <td class="py-1">Fat</td>
+              <td class="py-1 text-right">{r.totals.fat.toFixed(1)} g</td>
+              <td class="py-1 text-right">{per100.fat.toFixed(1)} g</td>
+            </tr>
+            <tr>
+              <td class="py-1">Fibre</td>
+              <td class="py-1 text-right">{r.totals.fibre.toFixed(1)} g</td>
+              <td class="py-1 text-right">{((r.totals.fibre / grams) * 100).toFixed(1)} g</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="text-muted mt-4 text-sm leading-relaxed">
+          {proteinPct}% of the calories come from protein. Totals are the sums of the ingredient
+          rows in the Ethereal food database (per 100 g values from national composition tables and
+          labels), so logging this recipe puts exactly these numbers in your diary.
+        </p>
+      </section>
+    </div>
+
+    {related.length > 0 && (
+      <section class="mt-12" aria-labelledby="related-h">
+        <h2 id="related-h" class="font-display text-3xl tracking-tight">
+          More {MEAL_LABEL[r.meal].toLowerCase()}s like this
+        </h2>
+        <ul class="mt-5 grid gap-4 sm:grid-cols-3">
+          {related.map((x) => (
+            <li class="surface p-5">
+              <a
+                class="font-bold tracking-tight hover:underline"
+                href={withBase(`/recipes/${x.id}/`)}
+              >
+                {x.name}
+              </a>
+              <p class="text-subtle mt-1 text-xs">
+                {x.minutes} min · {r0(x.totals.kcal)} kcal · P {r0(x.totals.protein)} g
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </article>
+</Base>

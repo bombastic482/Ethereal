@@ -12,6 +12,7 @@ const PAGES = [
   '/guides/',
   '/guides/calorie-deficit-explained/',
   '/recipes/',
+  '/recipes/shakshuka-with-feta/',
   '/start/',
   '/plan/',
   '/track/',
