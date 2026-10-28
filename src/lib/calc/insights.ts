@@ -1,3 +1,4 @@
+import { lateShare as lateCalorieShare, topFoods } from './breakdown';
 import { MEALS, summariseDay, type ExerciseEntry, type FoodEntry } from './nutrition';
 import { round } from './units';
 
@@ -116,7 +117,31 @@ export function buildInsights(
     });
   }
 
-  // 6. Consistency
+  // 6. Late eating (only when entries carry times)
+  const late = lateCalorieShare(food, dates);
+  if (late !== null && late >= 0.3) {
+    out.push({
+      key: 'late',
+      title: `${round(late * 100)}% of calories after 9 pm`,
+      detail:
+        'Late eating is not fattening by itself, but it is where unplanned calories land and it can cost sleep. Try moving one planned snack earlier and see whether the trend changes.',
+      tone: 'neutral',
+    });
+  }
+
+  // 7. Concentration: a few foods carrying most of the week
+  const top = topFoods(food, dates, 3);
+  const topShare = top.reduce((s, x) => s + x.share, 0);
+  if (top.length === 3 && topShare >= 0.5) {
+    out.push({
+      key: 'concentration',
+      title: `Three foods make up ${round(topShare * 100)}% of your calories`,
+      detail: `${top.map((x) => x.name).join(', ')}. Weigh these three carefully; small errors on repeat foods compound across the week.`,
+      tone: 'neutral',
+    });
+  }
+
+  // 8. Consistency
   const sd = Math.sqrt(
     perDay.reduce((s, x) => s + (x.s.eaten.kcal - targets.kcal) ** 2, 0) / perDay.length,
   );
@@ -128,5 +153,5 @@ export function buildInsights(
       tone: 'good',
     });
   }
-  return out.slice(0, 4);
+  return out.slice(0, 5);
 }

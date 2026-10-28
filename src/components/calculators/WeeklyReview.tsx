@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { estimateExpenditure } from '@/lib/calc/expenditure';
+import { topFoods } from '@/lib/calc/breakdown';
 import { buildInsights } from '@/lib/calc/insights';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
 import { currentStreak, longestStreak, shift } from '@/lib/calc/streaks';
@@ -108,6 +109,7 @@ function WeeklyReviewInner() {
     ? Math.round(stepsDays.reduce((a, b) => a + b, 0) / stepsDays.length)
     : null;
 
+  const top = useMemo(() => topFoods(diary.food, days, 6), [diary.food, days]);
   const insights = useMemo(
     () => (t ? buildInsights(diary.food, diary.exercise, t, days) : []),
     [diary.food, diary.exercise, t, days],
@@ -375,6 +377,33 @@ function WeeklyReviewInner() {
             </section>
           </div>
 
+          {top.length > 0 && (
+            <section class="surface p-5 sm:p-6" aria-label="Where the calories went">
+              <h3 class="text-lg font-bold tracking-tight">Where the calories went</h3>
+              <p class="text-subtle text-xs">
+                The foods that carried this week, by share of everything you logged.
+              </p>
+              <ol class="mt-4 grid gap-2.5">
+                {top.map((f) => (
+                  <li key={f.name} class="grid gap-1 text-sm">
+                    <div class="flex items-baseline justify-between gap-3">
+                      <span class="truncate font-semibold">{f.name}</span>
+                      <span class="text-subtle tabular shrink-0 text-xs">
+                        {Math.round(f.share * 100)}% · {formatNumber(f.kcal)} kcal · P {f.protein} g
+                        · {f.count}×
+                      </span>
+                    </div>
+                    <div class="bg-muted h-1.5 overflow-hidden rounded-full">
+                      <div
+                        class="bg-brand-500 h-full rounded-full"
+                        style={{ width: `${Math.max(2, Math.round(f.share * 100))}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
           <section class="surface p-5 sm:p-6" aria-label="Consistency">
             <div class="flex flex-wrap items-end justify-between gap-3">
               <div>
