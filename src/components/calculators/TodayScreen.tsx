@@ -165,7 +165,7 @@ function TodayScreenInner() {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const t = e.target as HTMLElement | null;
       if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-      if (t?.isContentEditable || document.querySelector('[role="dialog"]')) return;
+      if (t?.isContentEditable || document.querySelector('[role="dialog"]:not([hidden])')) return;
       if (e.key === 'a') {
         e.preventDefault();
         setAdding(mealForTime(new Date().getHours()));
