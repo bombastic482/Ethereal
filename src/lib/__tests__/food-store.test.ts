@@ -56,3 +56,31 @@ describe('diary persistence', () => {
     expect(d.steps).toEqual({});
   });
 });
+
+describe('scanned products', () => {
+  it('remembers a barcode product after its diary entry is deleted', async () => {
+    installWindow();
+    vi.resetModules();
+    const fs = await import('../food-store');
+    const e = fs.addFood({
+      date: '2026-10-01',
+      meal: 'snack',
+      name: 'Protein bar',
+      brand: 'Acme',
+      grams: 60,
+      per100g: { kcal: 350, protein: 30, carbs: 30, fat: 12, fibre: 8 },
+      source: 'off',
+      barcode: '5000000000001',
+    });
+    fs.toggleFavourite('5000000000001');
+    fs.removeFood(e.id);
+    const d = fs.diaryStore.get();
+    expect(d.food).toHaveLength(0);
+    expect(d.favourites).toContain('5000000000001');
+    expect(d.products?.['5000000000001']).toMatchObject({
+      name: 'Protein bar',
+      brand: 'Acme',
+      grams: 60,
+    });
+  });
+});

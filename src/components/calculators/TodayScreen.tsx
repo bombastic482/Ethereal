@@ -822,16 +822,13 @@ function AddFoodSheet({
     if (f) return fromFood(f);
     const c = diary.customFoods.find((x) => x.id === key);
     if (c) return fromCustom(c);
-    const prev = diary.food.find((e) => e.barcode === key);
+    const prev = diary.products?.[key] ?? diary.food.find((e) => e.barcode === key);
     if (prev)
       return {
         name: prev.name,
         ...(prev.brand ? { brand: prev.brand } : {}),
         per100g: prev.per100g,
-        servings: [
-          { label: `${prev.grams} g`, grams: prev.grams },
-          { label: '100 g', grams: 100 },
-        ],
+        servings: withHundred([{ label: `${prev.grams} g`, grams: prev.grams }]),
         source: 'off',
         barcode: key,
       };

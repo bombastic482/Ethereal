@@ -26,8 +26,18 @@ export interface SavedMeal {
   items: SavedMealItem[];
 }
 
+/** What we remember about a scanned product so favourites and recents outlive diary entries. */
+export interface ProductSnapshot {
+  name: string;
+  brand?: string;
+  per100g: Nutrients;
+  grams: number;
+}
+
 export interface Diary {
   food: FoodEntry[];
+  /** Scanned products by barcode. */
+  products?: Record<string, ProductSnapshot>;
   /** Saved meals and recipes, logged as a group. */
   meals?: SavedMeal[];
   exercise: ExerciseEntry[];
@@ -63,6 +73,7 @@ export const diaryStore = createStore<Diary>(
       favourites: Array.isArray(r.favourites) ? r.favourites : [],
       meals: Array.isArray(r.meals) ? r.meals : [],
       steps: r.steps && typeof r.steps === 'object' ? r.steps : {},
+      products: r.products && typeof r.products === 'object' ? r.products : {},
     };
   },
 );
@@ -80,7 +91,18 @@ export function addFood(entry: Omit<FoodEntry, 'id'>): FoodEntry {
   const e: FoodEntry = { ...entry, id: uid() };
   const key = entry.barcode ?? entry.foodId;
   const recent = key ? [key, ...d.recent.filter((k) => k !== key)].slice(0, 30) : d.recent;
-  diaryStore.set({ ...d, food: [...d.food, e], recent });
+  const products = entry.barcode
+    ? {
+        ...(d.products ?? {}),
+        [entry.barcode]: {
+          name: entry.name,
+          ...(entry.brand ? { brand: entry.brand } : {}),
+          per100g: entry.per100g,
+          grams: entry.grams,
+        },
+      }
+    : d.products;
+  diaryStore.set({ ...d, food: [...d.food, e], recent, ...(products ? { products } : {}) });
   return e;
 }
 
