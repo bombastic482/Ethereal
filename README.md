@@ -3,6 +3,7 @@
 Free, science-backed weight-loss planning that runs entirely in your browser.
 
 - **A food diary** (`/today/`): calorie ring, macro bars, four meals, built-in offline food database, Open Food Facts search and barcode scanning, quick add, custom foods, exercise (MET), water, copy-yesterday, favourites and "what to eat next" suggestions.
+- **Saved meals and a shareable progress card**: log a whole meal in one tap; render your trend as an image for the share sheet.
 - **A food diary** (`/today/`): calorie ring, macro bars, four meals, a built-in offline food database, Open Food Facts search and barcode scanning, quick add, custom foods, exercise (MET-based), water, copy-yesterday, favourites and "what to eat next" suggestions.
 - **A personal plan** (`/start/` → `/plan/`): calories, protein, macros and a realistic goal date from your stats, in three steps.
 - **A weight tracker** (`/track/`): daily weigh-ins, an exponentially-smoothed trend line, weekly averages, waist and notes.
@@ -11,6 +12,7 @@ Free, science-backed weight-loss planning that runs entirely in your browser.
 - **A two-week check**: compares your measured trend with the plan and recommends a specific calorie adjustment (capped, never below safe floors), which you can apply with one click.
 - **Eight calculators** (calories/TDEE, goal timeline, macros, BMI, body fat, protein, ideal weight, water) sharing one profile.
 - **Twelve evidence-based guides**, installable as an app, works offline, exports/imports backups, shares a plan between devices via a link.
+- **An identity of its own**: warm paper and ink, moss and apricot, serif numerals, paper grain, warm-charcoal dark mode.
 - **No account, no server, no tracking.** Nothing you enter ever leaves your device.
 
 **Stack:** [Astro](https://astro.build) (static output) · [Preact](https://preactjs.com) islands · [Tailwind CSS v4](https://tailwindcss.com) · TypeScript strict · Vitest · Playwright · Lighthouse CI.
