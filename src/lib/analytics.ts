@@ -12,7 +12,7 @@
 import { createStore } from './store';
 
 /** The GoatCounter site code, as in https://<code>.goatcounter.com. Empty turns counting off. */
-export const GOATCOUNTER_CODE = '';
+export const GOATCOUNTER_CODE: string = 'ethereal';
 
 export const analyticsStore = createStore<{ enabled: boolean }>('ethereal:analytics:v1', {
   enabled: true,

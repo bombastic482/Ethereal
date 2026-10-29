@@ -146,7 +146,7 @@ Every formula lives in [`src/lib/calc`](src/lib/calc) as a pure function with te
 <summary><b>Privacy, by construction</b></summary>
 <br />
 
-Ethereal is static HTML and JavaScript: no server code, no database, no cookies, no analytics and no third-party scripts. The only optional network call is to Open Food Facts when you scan a barcode or search packaged products.
+Ethereal is static HTML and JavaScript: no server code, no database, no cookies and no third-party scripts. Page views are counted anonymously with [GoatCounter](https://www.goatcounter.com): the page address, the referring site and the screen size, never anything you enter, and never with Do Not Track, Global Privacy Control or the switch in Settings turned off. The only other network call, and an optional one, is to Open Food Facts when you scan a barcode or search packaged products.
 
 Your plan, diary, weigh-ins and preferences live in `localStorage`, and progress photos in IndexedDB. Settings exports, imports and deletes all of it. Shared plan links carry the plan in the URL fragment, which never reaches a server.
 
