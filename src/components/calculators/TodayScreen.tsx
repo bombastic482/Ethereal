@@ -46,7 +46,7 @@ import {
 import { allFoods, foodById, loadFoods, searchFoods, type Food } from '@/lib/foods';
 import { lookupBarcode, searchProducts, type OffProduct } from '@/lib/off';
 import { resolveQuickEntry, type ResolvedItem } from '@/lib/quick-parse';
-import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
+import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { confetti, haptic, onSwipe } from '@/lib/fx';
 import { StarterRecipes } from './StarterRecipes';
@@ -261,11 +261,14 @@ function TodayScreenInner() {
 
   const summary = useMemo(() => {
     try {
-      return buildPlanSummary(profile, plan.active ? plan : { ...plan, active: true });
+      return buildPlanSummary(
+        planProfile(profile, log.entries),
+        plan.active ? plan : { ...plan, active: true },
+      );
     } catch {
       return null;
     }
-  }, [profile, plan]);
+  }, [profile, plan, log.entries]);
   const targets = useMemo(
     () => ({
       kcal: summary?.target ?? 2000,
@@ -381,7 +384,7 @@ function TodayScreenInner() {
 
       {notice && (
         <div
-          class="bg-brand-100 text-brand-800 dark:bg-brand-400/15 dark:text-brand-100 flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm"
+          class="bg-brand-100 text-brand-800 dark:bg-brand-400/15 dark:text-brand-100 animate-toast flex items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm"
           role="status"
         >
           <span>{notice}</span>
@@ -564,9 +567,9 @@ function TodayScreenInner() {
                 </div>
               </header>
               {items.length > 0 ? (
-                <ul class="mt-3 grid gap-1">
-                  {items.map((e) => (
-                    <FoodRow key={e.id} entry={e} />
+                <ul class="stagger mt-3 grid gap-1">
+                  {items.map((e, i) => (
+                    <FoodRow key={e.id} entry={e} index={i} />
                   ))}
                 </ul>
               ) : (
@@ -758,7 +761,7 @@ function TodayScreenInner() {
             {Array.from({ length: Math.max(prefs.waterGoalGlasses, water) }, (_, i) => (
               <span
                 key={i}
-                class={`h-7 w-5 rounded-t-sm rounded-b-lg border ${i < water ? 'border-[oklch(62%_0.09_235)] bg-[oklch(72%_0.09_235)]' : 'border-line bg-muted'}`}
+                class={`h-7 w-5 rounded-t-sm rounded-b-lg border transition-[background-color,border-color,transform] duration-300 ease-[var(--ease-spring)] ${i < water ? 'border-[oklch(62%_0.09_235)] bg-[oklch(72%_0.09_235)]' : 'border-line bg-muted scale-95'}`}
               />
             ))}
           </div>
@@ -816,7 +819,7 @@ const minutesNow = () => {
   return d.getHours() * 60 + d.getMinutes();
 };
 
-function FoodRow({ entry }: { entry: FoodEntry }) {
+function FoodRow({ entry, index = 0 }: { entry: FoodEntry; index?: number }) {
   const [editing, setEditing] = useState(false);
   const [profile] = useProfile();
   const imperial = profile.units === 'imperial';
@@ -825,7 +828,10 @@ function FoodRow({ entry }: { entry: FoodEntry }) {
   const [diary] = diaryStore.use();
   const fav = key ? diary.favourites.includes(key) : false;
   return (
-    <li class="border-line border-t py-2 text-sm">
+    <li
+      class="border-line border-t py-2 text-sm"
+      style={{ '--i': index } as Record<string, number>}
+    >
       <div class="flex items-center gap-3">
         <button
           type="button"

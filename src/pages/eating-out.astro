@@ -129,15 +129,15 @@ const jsonLd = [
             <table class="w-full text-sm">
               <thead>
                 <tr class="text-subtle text-left text-xs">
-                  <th class="w-10 px-3 py-3">
+                  <th class="w-8 px-2 py-3 sm:w-10 sm:px-3">
                     <span class="sr-only">Add to order</span>
                   </th>
-                  <th class="px-4 py-3 font-semibold">Item</th>
-                  <th class="px-4 py-3 text-right font-semibold">kcal</th>
-                  <th class="px-4 py-3 text-right font-semibold">Protein</th>
-                  <th class="px-4 py-3 text-right font-semibold">Carbs</th>
-                  <th class="px-4 py-3 text-right font-semibold">Fat</th>
-                  <th class="px-4 py-3 text-right font-semibold">
+                  <th class="px-2 py-3 font-semibold sm:px-4">Item</th>
+                  <th class="px-2 py-3 text-right font-semibold sm:px-4">kcal</th>
+                  <th class="px-2 py-3 text-right font-semibold sm:px-4">Protein</th>
+                  <th class="hidden px-4 py-3 text-right font-semibold sm:table-cell">Carbs</th>
+                  <th class="hidden px-4 py-3 text-right font-semibold sm:table-cell">Fat</th>
+                  <th class="px-2 py-3 text-right font-semibold sm:px-4">
                     {c.kind === 'drinks' ? 'kcal / 100 ml' : 'P / 100 kcal'}
                   </th>
                   <th class="hidden px-4 py-3 sm:table-cell" />
@@ -150,7 +150,7 @@ const jsonLd = [
                     data-item-row
                     data-search={`${it.name} ${c.name}`.toLowerCase()}
                   >
-                    <td class="px-3 py-2.5 align-middle">
+                    <td class="px-2 py-2.5 align-middle sm:px-3">
                       <input
                         type="checkbox"
                         class="accent-brand-600 h-5 w-5 cursor-pointer rounded"
@@ -163,9 +163,15 @@ const jsonLd = [
                         aria-label={`Add ${it.name} to your ${c.name} order`}
                       />
                     </td>
-                    <td class="px-4 py-2.5">
+                    <td class="min-w-[9.5rem] px-2 py-2.5 sm:px-4">
                       <span class="font-semibold">{it.name}</span>
-                      <span class="text-subtle block text-xs">{it.servingLabel}</span>
+                      <span class="text-subtle block text-xs">
+                        {it.servingLabel}
+                        <span class="sm:hidden">
+                          {' '}
+                          · C {it.carbs} g · F {it.fat} g
+                        </span>
+                      </span>
                       <a
                         class="text-brand-700 dark:text-brand-300 mt-1 inline-block text-xs font-semibold sm:hidden"
                         href={withBase(`/today/#food=${it.id}`)}
@@ -174,12 +180,16 @@ const jsonLd = [
                         Log →
                       </a>
                     </td>
-                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.kcal}</td>
-                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.protein} g</td>
-                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.carbs} g</td>
-                    <td class="px-4 py-2.5 text-right whitespace-nowrap">{it.fat} g</td>
+                    <td class="px-2 py-2.5 text-right whitespace-nowrap sm:px-4">{it.kcal}</td>
+                    <td class="px-2 py-2.5 text-right whitespace-nowrap sm:px-4">{it.protein} g</td>
+                    <td class="hidden px-4 py-2.5 text-right whitespace-nowrap sm:table-cell">
+                      {it.carbs} g
+                    </td>
+                    <td class="hidden px-4 py-2.5 text-right whitespace-nowrap sm:table-cell">
+                      {it.fat} g
+                    </td>
                     <td
-                      class={`px-4 py-2.5 text-right font-semibold whitespace-nowrap ${i === 0 ? 'text-brand-700 dark:text-brand-300' : ''}`}
+                      class={`px-2 py-2.5 text-right font-semibold whitespace-nowrap sm:px-4 ${i === 0 ? 'text-brand-700 dark:text-brand-300' : ''}`}
                     >
                       {c.kind === 'drinks' ? it.kcalPer100ml : it.proteinPer100}
                     </td>

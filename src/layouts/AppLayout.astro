@@ -38,6 +38,7 @@ const tabs = [
               t.key === current ? 'bg-elevated text-fg shadow-soft' : 'text-muted hover:text-fg',
             ]}
             aria-current={t.key === current ? 'page' : undefined}
+            transition:name={t.key === current ? 'app-tab-active' : undefined}
           >
             <Icon name={t.icon} size={16} /> {t.label}
           </a>

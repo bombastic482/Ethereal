@@ -32,6 +32,16 @@ const { class: cls, ...seo } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      // Phones and tablets: iOS Safari mishandles fixed bars inside view transitions (they
+      // flicker or briefly vanish), so touch devices use an instant swap with a light fade on the
+      // page content instead. Astro reads this once when its router loads, which is after this.
+      if (matchMedia('(pointer: coarse)').matches && 'startViewTransition' in document) {
+        try {
+          document.startViewTransition = undefined;
+        } catch (e) {}
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content={SITE.themeColor} />
     <meta name="color-scheme" content="light dark" />
@@ -59,7 +69,7 @@ const { class: cls, ...seo } = Astro.props;
       })();
     </script>
   </head>
-  <body class="flex min-h-dvh flex-col pb-20 md:pb-0">
+  <body class="flex min-h-svh flex-col pb-20 md:pb-0">
     <a
       href="#main"
       class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
@@ -73,6 +83,25 @@ const { class: cls, ...seo } = Astro.props;
     <Footer />
     <TabBar />
     <script>
+      // A thin progress bar while the client router fetches the next page (see global.css).
+      document.addEventListener('astro:before-preparation', () => {
+        document.documentElement.dataset.navigating = '1';
+      });
+      document.addEventListener('astro:page-load', () => {
+        delete document.documentElement.dataset.navigating;
+      });
+      // iOS Safari only applies :active styles when the page listens for touches. Without this,
+      // every button and tab gave no visual response to a tap, which reads as "unresponsive".
+      document.addEventListener('touchstart', () => {}, { passive: true });
+      // Touch devices skip view transitions (see the head), so fade the new content in instead.
+      const coarse = matchMedia('(pointer: coarse)');
+      const still = matchMedia('(prefers-reduced-motion: reduce)');
+      document.addEventListener('astro:after-swap', () => {
+        if (!coarse.matches || still.matches) return;
+        document
+          .getElementById('main')
+          ?.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
+      });
       // Keep the chosen theme when the ClientRouter swaps <html> attributes during navigation.
       document.addEventListener('astro:before-swap', (e) => {
         const ev = e as Event & { newDocument: Document };

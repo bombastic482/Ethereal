@@ -16,6 +16,7 @@ import {
 } from './calc/macros';
 import { calculateProtein } from './calc/protein';
 import { projectTimeline } from './calc/timeline';
+import { trendSeries, type WeighIn } from './calc/trend';
 import { round } from './calc/units';
 import type { Profile } from './profile';
 import { createStore } from './store';
@@ -62,6 +63,17 @@ export interface PlanSummary {
   protein: ReturnType<typeof calculateProtein>;
   timeline: ReturnType<typeof projectTimeline> | null;
   warnings: string[];
+}
+
+/**
+ * The profile a plan is computed from. Weigh-ins do not rewrite the profile, so once there are
+ * any, the latest trend weight stands in for the weight entered at setup. Every screen then shows
+ * the same target, and the target follows the user down as they get lighter.
+ */
+export function planProfile(profile: Profile, entries: WeighIn[]): Profile {
+  const trend = trendSeries(entries);
+  const latest = trend[trend.length - 1];
+  return latest ? { ...profile, weightKg: latest.trendKg } : profile;
 }
 
 export function buildPlanSummary(profile: Profile, plan: Plan, today = new Date()): PlanSummary {

@@ -50,6 +50,13 @@
   --animate-rise: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
   --animate-fade: fade 0.5s ease-out backwards;
   --animate-float: float 6s ease-in-out infinite;
+  --animate-sheet-up: sheet-up 0.38s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-pop: pop 0.28s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;
+  --animate-backdrop: fade 0.22s ease-out backwards;
+  --animate-toast: toast-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --animate-row: row-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 
   @keyframes rise {
     from {
@@ -76,6 +83,57 @@
     }
     50% {
       transform: translateY(-8px);
+    }
+  }
+  @keyframes sheet-up {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes nav-bar {
+    from {
+      transform: scaleX(0);
+    }
+    60% {
+      transform: scaleX(0.7);
+    }
+    to {
+      transform: scaleX(0.92);
     }
   }
 }
@@ -113,12 +171,56 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
+  /* Touch: no 300 ms double-tap delay, no grey tap flash; feedback comes from :active states. */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  summary,
+  [role='button'],
+  [role='tab'] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Until an island hydrates, its controls look slightly muted so a tap that lands early reads
+     as "loading" rather than "broken". Islands hydrate in well under a second. */
+  astro-island[ssr] .btn,
+  astro-island[ssr] input,
+  astro-island[ssr] select {
+    opacity: 0.85;
+  }
+  /* Navigation progress: a thin bar at the top while the client router fetches the next page. */
+  html[data-navigating] body::after {
+    content: '';
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+    height: 2px;
+    width: 100%;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-300));
+    animation: nav-bar 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.22s;
+    animation-timing-function: var(--ease-out-quint);
+  }
+  ::view-transition-group(nav-active),
+  ::view-transition-group(app-tab-active) {
+    animation-duration: 0.34s;
+    animation-timing-function: var(--ease-spring);
+  }
   body {
     /* A faint glow at the top of every page gives the flat surfaces some depth. */
     background: radial-gradient(70rem 28rem at 50% -14rem, var(--glow), transparent 70%), var(--bg);
     color: var(--fg);
     font-family: var(--font-sans);
-    min-height: 100dvh;
+    /* svh, not dvh: dvh changes while Safari's toolbar slides, which re-lays out the page mid-scroll. */
+    min-height: 100svh;
     overflow-x: clip;
     position: relative;
   }
@@ -229,45 +331,65 @@
   font-size: 0.95rem;
   line-height: 1;
   transition:
-    transform 0.15s ease,
+    transform 0.18s var(--ease-spring),
     background-color 0.15s ease,
-    box-shadow 0.15s ease,
-    color 0.15s ease;
+    box-shadow 0.18s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
   &:active {
-    transform: translateY(1px);
+    transform: scale(0.96);
+  }
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 @utility btn-primary {
   background: var(--fg);
   color: var(--bg);
   box-shadow: 0 6px 20px -10px oklch(0% 0 0 / 0.45);
-  &:hover {
-    background: var(--color-brand-600);
-    color: white;
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-brand-600);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px -10px oklch(63% 0.15 160 / 0.55);
+    }
+  }
+  &:active {
+    transform: scale(0.96);
   }
   [data-theme='dark'] & {
     box-shadow: none;
   }
-  [data-theme='dark'] &:hover {
-    background: var(--color-brand-300);
-    color: var(--color-ink-950);
+  @media (hover: hover) {
+    [data-theme='dark'] &:hover {
+      background: var(--color-brand-300);
+      color: var(--color-ink-950);
+    }
   }
 }
 @utility btn-secondary {
   background: var(--bg-elevated);
   color: var(--fg);
   border: 1px solid var(--border-strong);
-  &:hover {
-    border-color: var(--color-brand-500);
-    color: var(--color-brand-700);
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--color-brand-500);
+      color: var(--color-brand-700);
+    }
   }
 }
 @utility btn-ghost {
   background: transparent;
   color: var(--fg-muted);
-  &:hover {
-    background: var(--bg-muted);
-    color: var(--fg);
+  @media (hover: hover) {
+    &:hover {
+      background: var(--bg-muted);
+      color: var(--fg);
+    }
   }
 }
 @utility field {
@@ -282,8 +404,10 @@
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
-  &:hover {
-    border-color: var(--color-brand-400);
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--color-brand-400);
+    }
   }
   &:focus {
     outline: none;
@@ -307,6 +431,13 @@
   align-items: center;
   gap: 0.35rem;
   border-radius: 999px;
+  transition:
+    transform 0.18s var(--ease-spring),
+    background-color 0.15s ease,
+    color 0.15s ease;
+  &:is(button, a):active {
+    transform: scale(0.95);
+  }
   padding: 0.3rem 0.7rem;
   font-size: 0.75rem;
   font-weight: 600;
@@ -330,6 +461,30 @@
   [data-theme='dark'] & {
     color: var(--color-brand-300);
   }
+}
+@utility pressable {
+  transition:
+    transform 0.18s var(--ease-spring),
+    background-color 0.15s ease,
+    box-shadow 0.18s ease;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+/* Overlays rendered through <Layer>: the backdrop fades and the panel rises or pops. */
+[data-layer] > [role='dialog'] {
+  animation: var(--animate-backdrop);
+}
+[data-layer] > [role='dialog'] > div {
+  animation: var(--animate-sheet-up);
+}
+[data-layer] > [role='dialog'][data-pop] > div {
+  animation: var(--animate-pop);
+}
+/* Staggered list entrances: set --i on each row. */
+.stagger > * {
+  animation: var(--animate-row);
+  animation-delay: calc(min(var(--i, 0), 8) * 40ms);
 }
 @utility tabular {
   font-variant-numeric: tabular-nums;
@@ -478,5 +633,27 @@
   }
   main {
     padding-bottom: 0 !important;
+  }
+}
+
+/* The sticky header: translucent with a blur where it is cheap (desktop), solid on touch
+   screens, where a live blur under a sticky bar is the costliest thing Safari repaints. */
+.site-header {
+  background: color-mix(in oklab, var(--bg) 80%, transparent);
+  border-bottom: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+@media (hover: none) {
+  .site-header {
+    background: var(--bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  /* Sheets and dialogs dim the page instead of blurring it, so they open without stutter. */
+  .backdrop-blur-sm,
+  .backdrop-blur-md {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 }

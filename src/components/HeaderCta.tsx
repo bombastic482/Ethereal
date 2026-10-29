@@ -1,7 +1,8 @@
 import { summariseDay } from '@/lib/calc/nutrition';
 import { formatNumber } from '@/lib/calc/units';
 import { diaryStore, prefsStore } from '@/lib/food-store';
-import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
+import { logStore } from '@/lib/log';
+import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Icon } from './ui/Icon';
@@ -12,6 +13,7 @@ export default function HeaderCta({ compact = false }: { compact?: boolean }) {
   const [plan] = planStore.use();
   const [diary] = diaryStore.use();
   const [prefs] = prefsStore.use();
+  const [log] = logStore.use();
   const cls = `h-10 px-4 text-sm ${compact ? '' : 'hidden sm:inline-flex'}`;
   if (!plan.active) {
     return (
@@ -22,7 +24,7 @@ export default function HeaderCta({ compact = false }: { compact?: boolean }) {
   }
   let label = 'Today';
   try {
-    const s = buildPlanSummary(profile, plan);
+    const s = buildPlanSummary(planProfile(profile, log.entries), plan);
     const today = todayIso();
     const d = summariseDay(
       diary.food.filter((e) => e.date === today),

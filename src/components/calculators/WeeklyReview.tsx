@@ -9,7 +9,7 @@ import { formatNumber, formatWeight, kgToLb, round } from '@/lib/calc/units';
 import { diaryStore, prefsStore } from '@/lib/food-store';
 import { haptic } from '@/lib/fx';
 import { logStore } from '@/lib/log';
-import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
+import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
@@ -40,11 +40,14 @@ function WeeklyReviewInner() {
 
   const summary = useMemo(() => {
     try {
-      return buildPlanSummary(profile, plan.active ? plan : { ...plan, active: true });
+      return buildPlanSummary(
+        planProfile(profile, log.entries),
+        plan.active ? plan : { ...plan, active: true },
+      );
     } catch {
       return null;
     }
-  }, [profile, plan]);
+  }, [profile, plan, log.entries]);
   const t = summary
     ? {
         kcal: summary.target,
@@ -249,7 +252,9 @@ function WeeklyReviewInner() {
             ›
           </button>
         </div>
-        <div class="flex items-center gap-2">
+        {/* Wraps instead of squeezing on phones: the status chip takes its own line if needed and
+            no button label ever breaks mid-phrase. */}
+        <div class="flex flex-wrap items-center gap-2 [&>*]:whitespace-nowrap">
           <span class="chip">
             {logged.length}/7 days logged · {weighIns} weigh-ins
           </span>

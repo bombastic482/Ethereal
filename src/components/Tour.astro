@@ -39,7 +39,11 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   hidden
   data-steps={STEPS.length}
 >
-  <div class="bg-elevated w-full max-w-md rounded-3xl p-6 shadow-2xl" tabindex="-1" data-panel>
+  <div
+    class="tour-panel bg-elevated w-full max-w-md rounded-3xl p-6 shadow-2xl"
+    tabindex="-1"
+    data-panel
+  >
     <div class="flex items-center justify-between">
       <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 place-items-center rounded-2xl">
         {STEPS.map((s, i) => (
@@ -88,6 +92,22 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   </div>
 </div>
 
+<script is:inline>
+  // Show the tour on first paint for new visitors instead of waiting for the script bundle
+  // below, which only wires up its buttons. Moving it onto <body> keeps it above the header.
+  (function () {
+    try {
+      if (localStorage.getItem('ethereal:tour:v1')) return;
+    } catch (e) {
+      return;
+    }
+    var root = document.getElementById('tour');
+    if (!root) return;
+    document.body.appendChild(root);
+    root.hidden = false;
+    document.body.style.overflow = 'hidden';
+  })();
+</script>
 <script>
   const KEY = 'ethereal:tour:v1';
   function bind() {
@@ -96,7 +116,8 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
     root.dataset.bound = '1';
     // Page regions carry a view-transition-name and so form stacking contexts; move the overlay
     // onto <body> so it paints above the header and tab bar (same reason the islands use Layer).
-    document.body.appendChild(root);
+    // Re-inserting a node counts as a fresh paint, so only move it if the inline script did not.
+    if (root.parentElement !== document.body) document.body.appendChild(root);
     let seen = true;
     try {
       seen = !!localStorage.getItem(KEY);
@@ -156,3 +177,23 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   bind();
   document.addEventListener('astro:page-load', bind);
 </script>
+
+<style>
+  /* The tour is the first thing a new visitor sees, so it must count as painted at once: it
+     rises in with a transform and starts mostly opaque (an entrance from opacity 0 would hold
+     back the page's largest-paint time until the animation ends). */
+  .tour-panel {
+    animation: tour-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  @keyframes tour-in {
+    from {
+      opacity: 0.6;
+      transform: translateY(18px) scale(0.98);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tour-panel {
+      animation: none;
+    }
+  }
+</style>

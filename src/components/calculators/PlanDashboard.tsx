@@ -8,7 +8,7 @@ import { diaryStore, prefsStore } from '@/lib/food-store';
 import { humaniseWeeks } from '@/lib/calc/timeline';
 import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { logStore, upsertEntry } from '@/lib/log';
-import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
+import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { confetti, haptic } from '@/lib/fx';
 import { withBase } from '@/lib/url';
@@ -52,12 +52,11 @@ function PlanDashboardInner() {
   const summary = useMemo(() => {
     if (!plan.active) return null;
     try {
-      // Project from the trend weight, not the possibly-stale profile weight.
-      return buildPlanSummary({ ...profile, weightKg: latestTrend }, plan);
+      return buildPlanSummary(planProfile(profile, log.entries), plan);
     } catch {
       return null;
     }
-  }, [profile, plan, latestTrend]);
+  }, [profile, plan, log.entries]);
 
   const report = useMemo(
     () =>

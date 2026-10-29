@@ -230,3 +230,57 @@ test.describe('goal reached', () => {
     await expect(page.getByRole('heading', { name: 'Holding steady' })).toBeVisible();
   });
 });
+
+test.describe('one daily target', () => {
+  test('Today and the plan agree once the setup weight is out of date', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('ethereal:tour:v1', '1');
+      const today = new Date();
+      const iso = (d: Date) =>
+        new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      const entries = [];
+      for (let i = 30; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        entries.push({ date: iso(d), weightKg: 88 - (30 - i) * 0.2 }); // 88 → 82 kg
+      }
+      localStorage.setItem('ethereal:log:v1', JSON.stringify({ entries }));
+      // Weigh-ins never rewrite the profile, so it still holds the weight from setup.
+      localStorage.setItem(
+        'ethereal:profile:v1',
+        JSON.stringify({
+          units: 'metric',
+          sex: 'male',
+          age: 40,
+          heightCm: 180,
+          weightKg: 88,
+          activity: 1.375,
+        }),
+      );
+      localStorage.setItem(
+        'ethereal:plan:v1',
+        JSON.stringify({
+          active: true,
+          goal: 'lose',
+          goalWeightKg: 75,
+          rateKgPerWeek: 0.5,
+          formula: 'mifflin',
+          macroPreset: 'balanced',
+          startedOn: iso(new Date(today.getTime() - 30 * 86400000)),
+          startWeightKg: 88,
+          calorieOverride: null,
+          lastAdjustedOn: null,
+        }),
+      );
+    });
+    const target = async (path: string, pattern: RegExp) => {
+      await page.goto(path);
+      await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+      await expect(page.locator('main')).toContainText(pattern);
+      return (await page.locator('main').innerText()).match(pattern)![1];
+    };
+    const onPlan = await target('/plan/', /eat per day\s*([\d,]+)/i);
+    const onToday = await target('/today/', /([\d,]+)\s+target/);
+    expect(onToday).toBe(onPlan);
+  });
+});

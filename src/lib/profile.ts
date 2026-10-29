@@ -59,6 +59,11 @@ function current(): Profile {
   return cache;
 }
 
+/** The current profile, read outside a component. */
+export function getProfile(): Profile {
+  return current();
+}
+
 export function updateProfile(patch: Partial<Profile>): Profile {
   const next = { ...current(), ...patch };
   cache = next;

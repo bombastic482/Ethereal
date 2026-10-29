@@ -5,9 +5,9 @@ import { humaniseWeeks } from '@/lib/calc/timeline';
 import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { readShareLink } from '@/lib/backup';
 import { prefsStore } from '@/lib/food-store';
-import { upsertEntry } from '@/lib/log';
-import { buildPlanSummary, planStore, todayIso, DEFAULT_PLAN } from '@/lib/plan';
-import { updateProfile, useProfile } from '@/lib/profile';
+import { logStore, upsertEntry } from '@/lib/log';
+import { buildPlanSummary, planProfile, planStore, todayIso, DEFAULT_PLAN } from '@/lib/plan';
+import { getProfile, updateProfile, useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
@@ -39,6 +39,16 @@ function OnboardingInner() {
       setImported(true);
       history.replaceState(null, '', location.pathname);
     }
+  }, []);
+
+  // Editing starts from the current trend weight: weigh-ins never rewrite the profile, so the
+  // weight entered at setup is out of date by now.
+  const openedWeight = useRef<number | null>(null);
+  useEffect(() => {
+    if (!planStore.get().active) return;
+    const weightKg = round(planProfile(getProfile(), logStore.get().entries).weightKg, 1);
+    openedWeight.current = weightKg;
+    if (weightKg !== getProfile().weightKg) updateProfile({ weightKg });
   }, []);
 
   // Sensible default goal weight the first time through.
@@ -79,7 +89,11 @@ function OnboardingInner() {
       calorieOverride: null,
       lastAdjustedOn: null,
     });
-    if (!editing) upsertEntry({ date: today, weightKg: profile.weightKg });
+    // A new plan's weight, or one changed while editing, becomes today's weigh-in, so the
+    // trend (and with it every target) takes it into account.
+    const changed =
+      openedWeight.current !== null && Math.abs(profile.weightKg - openedWeight.current) >= 0.05;
+    if (!editing || changed) upsertEntry({ date: today, weightKg: profile.weightKg });
     location.assign(withBase('/plan/'));
   };
 

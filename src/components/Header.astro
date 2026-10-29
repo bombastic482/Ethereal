@@ -18,10 +18,7 @@ const isActive = (href: string) =>
   current === withBase(href) || (href !== '/' && current.startsWith(withBase(href)));
 ---
 
-<header
-  class="sticky top-0 z-40 backdrop-blur-md"
-  style="background: color-mix(in oklab, var(--bg) 80%, transparent); border-bottom: 1px solid var(--border);"
->
+<header class="site-header sticky top-0 z-40">
   <div class="container-page flex h-16 items-center justify-between gap-4">
     <a
       href={withBase('/')}
@@ -41,6 +38,7 @@ const isActive = (href: string) =>
             isActive(item.href) ? 'bg-muted text-fg' : 'text-muted hover:text-fg hover:bg-muted',
           ]}
           aria-current={isActive(item.href) ? 'page' : undefined}
+          transition:name={isActive(item.href) ? 'nav-active' : undefined}
         >
           {item.label}
         </a>

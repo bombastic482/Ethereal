@@ -111,14 +111,14 @@ const quickCount = recipes.filter((r) => r.minutes <= 15).length;
       ].map(([v, label]) => (
         <button
           type="button"
-          class="chip filter-chip"
+          class="chip filter-chip pressable"
           data-diet={v}
           aria-pressed={v === 'all' ? 'true' : 'false'}
         >
           {label}
         </button>
       ))}
-      <button type="button" class="chip filter-chip" data-quick aria-pressed="false">
+      <button type="button" class="chip filter-chip pressable" data-quick aria-pressed="false">
         15 minutes or less
       </button>
       <span class="text-subtle ml-auto text-xs" data-count aria-live="polite"></span>

@@ -200,6 +200,7 @@ export default function CommandPalette({ guides = [] }: Props) {
         class="fixed inset-0 z-[60] grid place-items-start justify-items-center bg-black/35 p-4 pt-[12vh] backdrop-blur-sm"
         role="dialog"
         aria-modal="true"
+        data-pop
         aria-label="Quick launcher"
         onClick={(e) => e.target === e.currentTarget && setOpen(false)}
       >

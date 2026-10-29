@@ -45,7 +45,7 @@ export function Layer({ children }: { children: ComponentChildren }) {
   }, []);
   if (typeof document === 'undefined') return null;
   return createPortal(
-    <div ref={box} tabIndex={-1} class="outline-none">
+    <div ref={box} tabIndex={-1} class="outline-none" data-layer>
       {children}
     </div>,
     document.body,

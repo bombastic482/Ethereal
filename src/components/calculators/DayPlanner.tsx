@@ -10,7 +10,8 @@ import {
 } from '@/lib/day-plan';
 import { prefsStore } from '@/lib/food-store';
 import { haptic } from '@/lib/fx';
-import { buildPlanSummary, planStore, todayIso } from '@/lib/plan';
+import { logStore } from '@/lib/log';
+import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import {
   allRecipes,
@@ -38,6 +39,7 @@ const LABEL: Record<RecipeMeal, string> = {
  */
 function DayPlannerInner() {
   const [profile] = useProfile();
+  const [log] = logStore.use();
   const [plan] = planStore.use();
   const [prefs] = prefsStore.use();
   const [ready, setReady] = useState(allRecipes().length > 0);
@@ -56,11 +58,14 @@ function DayPlannerInner() {
 
   const summary = useMemo(() => {
     try {
-      return buildPlanSummary(profile, plan.active ? plan : { ...plan, active: true });
+      return buildPlanSummary(
+        planProfile(profile, log.entries),
+        plan.active ? plan : { ...plan, active: true },
+      );
     } catch {
       return null;
     }
-  }, [profile, plan]);
+  }, [profile, plan, log.entries]);
   const targetKcal = summary?.target ?? 2000;
   const targetProtein = summary?.macros.grams.protein ?? 120;
 
@@ -101,7 +106,15 @@ function DayPlannerInner() {
   // First plan, and re-plan when targets or diet change (keeping user locks).
   useEffect(() => {
     if (!ready) return;
-    setDay(compute({ locked: lockedIds(day) }));
+    // The search is the heaviest thing on the page; run it in its own task once the browser is
+    // idle, so it never lengthens the task that makes the page interactive.
+    const run = () => setDay(compute({ locked: lockedIds(day) }));
+    if (day !== undefined || typeof requestIdleCallback !== 'function') {
+      run();
+      return;
+    }
+    const id = requestIdleCallback(run, { timeout: 400 });
+    return () => cancelIdleCallback(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, targetKcal, targetProtein, prefs.diet]);
 
@@ -256,18 +269,26 @@ function DayPlannerInner() {
         aria-label="Plan a day"
         aria-busy="true"
       >
-        <div>
-          <h2 class="text-lg font-bold tracking-tight">Plan a day that hits your numbers</h2>
-          <p class="text-muted mt-1 text-sm">
-            Four recipes from the starter set, chosen so the day lands on{' '}
-            <span class="tabular font-semibold">{targetKcal.toLocaleString('en-US')}</span> kcal
-            with at least <span class="tabular font-semibold">{targetProtein}</span> g protein. Swap
-            any slot, lock what you like, then log the lot.
-          </p>
-          <p class="text-subtle mt-2 text-xs" role="status">
-            Loading recipes…
-          </p>
-        </div>
+        {/* Same header structure as the loaded planner, so hydration reuses the intro
+            paragraph instead of redrawing it (a redraw counts as a late largest paint). */}
+        <header class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-bold tracking-tight">Plan a day that hits your numbers</h2>
+            <p class="text-muted mt-1 text-sm">
+              Four recipes from the starter set, chosen so the day lands on{' '}
+              <span class="tabular font-semibold">{targetKcal.toLocaleString('en-US')}</span> kcal
+              with at least <span class="tabular font-semibold">{targetProtein}</span> g protein.
+              Swap any slot, lock what you like, then log the lot.
+            </p>
+          </div>
+          <div class="flex items-center gap-2" aria-hidden="true">
+            <span class="surface-muted block h-9 w-44 animate-pulse rounded-xl" />
+            <span class="surface-muted block h-9 w-24 animate-pulse rounded-xl" />
+          </div>
+        </header>
+        <p class="text-subtle -mt-3 text-xs" role="status">
+          Loading recipes…
+        </p>
         <ul class="grid gap-3" aria-hidden="true">
           {SLOTS.map((s) => (
             <li key={s} class="surface-muted h-20 animate-pulse" />
