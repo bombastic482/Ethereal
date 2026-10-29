@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'preact/hooks';
+import { analyticsStore, GOATCOUNTER_CODE } from '@/lib/analytics';
 import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { buildShareLink, clearAllData, createBackup, logToCsv, restoreBackup } from '@/lib/backup';
 import { calculateHydration } from '@/lib/calc/hydration';
@@ -38,6 +39,7 @@ function DataManagerInner() {
   const [log] = logStore.use();
   const [diary] = diaryStore.use();
   const [prefs, patchPrefs] = prefsStore.use();
+  const [counting, patchCounting] = analyticsStore.use();
   const [msg, setMsg] = useState<{ tone: 'success' | 'warn'; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [weighTime, setWeighTime] = useState('07:30');
@@ -309,6 +311,31 @@ function DataManagerInner() {
         </div>
         {msg && <Callout tone={msg.tone}>{msg.text}</Callout>}
       </section>
+
+      {GOATCOUNTER_CODE && (
+        <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Anonymous page counts">
+          <h2 class="text-lg font-bold tracking-tight">Anonymous page counts</h2>
+          <label class="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              class="accent-brand-600 mt-0.5 h-4 w-4"
+              checked={counting.enabled}
+              onChange={(e) => patchCounting({ enabled: (e.target as HTMLInputElement).checked })}
+            />
+            <span>
+              <span class="font-semibold">Count my page views anonymously</span>
+              <span class="text-muted block text-xs">
+                Ethereal counts page views to learn which tools help people. Only the page address,
+                the site that linked you here and your screen size are sent, with no cookies and
+                nothing that identifies you. Nothing you enter is ever sent.{' '}
+                <a class="underline" href={withBase('/privacy/')}>
+                  What is counted
+                </a>
+              </span>
+            </span>
+          </label>
+        </section>
+      )}
 
       <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Switch from another app">
         <h2 class="text-lg font-bold tracking-tight">Switching from another app?</h2>

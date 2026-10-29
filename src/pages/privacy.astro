@@ -1,18 +1,26 @@
 ---
 import Base from '@/layouts/Base.astro';
+import { GOATCOUNTER_CODE } from '@/lib/analytics';
+
+const counting = GOATCOUNTER_CODE !== '';
 ---
 
 <Base
   title="Privacy"
-  description="Ethereal collects nothing. No accounts, no cookies, no analytics. Your inputs stay in your own browser. Here is exactly how that works."
+  description={
+    counting
+      ? 'Everything you enter stays in your own browser. No accounts, no cookies; only anonymous page counts. Here is exactly how that works.'
+      : 'Ethereal collects nothing. No accounts, no cookies, no analytics. Your inputs stay in your own browser. Here is exactly how that works.'
+  }
   path="/privacy/"
 >
   <div class="container-page pt-12 pb-16 sm:pt-16">
     <article class="prose-ethereal max-w-3xl">
       <h1 class="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">Privacy</h1>
       <p class="text-lg">
-        Short version: we do not collect, store or transmit any personal data. There is nothing to
-        opt out of.
+        {counting
+          ? 'Short version: nothing you enter ever leaves your browser, and we collect no personal data. We only count page views, anonymously, and you can switch even that off.'
+          : 'Short version: we do not collect, store or transmit any personal data. There is nothing to opt out of.'}
       </p>
       <h2>What happens to what you type</h2>
       <p>
@@ -51,9 +59,32 @@ import Base from '@/layouts/Base.astro';
       </p>
       <h2>Cookies and tracking</h2>
       <p>
-        The site sets no cookies and loads no analytics, advertising or social-media scripts. Fonts
-        are self-hosted, so no third party sees your visit.
+        The site sets no cookies and loads no advertising or social-media scripts. Fonts are
+        self-hosted, so no font service sees your visit.
       </p>
+      {counting ? (
+        <>
+          <h2>Anonymous page counts</h2>
+          <p>
+            To learn which pages and tools help people, the site counts page views with{' '}
+            <a href="https://www.goatcounter.com" rel="noopener">
+              GoatCounter
+            </a>
+            , an open-source service that uses no cookies and does not store IP addresses. For each
+            page you open, your browser sends the page's address and title, the site that linked you
+            here (its domain only), and your screen size. GoatCounter works out the browser,
+            operating system and country from the request, and nothing else.
+          </p>
+          <p>
+            Nothing you type, log, weigh or photograph is ever included, and there is no identifier
+            that could follow you from one page or day to the next. Counting is off when your
+            browser sends Do Not Track or Global Privacy Control, and you can switch it off in
+            Settings → Anonymous page counts.
+          </p>
+        </>
+      ) : (
+        <p>The site loads no analytics either.</p>
+      )}
       <h2>Hosting logs</h2>
       <p>
         Like every website, the hosting provider that serves these files may keep standard,

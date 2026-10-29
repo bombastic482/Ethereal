@@ -158,7 +158,7 @@ Your plan, diary, weigh-ins and preferences live in `localStorage`, and progress
 
 | Check                 | What it covers                                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 147 unit tests        | Every calculation, the trend and adjustment engine, insights, CSV import, the planner and food search.              |
+| 152 unit tests        | Every calculation, the trend and adjustment engine, insights, CSV import, the planner and food search.              |
 | 120 end-to-end tests  | Desktop and phone: onboarding, diary, planner, review, import, eating out, the tab bar, and an accessibility sweep. |
 | Lighthouse CI         | Performance budgets on a simulated slow phone; key pages score 100.                                                 |
 | Data validators       | Every food and recipe checked for shape, plausibility and energy consistency on each build.                         |

@@ -83,6 +83,10 @@ const { class: cls, ...seo } = Astro.props;
     <Footer />
     <TabBar />
     <script>
+      import { startCounting } from '@/lib/analytics';
+
+      // Anonymous page counts (see src/lib/analytics.ts for exactly what is sent, and when not).
+      startCounting();
       // A thin progress bar while the client router fetches the next page (see global.css).
       document.addEventListener('astro:before-preparation', () => {
         document.documentElement.dataset.navigating = '1';
