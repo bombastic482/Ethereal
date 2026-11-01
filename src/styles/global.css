@@ -800,7 +800,7 @@
   }
 }
 
-/* One colour per kind of thing in a day, shared by the dial, the Now card and the timeline.
+/* One colour per kind of thing in a day, shared by the day track, the Now card and the timeline.
    Components set class="kind-<kind>" and read var(--k). */
 .kind-wake,
 .kind-meal,
@@ -2358,7 +2358,7 @@
   max-width: 40rem;
 }
 
-/* Today: hero with the day dial */
+/* Today: the hero, from the sky down to the day track */
 .today-hero {
   padding: 0;
   overflow: hidden;
@@ -2368,188 +2368,166 @@
 [data-theme='dark'] .today-hero {
   background: oklch(19% 0.01 255);
 }
-.today-hero-grid {
+.today-hero-body {
   display: grid;
-  gap: 1.25rem;
-  align-items: center;
+  gap: 1.5rem;
   padding: 1.25rem;
 }
 @media (min-width: 768px) {
-  .today-hero-grid {
-    padding: 1.75rem 2rem 1.75rem 1.25rem;
-  }
-  .today-hero-grid {
-    grid-template-columns: 19rem minmax(0, 1fr);
-    gap: 2rem;
+  .today-hero-body {
+    padding: 1.5rem 2rem 1.75rem;
   }
 }
-.dial {
-  position: relative;
-  width: min(19rem, 82vw);
-  aspect-ratio: 1;
-  margin-inline: auto;
+
+/* The day as one fine line: lived part filled, each step a dot in its colour. */
+.track {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
 }
-.dial-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.track-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: var(--fg-subtle);
+  font-variant-numeric: tabular-nums;
 }
-.dial-track {
-  fill: none;
-  stroke: color-mix(in oklab, var(--fg) 8%, transparent);
-  stroke-width: 14;
-  stroke-linecap: round;
-}
-.dial-progress {
-  fill: none;
-  stroke: url(#dial-fill);
-  stroke-width: 14;
-  stroke-linecap: round;
-  filter: drop-shadow(0 4px 10px oklch(63% 0.15 var(--brand-h) / 0.35));
-}
-.dial-busy {
-  fill: none;
-  stroke: color-mix(in oklab, var(--fg) 14%, transparent);
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-dasharray: 1 5;
-}
-.dial-tick {
-  stroke: color-mix(in oklab, var(--fg) 18%, transparent);
-  stroke-width: 1.5;
-}
-.dial-tick-major {
-  stroke: color-mix(in oklab, var(--fg) 35%, transparent);
-  stroke-width: 2;
-}
-.dial-hour {
-  font-size: 10px;
-  font-weight: 700;
-  fill: var(--fg-subtle);
-}
-.dial-mark {
-  cursor: pointer;
-  outline: none;
-}
-.dial-dot {
-  fill: var(--bg-elevated);
-  stroke: var(--k);
-  stroke-width: 3;
-  transition:
-    r 0.25s var(--ease-spring),
-    fill 0.2s ease;
-}
-.dial-core {
-  fill: var(--k);
-  transition: r 0.25s var(--ease-spring);
-}
-.dial-done .dial-dot {
-  fill: var(--k);
-}
-.dial-check {
-  fill: none;
-  stroke: white;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.dial-sel .dial-dot {
-  stroke-width: 3.5;
-  filter: drop-shadow(0 4px 10px color-mix(in oklab, var(--k) 60%, transparent));
-}
-.dial-mark:focus-visible .dial-dot {
-  stroke-width: 4;
-  stroke: var(--fg);
-}
-.dial-now-halo {
-  fill: oklch(63% 0.15 var(--brand-h) / 0.22);
-  animation: dial-pulse 2.4s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.dial-now-dot {
-  fill: white;
-  stroke: var(--color-brand-600);
-  stroke-width: 3.5;
-}
-@keyframes dial-pulse {
-  50% {
-    transform: scale(1.35);
-    opacity: 0.4;
-  }
-}
-.dial-center {
-  position: absolute;
-  inset: 22%;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.2rem;
-  text-align: center;
-  pointer-events: none;
-}
-.dial-center > * {
-  pointer-events: auto;
-}
-.dial-center-clock {
-  font-family: var(--font-display);
-  font-size: 2.25rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-.dial-center-sub {
-  font-size: 0.8rem;
+.track-count {
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--fg-muted);
 }
-.dial-center-icon {
+.track-line {
+  position: relative;
+  height: 2.25rem;
+  margin: 0 0.5rem;
+}
+.track-rail,
+.track-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+.track-rail {
+  right: 0;
+  background: color-mix(in oklab, var(--fg) 12%, transparent);
+}
+.track-fill {
+  background: color-mix(in oklab, var(--fg) 55%, transparent);
+  transition: width 1s ease;
+}
+.track-busy {
+  position: absolute;
+  top: 50%;
+  height: 10px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: color-mix(in oklab, var(--fg) 6%, transparent);
+}
+.track-now {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--fg);
+  transform: translate(-50%, -50%);
+}
+.track-dot {
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 2px var(--k);
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.25s var(--ease-spring),
+    height 0.25s var(--ease-spring),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.track-dot::before {
+  /* Tall for the thumb, but only as wide as half the gap to the next dot, so neighbours never
+     steal each other's taps. */
+  content: '';
+  position: absolute;
+  inset: -14px -2px;
+}
+.track-dot.is-done {
+  background: var(--k);
+}
+.track-dot.is-next {
+  width: 15px;
+  height: 15px;
+  box-shadow:
+    inset 0 0 0 2.5px var(--k),
+    0 0 0 5px color-mix(in oklab, var(--k) 20%, transparent);
+}
+.track-dot.is-sel {
+  box-shadow:
+    inset 0 0 0 2px var(--k),
+    0 0 0 3px var(--bg-elevated),
+    0 0 0 4.5px var(--fg);
+}
+.track-dot.is-done.is-sel {
+  box-shadow:
+    0 0 0 3px var(--bg-elevated),
+    0 0 0 4.5px var(--fg);
+}
+.track-dot:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
+.track-hours {
+  position: relative;
+  height: 1rem;
+  margin: 0 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--fg-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.track-hours span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.track-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 1rem;
+  background: var(--bg-muted);
+  animation: var(--animate-rise);
+}
+.track-detail-icon {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.8rem;
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.75rem;
   color: white;
   background: var(--k);
-  animation: var(--animate-pop);
-}
-.dial-center-time {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--fg-subtle);
-}
-.dial-center-title {
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  max-width: 9rem;
-}
-.dial-center-tick {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.25rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border: 1.5px solid var(--border-strong);
-  transition: transform 0.15s var(--ease-spring);
-}
-.dial-center-tick:active {
-  transform: scale(0.94);
-}
-.dial-center-tick.is-done {
-  color: white;
-  border-color: var(--color-brand-500);
-  background: var(--color-brand-500);
-}
-.dial-center-tick:disabled {
-  opacity: 0.8;
 }
 @media (prefers-reduced-motion: reduce) {
-  .dial-now-halo,
+  .track-fill,
+  .track-dot {
+    transition: none;
+  }
+  .track-detail {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
   .today-hero {
     animation: none;
   }

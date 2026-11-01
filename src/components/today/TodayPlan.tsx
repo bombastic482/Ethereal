@@ -17,7 +17,8 @@ import { withBase } from '@/lib/url';
 import { lastGood, mindStore } from '@/lib/mind';
 import { GoodThing } from '../mind/GoodThing';
 import TodayMind from '../mind/TodayMind';
-import { DayDial, KIND_ICON, KindIcon } from './DayDial';
+import { DayTrack } from './DayTrack';
+import { KIND_ICON, KindIcon, clock } from './kinds';
 import { PrayerStrip } from './PrayerStrip';
 import { SkyScene } from './SkyScene';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
@@ -27,13 +28,6 @@ const minutesNow = () => {
   const d = new Date();
   return d.getHours() * 60 + d.getMinutes();
 };
-
-/** "07:30" in the device's own clock style. */
-function clock(hhmm: string): string {
-  const [h, m] = hhmm.split(':').map(Number);
-  const d = new Date(2000, 0, 1, h, m);
-  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-}
 
 function relative(item: DayItem, now: number): string {
   let diff = toMinutes(item.time) - now;
@@ -248,6 +242,12 @@ function TodayPlanInner() {
                   day: 'numeric',
                   month: 'long',
                 })}
+                <span class="tabular">
+                  {' · '}
+                  {clock(
+                    `${String(Math.floor(now / 60)).padStart(2, '0')}:${String(now % 60).padStart(2, '0')}`,
+                  )}
+                </span>
               </p>
               <h2 id="plan-h" class="sky-title">
                 {greeting(now, life.name)}
@@ -270,24 +270,53 @@ function TodayPlanInner() {
           </div>
         )}
         {sky.prayers && <PrayerStrip times={sky.prayers} now={now} />}
-        <div class="today-hero-grid">
-          <DayDial
+        <div class="today-hero-body">
+          {current ? (
+            <NowCard
+              bare
+              item={current}
+              now={now}
+              date={date}
+              weightKg={planProfile(profile, weights.entries).weightKg}
+              onTick={() => tick(current)}
+            />
+          ) : (
+            <div>
+              <p class="eyebrow">That's the day</p>
+              <h3 class="font-display text-3xl tracking-tight">
+                {doneCount >= actionable.length - 1
+                  ? 'Everything done. Rest well.'
+                  : 'Rest now. Tomorrow is a fresh page.'}
+              </h3>
+              {why && <p class="text-muted mt-2 italic">“{why}”</p>}
+              <div class="mt-4">
+                <GoodThing date={date} />
+              </div>
+            </div>
+          )}
+          <DayTrack
             items={day}
             now={now}
+            nextId={current?.id ?? null}
             selected={sel}
             onSelect={(id) => setSel(sel === id ? null : id)}
-            center={
-              picked ? (
+            detail={
+              picked && (
                 <>
-                  <span class={`dial-center-icon kind-${picked.kind}`}>
-                    <KindIcon kind={picked.kind} size={18} />
+                  <span class={`track-detail-icon kind-${picked.kind}`} aria-hidden="true">
+                    <KindIcon kind={picked.kind} size={16} />
                   </span>
-                  <span class="dial-center-time">{clock(picked.time)}</span>
-                  <span class="dial-center-title">{picked.title}</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="text-subtle tabular block text-xs">
+                      {clock(picked.time)}
+                      {picked.end && ` to ${clock(picked.end)}`}
+                    </span>
+                    <span class="block truncate font-semibold">{picked.title}</span>
+                  </span>
                   {!picked.passive && (
                     <button
                       type="button"
-                      class={`dial-center-tick ${picked.done ? 'is-done' : ''}`}
+                      class={`btn h-9 px-3 text-sm ${picked.done ? 'btn-secondary' : 'btn-primary'}`}
                       disabled={picked.auto}
                       onClick={() => tick(picked)}
                     >
@@ -296,47 +325,9 @@ function TodayPlanInner() {
                     </button>
                   )}
                 </>
-              ) : (
-                <>
-                  <span class="dial-center-clock tabular">
-                    {clock(
-                      `${String(Math.floor(now / 60)).padStart(2, '0')}:${String(now % 60).padStart(2, '0')}`,
-                    )}
-                  </span>
-                  <span class="dial-center-sub tabular">
-                    {doneCount} of {actionable.length} done
-                  </span>
-                </>
               )
             }
           />
-          <div class="min-w-0">
-            <div>
-              {current ? (
-                <NowCard
-                  bare
-                  item={current}
-                  now={now}
-                  date={date}
-                  weightKg={planProfile(profile, weights.entries).weightKg}
-                  onTick={() => tick(current)}
-                />
-              ) : (
-                <div class="py-2">
-                  <p class="eyebrow">That's the day</p>
-                  <h3 class="font-display text-3xl tracking-tight">
-                    {doneCount >= actionable.length - 1
-                      ? 'Everything done. Rest well.'
-                      : 'Rest now. Tomorrow is a fresh page.'}
-                  </h3>
-                  {why && <p class="text-muted mt-2 italic">“{why}”</p>}
-                  <div class="mt-4">
-                    <GoodThing date={date} />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 

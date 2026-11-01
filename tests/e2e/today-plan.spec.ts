@@ -33,7 +33,7 @@ test.describe('today plan', () => {
     await expect(page.getByRole('button', { name: /catch me up/i })).toHaveCount(0);
     await expect(page.getByRole('group', { name: /Your day: 1 of \d+ done/ })).toBeVisible();
 
-    // The day dial: tap dinner's marker, mark it done from the centre.
+    // The day track: tap dinner's dot, mark it done from the detail under the line.
     const dial = page.getByRole('group', { name: /Your day: \d+ of \d+ done/ });
     await dial.getByRole('button', { name: /Dinner$/ }).click();
     await page.getByRole('button', { name: 'Mark done', exact: true }).click();
