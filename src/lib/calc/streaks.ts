@@ -38,13 +38,17 @@ export interface Milestone {
   reached: boolean;
   /** 0–1 progress toward the milestone. */
   progress: number;
+  /** Where it sits on the way from the start weight (0) to the goal (1). */
+  at: number;
+  /** The trend weight that reaches it. */
+  kg: number;
 }
 
 /**
- * Weight milestones from trend weight: each 5% of start weight, every whole 5 kg (or 10 lb), and the goal.
- * Keeps the list short: the next unreached milestone plus everything already reached.
+ * Every weight milestone between the start and the goal, in the order you meet them: every whole
+ * 5 kg (or 10 lb), each 5% of start weight, and the goal itself.
  */
-export function weightMilestones(
+export function allWeightMilestones(
   startKg: number,
   trendKg: number | null,
   goalKg: number,
@@ -55,37 +59,47 @@ export function weightMilestones(
   if (total === 0 || trendKg === null) return [];
   const done = losing ? startKg - trendKg : trendKg - startKg;
   const list: Milestone[] = [];
+  const add = (key: string, label: string, detail: string, k: number) =>
+    list.push({
+      key,
+      label,
+      detail,
+      reached: done >= k,
+      progress: Math.min(1, Math.max(0, done / k)),
+      at: k / total,
+      kg: losing ? startKg - k : startKg + k,
+    });
   const unit = imperial ? 4.5359237 : 5; // 10 lb or 5 kg steps
   for (let k = unit, i = 1; k < total; k += unit, i++) {
     const label = imperial
       ? `${Math.round(k / 0.45359237)} lb ${losing ? 'lost' : 'gained'}`
       : `${Math.round(k)} kg ${losing ? 'lost' : 'gained'}`;
-    list.push({
-      key: `${imperial ? 'lb' : 'kg'}-step-${i}`,
+    add(
+      `${imperial ? 'lb' : 'kg'}-step-${i}`,
       label,
-      detail: `${losing ? 'Down' : 'Up'} to ${(losing ? startKg - k : startKg + k).toFixed(1)} kg`,
-      reached: done >= k,
-      progress: Math.min(1, Math.max(0, done / k)),
-    });
+      `${losing ? 'Down' : 'Up'} to ${(losing ? startKg - k : startKg + k).toFixed(1)} kg`,
+      k,
+    );
   }
   for (const pct of [5, 10, 15, 20]) {
     const k = (startKg * pct) / 100;
     if (k >= total) break;
-    list.push({
-      key: `pct-${pct}`,
-      label: `${pct}% of body weight`,
-      detail: 'Where health markers start to improve',
-      reached: done >= k,
-      progress: Math.min(1, Math.max(0, done / k)),
-    });
+    add(`pct-${pct}`, `${pct}% of body weight`, 'Where health markers start to improve', k);
   }
-  list.push({
-    key: 'goal',
-    label: 'Goal weight',
-    detail: `${goalKg.toFixed(1)} kg`,
-    reached: done >= total,
-    progress: Math.min(1, Math.max(0, done / total)),
-  });
+  add('goal', 'Goal weight', `${goalKg.toFixed(1)} kg`, total);
+  return list.sort((a, b) => a.at - b.at);
+}
+
+/**
+ * Weight milestones from trend weight, kept short: everything already reached plus the next one.
+ */
+export function weightMilestones(
+  startKg: number,
+  trendKg: number | null,
+  goalKg: number,
+  imperial = false,
+): Milestone[] {
+  const list = allWeightMilestones(startKg, trendKg, goalKg, imperial);
   list.sort((a, b) => Number(b.reached) - Number(a.reached) || b.progress - a.progress);
   const reached = list.filter((m) => m.reached);
   const next = list.filter((m) => !m.reached).sort((a, b) => b.progress - a.progress)[0];

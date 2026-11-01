@@ -9,7 +9,13 @@ import {
   type FoodEntry,
 } from '../nutrition';
 import { ACTIVITIES, activity, exerciseKcal, exerciseNetKcal, stepsKcal } from '../exercise';
-import { currentStreak, longestStreak, shift, weightMilestones } from '../streaks';
+import {
+  allWeightMilestones,
+  currentStreak,
+  longestStreak,
+  shift,
+  weightMilestones,
+} from '../streaks';
 
 const egg: FoodEntry = {
   id: '1',
@@ -195,5 +201,14 @@ describe('streaks and milestones', () => {
     expect(['kg-step-2', 'pct-10']).toContain(m.filter((x) => !x.reached)[0]!.key); // whichever is nearer
     expect(weightMilestones(92, null, 80)).toEqual([]);
     expect(weightMilestones(80, 80, 80)).toEqual([]);
+  });
+  it('places every milestone on the way from start to goal', () => {
+    const all = allWeightMilestones(92, 86.5, 80);
+    expect(all.map((m) => m.key)).toEqual(['pct-5', 'kg-step-1', 'pct-10', 'kg-step-2', 'goal']);
+    expect(all.at(-1)).toMatchObject({ at: 1, kg: 80, reached: false });
+    expect(all[1]).toMatchObject({ kg: 87, reached: true });
+    expect(all[1]!.at).toBeCloseTo(5 / 12);
+    // Gaining runs the other way.
+    expect(allWeightMilestones(60, 61, 66).at(-1)).toMatchObject({ kg: 66, at: 1 });
   });
 });

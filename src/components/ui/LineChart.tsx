@@ -1,4 +1,4 @@
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useId, useRef, useState } from 'preact/hooks';
 
 interface Point {
   x: number;
@@ -17,7 +17,10 @@ interface Props {
   ariaLabel: string;
 }
 
-/** Dependency-free responsive SVG line chart with a filled area and goal line. */
+/**
+ * Dependency-free SVG line chart with a filled area and goal line. It draws at the width it is
+ * given rather than scaling one fixed drawing, so labels stay a readable size on a phone.
+ */
 export function LineChart({
   points,
   dots = [],
@@ -28,10 +31,23 @@ export function LineChart({
   ariaLabel,
 }: Props) {
   const svg = useRef<SVGSVGElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  const gradient = `area-${useId()}`;
   const [hover, setHover] = useState<number | null>(null);
+  const [width, setWidth] = useState(640);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([e]) => {
+      const w = Math.round(e!.contentRect.width);
+      if (w > 0) setWidth(Math.max(260, w));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   if (points.length < 2) return null;
-  const W = 640;
-  const H = 260;
+  const W = width;
+  const H = Math.round(Math.min(260, Math.max(180, W * 0.42)));
   const pad = { l: 48, r: 16, t: 16, b: 32 };
   const xs = points.map((p) => p.x).concat(dots.map((p) => p.x));
   const dataYs = points.map((p) => p.y).concat(dots.map((p) => p.y));
@@ -56,14 +72,14 @@ export function LineChart({
     .join(' ');
   const area = `${d} L${sx(xMax).toFixed(1)},${(H - pad.b).toFixed(1)} L${sx(xMin).toFixed(1)},${(H - pad.b).toFixed(1)} Z`;
   const yTicks = 4;
-  const xTicks = Math.min(6, points.length - 1);
+  const xTicks = Math.min(W < 480 ? 3 : 6, points.length - 1);
   const last = points[points.length - 1]!;
   // Touch or hover anywhere to read the nearest point; arrows step through them.
   const pick = (clientX: number) => {
     const el = svg.current;
     if (!el) return;
-    const box = el.getBoundingClientRect();
-    const x = ((clientX - box.left) / box.width) * W;
+    const rect = el.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * W;
     let best = 0;
     let dist = Infinity;
     points.forEach((p, i) => {
@@ -81,7 +97,7 @@ export function LineChart({
   const tipX = hp ? Math.min(W - pad.r - tipW, Math.max(pad.l, sx(hp.x) - tipW / 2)) : 0;
   const tipY = hp ? (sy(hp.y) - 40 < pad.t ? sy(hp.y) + 14 : sy(hp.y) - 38) : 0;
   return (
-    <>
+    <div ref={box}>
       <svg
         ref={svg}
         viewBox={`0 0 ${W} ${H}`}
@@ -106,7 +122,7 @@ export function LineChart({
         }}
       >
         <defs>
-          <linearGradient id="area" x1="0" x2="0" y1="0" y2="1">
+          <linearGradient id={gradient} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stop-color="var(--color-brand-500)" stop-opacity="0.35" />
             <stop offset="1" stop-color="var(--color-brand-500)" stop-opacity="0" />
           </linearGradient>
@@ -173,7 +189,7 @@ export function LineChart({
             </text>
           </g>
         )}
-        <path d={area} fill="url(#area)" />
+        <path d={area} fill={`url(#${gradient})`} />
         {dots.map((p, i) => (
           <circle
             key={i}
@@ -238,6 +254,6 @@ export function LineChart({
       <span class="sr-only" aria-live="polite">
         {readout}
       </span>
-    </>
+    </div>
   );
 }

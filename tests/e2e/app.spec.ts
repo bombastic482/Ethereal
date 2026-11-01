@@ -55,6 +55,10 @@ test.describe('plan and tracker', () => {
     await expect(page.getByRole('progressbar')).toBeVisible();
     await expect(page.getByText(/Logged .* today/)).toBeVisible();
     await expect(page.getByText(/more days of data needed/)).toBeVisible();
+    // Too early to change anything, so the one thing is to keep weighing in.
+    await expect(page.getByRole('region', { name: 'Your next move' })).toContainText(
+      'Weighed in. Same again tomorrow.',
+    );
 
     // Header CTA now shows the calorie target (inside the menu on small screens)
     if ((page.viewportSize()?.width ?? 1280) < 768)

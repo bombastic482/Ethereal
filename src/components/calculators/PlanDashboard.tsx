@@ -2,7 +2,13 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { estimateExpenditure } from '@/lib/calc/expenditure';
 import { buildInsights } from '@/lib/calc/insights';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
-import { currentStreak, longestStreak, shift, weightMilestones } from '@/lib/calc/streaks';
+import {
+  allWeightMilestones,
+  currentStreak,
+  longestStreak,
+  shift,
+  weightMilestones,
+} from '@/lib/calc/streaks';
 import { assessProgress, daysBetween, trendSeries } from '@/lib/calc/trend';
 import { diaryStore, prefsStore } from '@/lib/food-store';
 import { humaniseWeeks } from '@/lib/calc/timeline';
@@ -15,8 +21,7 @@ import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Hydrated, Placeholder } from '../ui/Hydrated';
-import { DonutChart } from '../ui/DonutChart';
-import { Icon } from '../ui/Icon';
+import { Icon, type IconName } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
 import { NumberField } from '../ui/NumberField';
 import { Stat } from '../ui/Stat';
@@ -245,6 +250,254 @@ function PlanDashboardInner() {
     x: daysBetween(plan.startedOn, e.date),
     y: imperial ? kgToLb(e.weightKg) : e.weightKg,
   }));
+  const trendChart = chartPoints.length > 1 && (
+    <LineChart
+      ariaLabel="Trend weight since the plan started"
+      points={chartPoints}
+      dots={chartDots}
+      goal={
+        plan.goal === 'maintain'
+          ? undefined
+          : imperial
+            ? kgToLb(plan.goalWeightKg)
+            : plan.goalWeightKg
+      }
+      xLabel={(x) => (x === 0 ? 'Start' : `Day ${x}`)}
+      yLabel={(y) => `${round(y, 1)} ${imperial ? 'lb' : 'kg'}`}
+    />
+  );
+
+  // The way from start to goal, with every milestone on it. Marks that would crowd each other or
+  // the ends are left off the line; they still count.
+  const marks =
+    plan.goal === 'maintain'
+      ? []
+      : allWeightMilestones(plan.startWeightKg, latestTrend, plan.goalWeightKg, imperial);
+  const lineMarks: typeof marks = [];
+  for (const m of marks) {
+    const prev = lineMarks[lineMarks.length - 1];
+    if (m.at < 0.97 && (!prev || m.at - prev.at >= 0.05)) lineMarks.push(m);
+  }
+  const nextMark = marks.find((m) => !m.reached) ?? null;
+
+  // The one thing to change next. A calorie change the trend asks for comes first, then the
+  // pattern most worth fixing, and if nothing needs fixing, saying so is the advice.
+  const promoted = insights.find((i) => i.tone === 'warn') ?? null;
+  const focusWeighIn = () => {
+    const el = document.getElementById('quick-weight');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el?.focus({ preventScroll: true });
+  };
+  type Move = {
+    key: string;
+    icon: IconName;
+    title: string;
+    detail: string;
+    action?: preact.ComponentChildren;
+  };
+  let move: Move | null = null;
+  if (goalReached) move = null;
+  else if (report?.recommendedCalories && !recentlyAdjusted) {
+    const less = report.recommendedCalories < (summary?.target ?? 0);
+    move = {
+      key: 'retarget',
+      icon: 'target',
+      title: `${less ? 'Eat a little less' : 'Eat a little more'}: ${formatNumber(report.recommendedCalories)} kcal a day`,
+      detail:
+        'This comes from what your trend actually did, not a formula. It runs for two weeks, then Ethereal checks again.',
+      action: (
+        <button type="button" class="btn btn-primary" onClick={applyRecommendation}>
+          Set target to {formatNumber(report.recommendedCalories)} kcal
+        </button>
+      ),
+    };
+  } else if (report?.status === 'insufficient-data') {
+    move = {
+      key: 'weigh',
+      icon: 'scale',
+      title: todayEntry ? 'Weighed in. Same again tomorrow.' : 'Weigh in this morning',
+      detail:
+        'Water moves the scale a kilo or two from day to day. After two weeks of weigh-ins the trend is steady enough to act on, and this card tells you what to change.',
+      action: !todayEntry && (
+        <button type="button" class="btn btn-secondary" onClick={focusWeighIn}>
+          <Icon name="scale" size={16} /> Log today's weight
+        </button>
+      ),
+    };
+  } else if (promoted) {
+    move = {
+      key: promoted.key,
+      icon: 'spark',
+      title: promoted.move?.title ?? promoted.title,
+      detail: promoted.move?.detail ?? promoted.detail,
+      action: promoted.link && (
+        <a class="next-move-link" href={withBase(promoted.link.href)}>
+          {promoted.link.label} <Icon name="arrow" size={15} />
+        </a>
+      ),
+    };
+  } else if (report?.status === 'on-track') {
+    move = {
+      key: 'steady',
+      icon: 'check',
+      title: 'Change nothing',
+      detail:
+        'Your trend matches the plan. The best next move is the one you are already making: eat to your target, weigh in, repeat.',
+    };
+  } else if (report) {
+    move = {
+      key: 'check',
+      icon: 'target',
+      title: report.headline,
+      detail: 'The two-week check below says why, and what to do about it.',
+    };
+  }
+  const patterns =
+    move && promoted && move.key === promoted.key
+      ? insights.filter((i) => i !== promoted)
+      : insights;
+
+  const journey =
+    plan.goal !== 'maintain' ? (
+      <section class="surface journey p-5 sm:p-6" aria-label="Your journey">
+        <div
+          class="journey-bar"
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Progress to goal"
+          aria-valuetext={`${pct}% of the way, trend ${w(latestTrend)}`}
+        >
+          <span class="journey-fill" style={{ width: `${pct}%` }} />
+          {lineMarks.map((m) => (
+            <span
+              key={m.key}
+              class={`journey-mark ${m.reached ? 'is-reached' : ''}`}
+              style={{ left: `${m.at * 100}%` }}
+              title={`${m.label}, ${w(m.kg)}`}
+            />
+          ))}
+          <span class="journey-you" style={{ left: `${pct}%` }} />
+          <span
+            class="journey-you-label tabular"
+            style={{ left: `${Math.min(86, Math.max(14, pct))}%` }}
+            aria-hidden="true"
+          >
+            {w(latestTrend)}
+          </span>
+        </div>
+        <div class="journey-ends">
+          <span>
+            <span class="journey-k">Start</span>
+            {w(plan.startWeightKg)}
+          </span>
+          <span class="journey-pct tabular">{pct}% there</span>
+          <span class="text-right">
+            <span class="journey-k">Goal</span>
+            {w(plan.goalWeightKg)}
+          </span>
+        </div>
+        {goalDate && weeksLeft !== null && (
+          <p class="text-muted mt-4 text-sm leading-relaxed">
+            At your current trend you reach {w(plan.goalWeightKg)} in about{' '}
+            <strong class="text-fg">{humaniseWeeks(weeksLeft)}</strong> (
+            {goalDate.toLocaleDateString(undefined, {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+            ).
+          </p>
+        )}
+        {nextMark && nextMark.key !== 'goal' && !goalReached && (
+          <p class="journey-next">
+            <Icon name="target" size={14} />
+            <span>
+              Next: <strong>{nextMark.label}</strong> at {w(nextMark.kg)},{' '}
+              {w(Math.abs(latestTrend - nextMark.kg))} away
+            </span>
+          </p>
+        )}
+      </section>
+    ) : null;
+
+  const chartCard = trendChart && (
+    <section class="surface p-5 sm:p-6" aria-label="Trend chart">
+      <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h3 class="text-lg font-bold tracking-tight">Trend since you started</h3>
+        <p class="text-subtle text-xs">Dots are weigh-ins, the line is the trend</p>
+      </div>
+      <div class="mt-3">{trendChart}</div>
+    </section>
+  );
+
+  const nextMove = move && (
+    <section class="surface next-move" aria-label="Your next move" key={move.key}>
+      <span class="next-move-icon" aria-hidden="true">
+        <Icon name={move.icon} size={22} />
+      </span>
+      <div class="min-w-0">
+        <p class="next-move-eyebrow">Your next move</p>
+        <h3 class="next-move-title">{move.title}</h3>
+        <p class="text-muted mt-1.5 text-sm leading-relaxed">{move.detail}</p>
+        {move.action && <div class="mt-4">{move.action}</div>}
+      </div>
+    </section>
+  );
+
+  const weighIn = (
+    <section class="surface grid content-start gap-4 p-5 sm:p-6" aria-label="Today's weigh-in">
+      <h3 class="text-lg font-bold tracking-tight">Today's weigh-in</h3>
+      {todayEntry ? (
+        <Callout tone="success">
+          Logged {w(todayEntry.weightKg)} today. Trend weight: <strong>{w(latestTrend)}</strong>.
+        </Callout>
+      ) : (
+        <p class="text-muted text-sm">
+          Morning, after the bathroom, before food. Same scale, same spot.
+        </p>
+      )}
+      <div class="flex items-end gap-2">
+        <NumberField
+          id="quick-weight"
+          label={todayEntry ? 'Update today' : 'Weight'}
+          value={quick ?? (imperial ? kgToLb(lastRaw) : lastRaw)}
+          min={imperial ? 55 : 25}
+          max={imperial ? 880 : 400}
+          step={0.1}
+          suffix={imperial ? 'lb' : 'kg'}
+          onChange={setQuick}
+          class="flex-1"
+        />
+        <button type="button" class="btn btn-primary h-[46px]" onClick={quickSave}>
+          <Icon name={saved ? 'check' : 'scale'} size={16} /> {saved ? 'Saved' : 'Log'}
+        </button>
+      </div>
+      <a
+        href={withBase('/track/')}
+        class="text-brand-600 dark:text-brand-300 text-sm font-semibold"
+      >
+        Open the full tracker →
+      </a>
+    </section>
+  );
+
+  const macroTotal = summary
+    ? summary.macros.kcal.protein + summary.macros.kcal.carbs + summary.macros.kcal.fat
+    : 0;
+  const macroRows = summary
+    ? ([
+        [
+          'Protein',
+          summary.macros.grams.protein,
+          summary.macros.kcal.protein,
+          'var(--color-brand-500)',
+        ],
+        ['Carbs', summary.macros.grams.carbs, summary.macros.kcal.carbs, 'var(--color-accent-500)'],
+        ['Fat', summary.macros.grams.fat, summary.macros.kcal.fat, 'oklch(80% 0.15 85)'],
+      ] as const)
+    : [];
 
   return (
     <div class="grid gap-6">
@@ -306,134 +559,14 @@ function PlanDashboardInner() {
         </section>
       )}
 
-      {plan.goal !== 'maintain' && (
-        <div class="surface p-5">
-          <div class="text-subtle mb-2 flex justify-between text-xs font-semibold">
-            <span>{w(plan.startWeightKg)}</span>
-            <span>{pct}% there</span>
-            <span>{w(plan.goalWeightKg)}</span>
-          </div>
-          <div
-            class="bg-muted h-3 w-full overflow-hidden rounded-full"
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Progress to goal"
-          >
-            <div
-              class="from-brand-500 to-accent-500 h-full rounded-full bg-gradient-to-r transition-[width] duration-700"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          {goalDate && weeksLeft !== null && (
-            <p class="text-muted mt-3 text-sm">
-              At your current trend you reach {w(plan.goalWeightKg)} in about{' '}
-              <strong class="text-fg">{humaniseWeeks(weeksLeft)}</strong> (
-              {goalDate.toLocaleDateString(undefined, {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-              ).
-            </p>
-          )}
-        </div>
-      )}
-
-      <div class="grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <section class="surface grid gap-5 p-5 sm:p-6" aria-label="Daily targets">
-          <div class="flex items-start justify-between gap-4">
-            <Stat
-              label="Eat per day"
-              value={formatNumber(summary?.target ?? 0)}
-              unit="kcal"
-              size="lg"
-              tone="brand"
-              sub={
-                plan.calorieOverride !== null
-                  ? `Adjusted on ${plan.lastAdjustedOn} from ${formatNumber(summary?.computedTarget ?? 0)} kcal`
-                  : `Maintenance ≈ ${formatNumber(summary?.tdee ?? 0)} kcal`
-              }
-            />
-            <Stat
-              label="Protein"
-              value={summary?.protein.target ?? 0}
-              unit="g"
-              sub={`≈ ${summary?.protein.perMeal ?? 0} g × ${summary?.protein.mealsPerDay ?? 4} meals`}
-            />
-          </div>
-          {summary && (
-            <DonutChart
-              size={150}
-              centerValue={`${summary.macros.grams.protein}g`}
-              centerLabel="PROTEIN"
-              slices={[
-                {
-                  label: `Protein · ${summary.macros.grams.protein} g`,
-                  value: summary.macros.kcal.protein,
-                  color: 'var(--color-brand-500)',
-                },
-                {
-                  label: `Carbs · ${summary.macros.grams.carbs} g`,
-                  value: summary.macros.kcal.carbs,
-                  color: 'var(--color-accent-500)',
-                },
-                {
-                  label: `Fat · ${summary.macros.grams.fat} g`,
-                  value: summary.macros.kcal.fat,
-                  color: 'oklch(80% 0.15 85)',
-                },
-              ]}
-            />
-          )}
-          <p class="text-subtle text-xs">
-            Fibre ≈ {summary?.macros.grams.fibre} g · Water ≈ {round((latestTrend * 35) / 1000, 1)}{' '}
-            L.{' '}
-            <a class="underline" href={withBase('/tools/macros/')}>
-              Fine-tune macros
-            </a>
-          </p>
-        </section>
-
-        <section class="surface grid content-start gap-4 p-5 sm:p-6" aria-label="Today's weigh-in">
-          <h3 class="text-lg font-bold tracking-tight">Today's weigh-in</h3>
-          {todayEntry ? (
-            <Callout tone="success">
-              Logged {w(todayEntry.weightKg)} today. Trend weight: <strong>{w(latestTrend)}</strong>
-              .
-            </Callout>
-          ) : (
-            <p class="text-muted text-sm">
-              Morning, after the bathroom, before food. Same scale, same spot.
-            </p>
-          )}
-          <div class="flex items-end gap-2">
-            <NumberField
-              id="quick-weight"
-              label={todayEntry ? 'Update today' : 'Weight'}
-              value={quick ?? (imperial ? kgToLb(lastRaw) : lastRaw)}
-              min={imperial ? 55 : 25}
-              max={imperial ? 880 : 400}
-              step={0.1}
-              suffix={imperial ? 'lb' : 'kg'}
-              onChange={setQuick}
-              class="flex-1"
-            />
-            <button type="button" class="btn btn-primary h-[46px]" onClick={quickSave}>
-              <Icon name={saved ? 'check' : 'scale'} size={16} /> {saved ? 'Saved' : 'Log'}
-            </button>
-          </div>
-          <a
-            href={withBase('/track/')}
-            class="text-brand-600 dark:text-brand-300 text-sm font-semibold"
-          >
-            Open the full tracker →
-          </a>
-        </section>
+      <div class="progress-top">
+        {journey && <div class="progress-a">{journey}</div>}
+        {nextMove && <div class="progress-b">{nextMove}</div>}
+        {chartCard && <div class="progress-a">{chartCard}</div>}
+        <div class="progress-b">{weighIn}</div>
       </div>
 
-      <div class="grid gap-6 lg:grid-cols-2">
+      <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
         <section class="surface p-5 sm:p-6" aria-label="This week">
           <div class="flex items-center justify-between gap-3">
             <h3 class="text-lg font-bold tracking-tight">This week</h3>
@@ -466,7 +599,7 @@ function PlanDashboardInner() {
                 <Stat
                   label="On target"
                   value={week.adherence === null ? '—' : `${week.adherence}%`}
-                  sub="days within ±10%"
+                  sub="within ±10%"
                 />
               </div>
               <div class="mt-5">
@@ -486,130 +619,148 @@ function PlanDashboardInner() {
             </p>
           )}
         </section>
-        <section class="surface p-5 sm:p-6" aria-label="Weight milestones">
-          <h3 class="text-lg font-bold tracking-tight">Weight milestones</h3>
-          {milestones.length > 0 ? (
-            <ul class="mt-4 grid gap-3">
-              {milestones.map((m) => (
-                <li key={m.key} class="flex items-center gap-3">
-                  <span
-                    class={`grid h-8 w-8 shrink-0 place-items-center rounded-full ${m.reached ? 'bg-brand-600 text-white' : 'bg-muted text-subtle'}`}
-                  >
-                    <Icon name={m.reached ? 'check' : 'target'} size={16} />
-                  </span>
-                  <span class="min-w-0 flex-1">
-                    <span class="block text-sm font-semibold">{m.label}</span>
-                    <span class="text-subtle block text-xs">{m.detail}</span>
-                    {!m.reached && (
-                      <span class="bg-muted mt-1 block h-1.5 w-full overflow-hidden rounded-full">
-                        <span
-                          class="bg-brand-500 block h-full rounded-full"
-                          style={{ width: `${Math.round(m.progress * 100)}%` }}
-                        />
-                      </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="text-muted mt-3 text-sm">Milestones appear once your trend starts moving.</p>
+
+        <section class="surface grid gap-5 p-5 sm:p-6" aria-label="Daily targets">
+          <div class="flex items-start justify-between gap-4">
+            <Stat
+              label="Eat per day"
+              value={formatNumber(summary?.target ?? 0)}
+              unit="kcal"
+              size="lg"
+              tone="brand"
+              sub={
+                plan.calorieOverride !== null
+                  ? `Adjusted on ${plan.lastAdjustedOn} from ${formatNumber(summary?.computedTarget ?? 0)} kcal`
+                  : `Maintenance ≈ ${formatNumber(summary?.tdee ?? 0)} kcal`
+              }
+            />
+            <Stat
+              label="Protein"
+              value={summary?.protein.target ?? 0}
+              unit="g"
+              sub={`≈ ${summary?.protein.perMeal ?? 0} g × ${summary?.protein.mealsPerDay ?? 4} meals`}
+            />
+          </div>
+          {summary && macroTotal > 0 && (
+            <div>
+              <div
+                class="macro-split"
+                role="img"
+                aria-label={macroRows.map(([l, g]) => `${l} ${g} g`).join(', ')}
+              >
+                {macroRows.map(([l, , kcal, color]) => (
+                  <span key={l} style={{ flexGrow: kcal, background: color }} />
+                ))}
+              </div>
+              <ul class="macro-legend">
+                {macroRows.map(([l, g, kcal, color]) => (
+                  <li key={l}>
+                    <span class="macro-dot" style={{ background: color }} aria-hidden="true" />
+                    <span class="text-muted">{l}</span>
+                    <strong class="tabular">{g} g</strong>
+                    <span class="text-subtle tabular">
+                      {Math.round((100 * kcal) / macroTotal)}%
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
+          <p class="text-subtle text-xs">
+            Fibre ≈ {summary?.macros.grams.fibre} g · Water ≈ {round((latestTrend * 35) / 1000, 1)}{' '}
+            L.{' '}
+            <a class="underline" href={withBase('/tools/macros/')}>
+              Fine-tune macros
+            </a>
+          </p>
         </section>
       </div>
 
-      {report && (
-        <section class="surface p-5 sm:p-6" aria-label="Progress check">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <h3 class="text-lg font-bold tracking-tight">Two-week check</h3>
-            <span
-              class={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLE[report.status]}`}
-            >
-              {report.headline}
-            </span>
-          </div>
-          <p class="text-muted mt-3 text-sm leading-relaxed">{report.detail}</p>
-          {report.status !== 'insufficient-data' && (
-            <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Stat
-                label="Planned pace"
-                value={
-                  imperial
-                    ? `${round(kgToLb(report.plannedRateKgPerWeek), 2)} lb`
-                    : `${report.plannedRateKgPerWeek} kg`
-                }
-                unit="/wk"
-              />
-              <Stat
-                label="Measured pace"
-                value={
-                  report.measuredRateKgPerWeek === null
-                    ? '—'
-                    : imperial
-                      ? `${round(kgToLb(Math.abs(report.measuredRateKgPerWeek)), 2)} lb`
-                      : `${Math.abs(report.measuredRateKgPerWeek)} kg`
-                }
-                unit="/wk"
-              />
-              <Stat
-                label="Real deficit"
-                value={
-                  report.impliedDeficitKcal === null ? '—' : formatNumber(report.impliedDeficitKcal)
-                }
-                unit="kcal"
-              />
-              <Stat
-                label="Days logged"
-                value={log.entries.length}
-                sub={
-                  report.daysSinceLastEntry
-                    ? `${report.daysSinceLastEntry} day(s) since last`
-                    : 'Up to date'
-                }
-              />
-            </div>
-          )}
-          {report.recommendedCalories && !recentlyAdjusted && (
-            <div class="mt-5 flex flex-wrap items-center gap-3">
-              <button type="button" class="btn btn-primary" onClick={applyRecommendation}>
-                Set target to {formatNumber(report.recommendedCalories)} kcal
-              </button>
-              <span class="text-subtle text-xs">
-                Applies for the next two weeks, then we re-check.
+      <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+        {report && (
+          <section class="surface p-5 sm:p-6" aria-label="Progress check">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <h3 class="text-lg font-bold tracking-tight">Two-week check</h3>
+              <span
+                class={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_STYLE[report.status]}`}
+              >
+                {report.headline}
               </span>
             </div>
-          )}
-          {report.recommendedCalories && recentlyAdjusted && plan.lastAdjustedOn && (
-            <p class="text-subtle mt-4 text-xs">
-              Adjusted {daysBetween(plan.lastAdjustedOn, today)} day(s) ago. The next change is
-              offered after two weeks on the new target, so one slope is not acted on twice.
-            </p>
-          )}
-          {plan.calorieOverride !== null && (
-            <button
-              type="button"
-              class="btn btn-ghost mt-3 text-sm"
-              onClick={() => patchPlan({ calorieOverride: null, lastAdjustedOn: null })}
-            >
-              <Icon name="reset" size={14} /> Reset to the computed target
-            </button>
-          )}
-        </section>
-      )}
-
-      <div class="grid gap-6 lg:grid-cols-2">
-        <section class="surface p-5 sm:p-6" aria-label="Real expenditure">
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <h3 class="text-lg font-bold tracking-tight">Your real expenditure</h3>
-
-              <p class="text-subtle text-xs">
-                Estimated from what you logged and what the scale did, not a formula.
+            <p class="text-muted mt-3 text-sm leading-relaxed">{report.detail}</p>
+            {report.status !== 'insufficient-data' && (
+              <div class="mt-4 grid grid-cols-2 gap-4">
+                <Stat
+                  label="Planned pace"
+                  value={
+                    imperial
+                      ? `${round(kgToLb(report.plannedRateKgPerWeek), 2)} lb`
+                      : `${report.plannedRateKgPerWeek} kg`
+                  }
+                  unit="/wk"
+                />
+                <Stat
+                  label="Measured pace"
+                  value={
+                    report.measuredRateKgPerWeek === null
+                      ? '—'
+                      : imperial
+                        ? `${round(kgToLb(Math.abs(report.measuredRateKgPerWeek)), 2)} lb`
+                        : `${Math.abs(report.measuredRateKgPerWeek)} kg`
+                  }
+                  unit="/wk"
+                />
+                <Stat
+                  label="Real deficit"
+                  value={
+                    report.impliedDeficitKcal === null
+                      ? '—'
+                      : formatNumber(report.impliedDeficitKcal)
+                  }
+                  unit="kcal"
+                />
+                <Stat
+                  label="Weigh-ins"
+                  value={log.entries.length}
+                  sub={
+                    report.daysSinceLastEntry
+                      ? `${report.daysSinceLastEntry} day(s) since last`
+                      : 'Up to date'
+                  }
+                />
+              </div>
+            )}
+            {report.recommendedCalories && recentlyAdjusted && plan.lastAdjustedOn && (
+              <p class="text-subtle mt-4 text-xs">
+                Adjusted {daysBetween(plan.lastAdjustedOn, today)} day(s) ago. The next change is
+                offered after two weeks on the new target, so one slope is not acted on twice.
               </p>
-            </div>
+            )}
+            {plan.calorieOverride !== null && (
+              <button
+                type="button"
+                class="btn btn-ghost mt-3 text-sm"
+                onClick={() => patchPlan({ calorieOverride: null, lastAdjustedOn: null })}
+              >
+                <Icon name="reset" size={14} /> Reset to the computed target
+              </button>
+            )}
+          </section>
+        )}
 
-            {expenditure && <span class="chip">{expenditure.confidence} confidence</span>}
+        <section class="surface p-5 sm:p-6" aria-label="Real expenditure">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="text-lg font-bold tracking-tight">Your real expenditure</h3>
+            {expenditure && (
+              <span class="chip shrink-0 whitespace-nowrap">
+                {expenditure.confidence[0]!.toUpperCase() + expenditure.confidence.slice(1)}{' '}
+                confidence
+              </span>
+            )}
           </div>
+          <p class="text-subtle mt-1 text-xs">
+            Estimated from what you logged and what the scale did, not a formula.
+          </p>
 
           {expenditure ? (
             <div class="mt-4 grid gap-4">
@@ -622,7 +773,6 @@ function PlanDashboardInner() {
                   tone="brand"
                   sub={`Range ${formatNumber(expenditure.low)}–${formatNumber(expenditure.high)}`}
                 />
-
                 <Stat
                   label="Formula"
                   value={formatNumber(summary?.tdee ?? 0)}
@@ -634,9 +784,7 @@ function PlanDashboardInner() {
                   }
                 />
               </div>
-
               <p class="text-muted text-sm leading-relaxed">{expenditure.note}</p>
-
               <p class="text-subtle text-xs">
                 {expenditure.days} logged days · average intake{' '}
                 {formatNumber(expenditure.avgIntake)} kcal · trend{' '}
@@ -651,22 +799,23 @@ function PlanDashboardInner() {
             </p>
           )}
         </section>
+      </div>
 
+      {(patterns.length > 0 || insights.length === 0) && (
         <section class="surface p-5 sm:p-6" aria-label="Insights">
-          <h3 class="text-lg font-bold tracking-tight">Patterns</h3>
-
-          {insights.length > 0 ? (
-            <ul class="mt-4 grid gap-3">
-              {insights.map((i) => (
+          <h3 class="text-lg font-bold tracking-tight">
+            {move && promoted && move.key === promoted.key ? 'Other patterns' : 'Patterns'}
+          </h3>
+          {patterns.length > 0 ? (
+            <ul class="mt-4 grid gap-x-8 gap-y-4 lg:grid-cols-2">
+              {patterns.map((i) => (
                 <li key={i.key} class="flex gap-3">
                   <span
                     class={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${i.tone === 'good' ? 'bg-brand-500' : i.tone === 'warn' ? 'bg-accent-500' : 'bg-ink-400'}`}
                     aria-hidden="true"
                   />
-
                   <span>
                     <span class="block text-sm font-semibold">{i.title}</span>
-
                     <span class="text-muted block text-sm leading-relaxed">{i.detail}</span>
                     {i.link && (
                       <a
@@ -686,31 +835,6 @@ function PlanDashboardInner() {
               drift, your low-protein meal, fibre, snack share.
             </p>
           )}
-        </section>
-      </div>
-
-      {chartPoints.length > 1 && (
-        <section class="surface p-5 sm:p-6" aria-label="Trend chart">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 class="text-lg font-bold tracking-tight">Trend since you started</h3>
-            <p class="text-subtle text-xs">
-              Dots are daily weigh-ins; the line is the smoothed trend
-            </p>
-          </div>
-          <LineChart
-            ariaLabel="Trend weight since the plan started"
-            points={chartPoints}
-            dots={chartDots}
-            goal={
-              plan.goal === 'maintain'
-                ? undefined
-                : imperial
-                  ? kgToLb(plan.goalWeightKg)
-                  : plan.goalWeightKg
-            }
-            xLabel={(x) => (x === 0 ? 'Start' : `Day ${x}`)}
-            yLabel={(y) => `${round(y, 1)} ${imperial ? 'lb' : 'kg'}`}
-          />
         </section>
       )}
     </div>

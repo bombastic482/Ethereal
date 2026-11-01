@@ -10,6 +10,11 @@ export interface Insight {
   tone: 'good' | 'neutral' | 'warn';
   /** Optional place to act on it, as a site-relative path (components apply the base). */
   link?: { href: string; label: string };
+  /**
+   * The same finding said as the thing to do, for when it is the one change worth making next.
+   * The detail then carries the finding, since the title no longer does.
+   */
+  move?: { title: string; detail: string };
 }
 
 interface Targets {
@@ -62,6 +67,12 @@ export function buildInsights(
             ? `Two higher weekend days can erase a week's deficit. Try banking 100–150 kcal on weekdays or planning the weekend meal you care about most.`
             : `You eat more on weekdays. If weekday hunger is the issue, move more calories to breakfast and lunch.`,
         tone: diff > 0 ? 'warn' : 'neutral',
+        ...(diff > 0 && {
+          move: {
+            title: 'Plan the weekend before it arrives',
+            detail: `Weekends run ${diff} kcal higher than weekdays, and two of those can undo a week's deficit. Pick the one weekend meal you care about most and keep the rest ordinary.`,
+          },
+        }),
       });
     }
   }
@@ -97,6 +108,18 @@ export function buildInsights(
         ? 'That is the single best predictor of keeping muscle while losing fat. Keep it up.'
         : 'Aim for 70%+. Protein-first meals and a planned snack make the difference.',
     tone: rate >= 70 ? 'good' : 'warn',
+    ...(rate < 70 && {
+      move: {
+        title: 'Start every meal with the protein',
+        detail: `You reached your protein target on ${rate}% of logged days. Aim for 70% or more: eat the protein part of each meal first, and plan one high-protein snack.`,
+      },
+      link: lowest
+        ? {
+            href: `/recipes/#${lowest.m.key}`,
+            label: `High-protein ${lowest.m.label.toLowerCase()} ideas`,
+          }
+        : { href: '/recipes/', label: 'High-protein recipes' },
+    }),
   });
 
   // 4. Fibre
@@ -108,6 +131,10 @@ export function buildInsights(
       detail: `Your target is ${targets.fibre} g. Beans, oats, berries and vegetables fill you up for very few calories; most people feel a hunger difference within a week.`,
       tone: 'warn',
       link: { href: '/recipes/', label: 'High-fibre recipes' },
+      move: {
+        title: 'Add a fibre food to two meals',
+        detail: `Fibre averages ${round(fibre)} g against a target of ${targets.fibre} g. Beans, oats, berries or vegetables at two meals a day closes most of that gap, and most people feel less hungry within a week.`,
+      },
     });
   }
 
