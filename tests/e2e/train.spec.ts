@@ -54,6 +54,7 @@ test.describe('training', () => {
     await page.getByRole('button', { name: /finish now and save/i }).click();
     const done = page.getByRole('dialog', { name: /session done/i });
     await expect(done).toBeVisible();
+    await expect(done.getByText(/Your first session A/)).toBeVisible();
     await done.getByRole('button', { name: 'About right' }).click();
     await done.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByRole('heading', { name: 'Done for today' })).toBeVisible();

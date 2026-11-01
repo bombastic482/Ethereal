@@ -992,6 +992,15 @@ function Summary({
     .filter((x) => exerciseById(x.exerciseId)?.unit === 'reps')
     .reduce((n, x) => n + x.value, 0);
   const offers = suggestions(workout, sets, setup);
+  // Growth you can see: against the last session of the same kind, and how many you have done.
+  const history = trainStore.get().log;
+  const prevSame = [...history].reverse().find((l) => l.session === workout.session);
+  const repsOf = (l: WorkoutLog) =>
+    l.sets
+      .filter((x) => exerciseById(x.exerciseId)?.unit === 'reps')
+      .reduce((n, x) => n + x.value, 0);
+  const prevReps = prevSame ? repsOf(prevSame) : null;
+  const sessionNo = history.length + 1;
   const [accept, setAccept] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(offers.map((o) => [o.ladder, true])),
   );
@@ -1069,6 +1078,37 @@ function Summary({
                 </div>
               ))}
             </dl>
+            {sets.length > 0 && (
+              <div class="summary-growth">
+                <p class="flex items-start gap-2">
+                  {prevReps !== null && reps > prevReps && (
+                    <Icon name="spark" size={16} class="mt-1 flex-none" />
+                  )}
+                  <span>
+                    {prevReps === null || reps === 0 ? (
+                      <>
+                        Your first session {workout.session}. Next time, this is the number to beat.
+                      </>
+                    ) : reps > prevReps ? (
+                      <>
+                        <strong>{reps - prevReps} more reps</strong> than last session{' '}
+                        {workout.session}.
+                      </>
+                    ) : (
+                      <>
+                        Last session {workout.session}: {prevReps} reps. Matching it on a busy week
+                        still counts.
+                      </>
+                    )}
+                  </span>
+                </p>
+                <p class="text-subtle mt-0.5 text-xs">
+                  {sessionNo === 1
+                    ? 'Session one. The hardest one to start.'
+                    : `Session ${sessionNo} so far.`}
+                </p>
+              </div>
+            )}
 
             <fieldset class="mt-6">
               <legend class="label">How did that feel?</legend>

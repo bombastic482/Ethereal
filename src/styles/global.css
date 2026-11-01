@@ -1041,6 +1041,17 @@
   }
 }
 
+.summary-growth {
+  margin-top: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.9375rem;
+  background: oklch(63% 0.15 var(--brand-h) / 0.1);
+}
+.summary-growth svg {
+  color: var(--color-brand-600);
+}
+
 /* Rep pad: the count is the button. */
 .rep-pad {
   position: relative;
