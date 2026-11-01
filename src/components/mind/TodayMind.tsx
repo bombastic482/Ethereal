@@ -26,16 +26,43 @@ import { Icon } from '../ui/Icon';
 
 const Breathe = lazy(() => import('./Breathe'));
 
+/** A small face for a mood from 1 (rough) to 5 (great): the mouth turns up as the day does. */
+function MoodFace({ level }: { level: number }) {
+  const curve = (level - 3) * 2.6;
+  const y = 15.2 - curve * 0.3;
+  return (
+    <svg viewBox="0 0 24 24" class="mood-face" aria-hidden="true">
+      <circle cx="12" cy="12" r="11" />
+      <circle cx="8.4" cy="9.8" r="1.35" class="mood-feature" />
+      <circle cx="15.6" cy="9.8" r="1.35" class="mood-feature" />
+      <path d={`M7.6 ${y} Q12 ${y + curve} 16.4 ${y}`} class="mood-mouth" />
+    </svg>
+  );
+}
+
+/** Energy from 1 (empty) to 5 (full), as a battery. */
+function EnergyCell({ level }: { level: number }) {
+  return (
+    <svg viewBox="0 0 26 16" class="mood-battery" aria-hidden="true">
+      <rect x="1" y="2" width="21" height="12" rx="3.5" class="mood-battery-case" />
+      <rect x="23" y="5.5" width="2" height="5" rx="1" class="mood-battery-case" />
+      <rect x="3" y="4" width={(17 * level) / 5} height="8" rx="2" class="mood-battery-fill" />
+    </svg>
+  );
+}
+
 function Scale({
   label,
   words,
   value,
   onPick,
+  kind,
 }: {
   label: string;
   words: readonly string[];
   value: number | null;
   onPick: (v: number) => void;
+  kind: 'mood' | 'energy';
 }) {
   return (
     <fieldset>
@@ -49,7 +76,7 @@ function Scale({
             class={`mood-pick mood-${i + 1} ${value === i + 1 ? 'mood-on' : ''}`}
             onClick={() => onPick(i + 1)}
           >
-            <span class="mood-dot" aria-hidden="true" />
+            {kind === 'mood' ? <MoodFace level={i + 1} /> : <EnergyCell level={i + 1} />}
             {w}
           </button>
         ))}
@@ -185,9 +212,21 @@ export default function TodayMind({ date }: { date: string }) {
           <h3 id="mood-h" class="font-bold tracking-tight">
             How are you, really?
           </h3>
-          <Scale label="Mood" words={MOODS} value={mood ?? today?.mood ?? null} onPick={setMood} />
+          <Scale
+            kind="mood"
+            label="Mood"
+            words={MOODS}
+            value={mood ?? today?.mood ?? null}
+            onPick={setMood}
+          />
           {(mood !== null || editing) && (
-            <Scale label="Energy" words={ENERGY} value={today?.energy ?? null} onPick={save} />
+            <Scale
+              kind="energy"
+              label="Energy"
+              words={ENERGY}
+              value={today?.energy ?? null}
+              onPick={save}
+            />
           )}
         </section>
       ) : (
@@ -195,7 +234,9 @@ export default function TodayMind({ date }: { date: string }) {
           class={`surface flex flex-wrap items-center gap-3 p-4 ${gentle ? 'gentle-card' : ''}`}
           aria-label="Today's check-in"
         >
-          <span class={`mood-dot mood-${today.mood} flex-none`} aria-hidden="true" />
+          <span class={`mood-${today.mood} flex-none`} aria-hidden="true">
+            <MoodFace level={today.mood} />
+          </span>
           <span class="min-w-0 flex-1 text-sm">
             {gentle ? (
               <>

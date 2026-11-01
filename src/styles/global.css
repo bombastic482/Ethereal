@@ -1815,6 +1815,47 @@
   border-radius: 999px;
   background: var(--mood);
 }
+.mood-face {
+  width: 1.75rem;
+  height: 1.75rem;
+  transition: transform 0.3s var(--ease-spring);
+}
+.mood-face > circle:first-child {
+  fill: var(--mood);
+}
+.mood-feature {
+  fill: oklch(25% 0.03 60 / 0.75);
+}
+.mood-mouth {
+  fill: none;
+  stroke: oklch(25% 0.03 60 / 0.75);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.mood-on .mood-face {
+  transform: scale(1.15) rotate(-6deg);
+}
+.mood-battery {
+  width: 1.9rem;
+  height: 1.75rem;
+}
+.mood-battery-case {
+  fill: none;
+  stroke: color-mix(in oklab, var(--fg) 30%, transparent);
+  stroke-width: 1.4;
+}
+.mood-battery-case + .mood-battery-case {
+  fill: color-mix(in oklab, var(--fg) 30%, transparent);
+  stroke: none;
+}
+.mood-battery-fill {
+  fill: var(--mood);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mood-face {
+    transition: none;
+  }
+}
 .mood-1 {
   --mood: oklch(64% 0.15 30);
 }
