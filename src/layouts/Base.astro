@@ -1,12 +1,12 @@
 ---
-import { withBase } from '@/lib/url';
+import { BASE, withBase } from '@/lib/url';
 import '@/styles/global.css';
 import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import TabBar from '@/components/TabBar.astro';
 import { ClientRouter } from 'astro:transitions';
-import { SITE } from '@/lib/site';
+import { SITE, sectionOf } from '@/lib/site';
 // Preload the one font file the first paint needs; otherwise it is discovered only after the
 // stylesheet is parsed, which adds a network round trip before the final text render.
 import fontUrl from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
@@ -26,10 +26,12 @@ interface Props {
 }
 
 const { class: cls, ...seo } = Astro.props;
+// The app section this page belongs to sets the colour mood (see "Section moods" in global.css).
+const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-section={section}>
   <head>
     <meta charset="utf-8" />
     <script is:inline>

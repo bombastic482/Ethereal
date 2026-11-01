@@ -1,6 +1,6 @@
 ---
 import Disclaimer from '@/components/Disclaimer.astro';
-import SectionNav from '@/components/SectionNav.astro';
+import PageHeader from '@/components/PageHeader.astro';
 import type { Section } from '@/lib/site';
 import Base from './Base.astro';
 
@@ -30,14 +30,13 @@ const {
 
 <Base title={title} description={description} path={path} noindex={noindex}>
   <div class="container-page pt-6 pb-16 sm:pt-10">
-    {section !== 'start' && <SectionNav section={section} path={path} class="mb-6 sm:mb-8" />}
-    {bare ? (
-      <h1 class="sr-only">{heading}</h1>
-    ) : (
-      <header class="mb-8 max-w-3xl">
-        <h1 class="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">{heading}</h1>
-        <p class="text-muted mt-3 text-lg leading-relaxed">{lede}</p>
+    {section === 'start' ? (
+      <header class="page-head">
+        <h1 class="page-title">{heading}</h1>
+        <p class="page-lede">{lede}</p>
       </header>
+    ) : (
+      <PageHeader section={section} heading={heading} lede={lede} path={path} bare={bare} />
     )}
     <div>
       <slot />
