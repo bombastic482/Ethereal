@@ -1,25 +1,38 @@
 ---
 /**
- * The app's side rail on tablets and desktops: one entry per section, the current one lit in its
- * colour. On wide screens the current section's pages are listed beneath it, so the whole app is
- * one glance away. Phones use the tab bar instead.
+ * The app's side rail on tablets and desktops, on every page, so the frame never changes as you
+ * move around: one entry per section, the current one lit in its colour, with Guides and Tools
+ * below. On wide screens the current section's pages are listed beneath it. Phones use the tab
+ * bar instead.
  */
+import Logo from '@/components/Logo.astro';
 import { Icon } from '@/components/ui/Icon';
-import { SECTIONS, type Section } from '@/lib/site';
+import { SECTIONS, SITE, type Section } from '@/lib/site';
 import { withBase } from '@/lib/url';
 
 interface Props {
-  section: Section;
+  /** The section the page belongs to, if any. */
+  section?: Section | undefined;
+  /** The page's path without the base, e.g. "/guides/protein/". */
   path: string;
 }
 const { section, path } = Astro.props;
+const EXTRAS = [
+  { href: '/guides/', label: 'Guides', icon: 'book' },
+  { href: '/tools/', label: 'Tools', icon: 'pie' },
+] as const;
 const active = (href: string) =>
+  section !== undefined &&
   SECTIONS[section].pages
     .filter((p) => path.startsWith(p.href))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href === href;
 ---
 
-<nav class="rail" aria-label="App">
+<nav class="rail" aria-label="App" transition:name="rail" transition:animate="none">
+  <a href={withBase('/')} class="rail-brand" aria-label={`${SITE.name} home`}>
+    <Logo size={34} id="logo-rail" />
+    <span class="rail-brand-word">{SITE.name}</span>
+  </a>
   <ul class="rail-list">
     {(Object.entries(SECTIONS) as [Section, (typeof SECTIONS)[Section]][]).map(([key, s]) => (
       <li>
@@ -54,21 +67,23 @@ const active = (href: string) =>
     ))}
   </ul>
   <ul class="rail-list rail-extra">
-    <li>
-      <a href={withBase('/guides/')} class="rail-item rail-quiet">
-        <span class="rail-icon">
-          <Icon name="book" size={18} />
-        </span>
-        <span class="rail-label">Guides</span>
-      </a>
-    </li>
-    <li>
-      <a href={withBase('/tools/')} class="rail-item rail-quiet">
-        <span class="rail-icon">
-          <Icon name="pie" size={18} />
-        </span>
-        <span class="rail-label">Tools</span>
-      </a>
-    </li>
+    {EXTRAS.map((x) => {
+      const on = path.startsWith(x.href);
+      return (
+        <li>
+          <a
+            href={withBase(x.href)}
+            class:list={['rail-item rail-quiet', on && 'rail-on']}
+            aria-current={on ? 'page' : undefined}
+            data-astro-prefetch="hover"
+          >
+            <span class="rail-icon">
+              <Icon name={x.icon} size={18} />
+            </span>
+            <span class="rail-label">{x.label}</span>
+          </a>
+        </li>
+      );
+    })}
   </ul>
 </nav>

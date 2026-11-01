@@ -27,7 +27,7 @@ const youActive = section === 'you';
   <div class="container-page flex h-16 items-center justify-between gap-4">
     <a
       href={withBase('/')}
-      class="flex items-center gap-2.5 font-bold tracking-tight"
+      class="flex items-center gap-2.5 font-bold tracking-tight md:invisible"
       aria-label={`${SITE.name} home`}
     >
       <Logo size={32} id="logo-header" />
@@ -35,39 +35,8 @@ const youActive = section === 'you';
     </a>
     <span class="header-title" aria-hidden="true" data-header-title></span>
 
-    <nav
-      class:list={['hidden items-center gap-1', section ? 'md:hidden' : 'md:flex']}
-      aria-label="Primary"
-    >
-      {NAV.map((item) => (
-        <a
-          href={withBase(item.href)}
-          class:list={[
-            'rounded-full px-4 py-2 text-sm font-medium transition',
-            isActive(item.href) ? 'bg-muted text-fg' : 'text-muted hover:text-fg hover:bg-muted',
-          ]}
-          aria-current={isActive(item.href) ? 'page' : undefined}
-          transition:name={isActive(item.href) ? 'nav-active' : undefined}
-        >
-          {item.label}
-        </a>
-      ))}
-    </nav>
-
     <div class="flex items-center gap-2">
       <HeaderCta client:idle />
-      <a
-        href={withBase('/you/')}
-        class:list={[
-          'btn btn-ghost hidden h-10 w-10 rounded-full p-0 md:inline-flex',
-          youActive && 'bg-muted text-fg',
-        ]}
-        aria-label="You: profile and settings"
-        title="You: profile and settings"
-        aria-current={youActive ? 'page' : undefined}
-      >
-        <Icon name="user" size={18} />
-      </a>
       <button
         type="button"
         id="palette-btn"
