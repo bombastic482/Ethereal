@@ -2455,7 +2455,7 @@
   position: absolute;
   inset: auto 0 0;
   height: 38%;
-  background: linear-gradient(180deg, transparent, var(--hero-bg));
+  background: linear-gradient(180deg, transparent, var(--hero-bg, var(--bg-elevated)));
   pointer-events: none;
 }
 [data-theme='dark'] .sky {
@@ -2572,6 +2572,324 @@
   .sky-glow {
     animation: none;
   }
+}
+
+/* The sky at phone-preview size, for the home page */
+.sky-mini {
+  height: 10.5rem;
+}
+.sky-mini .sky-content {
+  padding: 1.1rem 1rem 0;
+}
+.sky-mini .sky-title {
+  font-size: 1.6rem;
+}
+
+/* Home page phone */
+.hero-phone {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.hero-phone-frame {
+  padding: 0.6rem;
+  border-radius: 2.6rem;
+  background: oklch(18% 0.01 260);
+  box-shadow:
+    inset 0 0 0 1.5px oklch(32% 0.01 260),
+    0 50px 90px -40px oklch(20% 0.05 var(--brand-h) / 0.7);
+}
+.hero-phone-screen {
+  --hero-bg: var(--bg-elevated);
+  overflow: hidden;
+  border-radius: 2.05rem;
+  background: var(--bg-elevated);
+}
+.hero-phone-next {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem;
+  border-radius: 1.1rem;
+  background: var(--bg-muted);
+}
+.hero-phone-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.8rem;
+  color: white;
+  background: linear-gradient(140deg, var(--color-brand-400), var(--color-brand-600));
+  box-shadow: 0 8px 18px -10px var(--color-brand-500);
+}
+.hero-phone-go {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  color: var(--color-brand-700);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--color-brand-500) 45%, transparent);
+}
+[data-theme='dark'] .hero-phone-go {
+  color: var(--color-brand-300);
+}
+.hero-phone-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.hero-phone-row.is-done > span:nth-child(2) {
+  color: var(--fg-subtle);
+}
+.hero-phone-tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1.5px var(--border-strong, var(--border));
+}
+.hero-phone-row.is-done .hero-phone-tick {
+  color: white;
+  background: var(--color-brand-500);
+  box-shadow: none;
+}
+.hero-phone-glow {
+  position: absolute;
+  inset: 8% -18% -6%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(closest-side, oklch(75% 0.12 var(--brand-h) / 0.35), transparent);
+  filter: blur(30px);
+}
+
+/* Home page tour: Train large on the left, Eat and Progress stacked on the right */
+.tour {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .tour {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tour-train {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1024px) {
+  /* Train spans the row: what it is on the left, the demo on the right. */
+  .tour > .tour-train {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    grid-template-areas:
+      'copy stage'
+      'ladder stage'
+      'link stage';
+    grid-template-rows: auto 1fr auto;
+    column-gap: 2.5rem;
+  }
+  .tour-train .tour-copy {
+    grid-area: copy;
+  }
+  .tour-train .tour-stage {
+    grid-area: stage;
+    height: auto;
+    min-height: 19rem;
+  }
+  .tour-train .tour-ladder {
+    grid-area: ladder;
+    align-self: end;
+  }
+  .tour-train .tour-link {
+    grid-area: link;
+  }
+}
+.tour > article {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .tour > article {
+    padding: 2rem;
+  }
+}
+.tour-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-brand-700);
+}
+[data-theme='dark'] .tour-kicker {
+  color: var(--color-brand-300);
+}
+.tour-title {
+  margin: 0.35rem 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.tour-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-brand-700);
+}
+.tour-link:hover {
+  gap: 0.55rem;
+}
+[data-theme='dark'] .tour-link {
+  color: var(--color-brand-300);
+}
+.tour-stage {
+  height: 16rem;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(110% 90% at 50% 100%, oklch(63% 0.15 var(--brand-h) / 0.12), transparent 60%),
+    var(--bg-muted);
+}
+.tour-ladder {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.tour-ladder li {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+.tour-ladder-fig {
+  width: 100%;
+  height: 4.5rem;
+  border-radius: 1rem;
+  background: var(--bg-muted);
+}
+.tour-ladder-arrow {
+  position: absolute;
+  top: 2.25rem;
+  right: -0.75rem;
+  translate: 50% -50%;
+  color: var(--fg-subtle);
+}
+.tour-plate {
+  width: 100%;
+  max-width: 13.5rem;
+  align-self: center;
+  margin-block: auto;
+  filter: drop-shadow(0 14px 22px oklch(30% 0.04 60 / 0.16));
+}
+.plate-rim {
+  fill: var(--bg-muted);
+}
+.plate-base {
+  fill: var(--bg-elevated);
+}
+.plate-veg {
+  fill: oklch(78% 0.13 145);
+}
+.plate-protein {
+  fill: oklch(72% 0.12 40);
+}
+.plate-carb {
+  fill: oklch(84% 0.11 85);
+}
+.plate-veg,
+.plate-protein,
+.plate-carb {
+  stroke: var(--bg-elevated);
+  stroke-width: 2.5;
+}
+.plate-label {
+  font-size: 10px;
+  font-weight: 700;
+  fill: oklch(28% 0.03 60);
+}
+.tour-trend {
+  width: 100%;
+}
+.trend-dot {
+  fill: color-mix(in oklab, var(--fg) 22%, transparent);
+}
+.trend-line {
+  fill: none;
+  stroke: var(--color-brand-500);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.trend-end {
+  fill: var(--color-brand-500);
+  stroke: var(--bg-elevated);
+  stroke-width: 3;
+}
+.tour-progress:not(.is-visible) .chart-line,
+.tour-progress:not(.is-visible) .chart-end {
+  animation-play-state: paused;
+}
+.tour-stat {
+  margin-top: -0.5rem;
+  font-size: 0.875rem;
+  color: var(--fg-muted);
+}
+.tour-stat span {
+  font-weight: 700;
+  color: var(--fg);
+}
+
+/* Compact tool links on the home page */
+.tool-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 1.1rem;
+  background: var(--bg-elevated);
+  box-shadow:
+    inset 0 0 0 1px var(--border),
+    inset 0 1px 0 var(--card-highlight);
+  transition:
+    transform 0.2s var(--ease-spring),
+    box-shadow 0.2s ease;
+}
+.tool-link:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--color-brand-500) 40%, var(--border)),
+    var(--card-shadow);
+}
+.tool-link-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  color: var(--color-brand-700);
+  background: oklch(63% 0.15 var(--brand-h) / 0.12);
+}
+[data-theme='dark'] .tool-link-icon {
+  color: var(--color-brand-200);
 }
 
 /* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */

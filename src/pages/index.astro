@@ -1,15 +1,13 @@
 ---
 import { withBase } from '@/lib/url';
 import HeroPreview from '@/components/HeroPreview';
-import HowItWorks from '@/components/HowItWorks.astro';
-import ToolCard from '@/components/ToolCard.astro';
+import Showcase from '@/components/home/Showcase.astro';
 import Faq from '@/components/Faq.astro';
 import { Icon } from '@/components/ui/Icon';
 import Base from '@/layouts/Base.astro';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
 import { getCollection } from 'astro:content';
-import { existsSync } from 'node:fs';
 import foodsA from '@/data/foods-a.json';
 import foodsB from '@/data/foods-b.json';
 import foodsC from '@/data/foods-c.json';
@@ -49,13 +47,7 @@ const picksHtml = chainPicks
   .join('');
 const guideCount = (await getCollection('guides', ({ data }) => !data.draft)).length;
 
-const heroArt = ['hero.webp', 'hero.png', 'hero.jpg'].find((f) =>
-  existsSync(new URL(`../../public/art/${f}`, import.meta.url)),
-);
-
 const tools = [...TOOLS].sort((a, b) => a.order - b.order);
-const featured = tools.filter((t) => t.featured);
-const rest = tools.filter((t) => !t.featured);
 const guides = (await getCollection('guides', ({ data }) => !data.draft))
   .sort(
     (a, b) =>
@@ -90,27 +82,6 @@ const faq = [
     a: 'Yes. Install it from the browser menu like an app. The food database, recipes, planner and your diary all work without a connection; only barcode lookups for packaged products need the network.',
   },
 ];
-
-const steps = [
-  {
-    icon: 'target',
-    title: 'Build your plan',
-    text: 'Calories, protein, macros and a realistic goal date from your stats.',
-    href: '/start/',
-  },
-  {
-    icon: 'dumbbell',
-    title: 'Train at home',
-    text: 'Short floor sessions with animated demos that step up as you get stronger.',
-    href: '/train/',
-  },
-  {
-    icon: 'chart',
-    title: 'See it working',
-    text: 'A weight trend that ignores the noise, and a check that says what to change.',
-    href: '/progress/',
-  },
-] as const;
 ---
 
 <Base title={SITE.name} description={SITE.description} path="/">
@@ -129,9 +100,9 @@ const steps = [
             Become who you’re <em class="text-gradient not-italic">working toward.</em>
           </h1>
           <p class="text-muted mt-6 max-w-2xl lg:mx-0 text-lg leading-relaxed text-pretty sm:text-xl">
-            A calm coach for your whole self. Home workouts with animated demos that grow with you,
-            food that fits your day, a weight trend that sees through the noise, and a clear next
-            step every morning. No gym, no sign-up, nothing leaves your device.
+            A calm coach for your whole self: home workouts that grow with you, food that fits your
+            day, and a clear next step every morning. No gym, no sign-up, and nothing leaves your
+            device.
           </p>
           <div class="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <a href={withBase('/start/')} class="btn btn-primary h-12 px-6 text-base">
@@ -146,164 +117,13 @@ const steps = [
           </p>
         </div>
         <div class="animate-rise relative [animation-delay:150ms]">
-          <div
-            class="surface animate-float absolute top-28 -left-4 z-10 hidden items-center gap-2.5 px-3.5 py-2.5 text-sm sm:flex lg:-left-16"
-            aria-hidden="true"
-          >
-            <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-8 w-8 place-items-center rounded-xl">
-              <Icon name="scale" size={16} />
-            </span>
-            <span>
-              <span class="block font-bold tracking-tight">−0.6 kg this week</span>
-              <span class="text-subtle block text-xs">trend, not the scale</span>
-            </span>
-          </div>
-          <div
-            class="surface animate-float absolute -right-2 bottom-16 z-10 hidden items-center gap-2.5 px-3.5 py-2.5 text-sm [animation-delay:1.4s] sm:flex lg:-right-8"
-            aria-hidden="true"
-          >
-            <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-8 w-8 place-items-center rounded-xl">
-              <Icon name="dumbbell" size={16} />
-            </span>
-            <span>
-              <span class="block font-bold tracking-tight">Session done · 24 min</span>
-              <span class="text-subtle block text-xs">next time: full push-ups</span>
-            </span>
-          </div>
-          {heroArt && (
-            <img
-              src={withBase(`/art/${heroArt}`)}
-              alt=""
-              width="1600"
-              height="900"
-              class="pointer-events-none absolute inset-0 -z-10 h-full w-full scale-125 object-cover opacity-70 blur-[1px]"
-              loading="eager"
-              fetchpriority="high"
-            />
-          )}
-          <HeroPreview client:visible />
+          <HeroPreview client:load />
         </div>
       </div>
     </div>
   </section>
 
-  <section class="container-page" aria-labelledby="start">
-    <h2 id="start" class="sr-only">
-      Start here
-    </h2>
-    <div class="grid gap-4 md:grid-cols-3">
-      {steps.map((s, i) => (
-        <a
-          href={withBase(s.href)}
-          class="surface hover:shadow-glow animate-rise flex gap-4 p-5 transition hover:-translate-y-0.5"
-          style={`animation-delay:${120 + i * 60}ms`}
-        >
-          <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 shrink-0 place-items-center rounded-2xl">
-            <Icon name={s.icon} size={22} />
-          </span>
-          <span>
-            <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-              Step {i + 1}
-            </span>
-            <span class="block font-bold tracking-tight">{s.title}</span>
-            <span class="text-muted block text-sm">{s.text}</span>
-          </span>
-        </a>
-      ))}
-    </div>
-  </section>
-
-  <HowItWorks />
-
-  <section class="container-page mt-24" aria-labelledby="features">
-    <div class="max-w-2xl">
-      <p class="eyebrow">Features</p>
-      <h2 id="features" class="font-display text-4xl tracking-tight">
-        Everything in one calm place
-      </h2>
-      <p class="text-muted mt-2">What the paid apps charge for, free here, with the maths shown.</p>
-    </div>
-    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {[
-        [
-          'flame',
-          'Food diary with barcode scanning',
-          'Built-in food database that works offline, Open Food Facts for packaged products, camera scanning, quick add and custom foods.',
-        ],
-        [
-          'target',
-          'Adaptive calorie targets',
-          'Every two weeks Ethereal compares your real trend with the plan and tells you the exact change, capped and safe.',
-        ],
-        [
-          'scale',
-          'A trend that sees through water',
-          'Daily weigh-ins are smoothed so a salty dinner never looks like failure.',
-        ],
-        [
-          'dumbbell',
-          'Home workouts that progress',
-          'Forty-plus bodyweight moves with animated demos, a guided player with rest timer and spoken cues, and ladders from wall push-ups to the real thing.',
-        ],
-        [
-          'spark',
-          'Streaks, milestones, weekly report',
-          'Small wins made visible: logging streaks, 5% and 5 kg milestones, and a weekly card that tells the truth.',
-        ],
-        [
-          'lock',
-          'Private, offline, installable',
-          'No account, no cloud. Install it on your phone, use it on a plane, export everything whenever you like.',
-        ],
-      ].map(([icon, title, text]) => (
-        <article class="surface reveal p-6">
-          <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 place-items-center rounded-2xl">
-            <Icon name={icon as never} size={22} />
-          </span>
-          <h3 class="mt-4 font-bold tracking-tight">{title}</h3>
-          <p class="text-muted mt-1 text-sm leading-relaxed">{text}</p>
-        </article>
-      ))}
-    </div>
-    <p class="text-muted mt-6 text-sm">
-      Curious how that stacks up against MyFitnessPal, Lose It! or MacroFactor?{' '}
-      <a
-        class="text-brand-700 dark:text-brand-300 font-semibold underline"
-        href={withBase('/compare/')}
-      >
-        See the comparison
-      </a>
-      .
-    </p>
-  </section>
-
-  <section class="container-page mt-20" aria-labelledby="tools">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p class="eyebrow">Tools</p>
-        <h2 id="tools" class="font-display text-4xl tracking-tight">
-          Every tool you need
-        </h2>
-        <p class="text-muted mt-2">Eight calculators, one shared profile, zero fluff.</p>
-      </div>
-      <a
-        href={withBase('/tools/')}
-        class="text-brand-600 dark:text-brand-300 text-sm font-semibold"
-      >
-        All tools →
-      </a>
-    </div>
-    <div class="mt-8 grid gap-4 md:grid-cols-3">
-      {featured.map((t) => (
-        <ToolCard tool={t} featured />
-      ))}
-    </div>
-    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {rest.map((t) => (
-        <ToolCard tool={t} />
-      ))}
-    </div>
-  </section>
+  <Showcase />
 
   <section class="container-page mt-24" aria-label="By the numbers">
     <div class="border-line grid gap-8 border-y py-10 sm:grid-cols-4">
@@ -401,9 +221,15 @@ const steps = [
           Why people trust it
         </h2>
         <p class="text-muted mt-4 leading-relaxed">
-          Most calculators are lead magnets for a subscription. This one exists to give you the
-          right number and explain the reasoning, then get out of your way.
+          Most health apps are lead magnets for a subscription. This one exists to give you the
+          right plan and explain the reasoning, then get out of your way.
         </p>
+        <a
+          class="text-brand-700 dark:text-brand-300 mt-4 inline-flex text-sm font-semibold"
+          href={withBase('/compare/')}
+        >
+          How it compares with MyFitnessPal, Lose It! and MacroFactor →
+        </a>
       </div>
       <ul class="grid gap-5 sm:grid-cols-2">
         {[
@@ -472,6 +298,41 @@ const steps = [
         </a>
       ))}
     </div>
+  </section>
+
+  <section class="container-page mt-24" aria-labelledby="tools">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="eyebrow">Calculators</p>
+        <h2 id="tools" class="font-display text-4xl tracking-tight">
+          The numbers, on their own
+        </h2>
+        <p class="text-muted mt-2">
+          Every calculator the plan uses, open to anyone. Type your stats once; they all share them.
+        </p>
+      </div>
+      <a
+        href={withBase('/tools/')}
+        class="text-brand-700 dark:text-brand-300 text-sm font-semibold"
+      >
+        All tools →
+      </a>
+    </div>
+    <ul class="mt-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      {tools.map((t) => (
+        <li>
+          <a href={withBase(`/tools/${t.slug}/`)} class="tool-link">
+            <span class="tool-link-icon">
+              <Icon name={t.icon} size={18} />
+            </span>
+            <span class="min-w-0">
+              <span class="block truncate font-semibold">{t.name}</span>
+              <span class="text-subtle block truncate text-xs">{t.short}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 
   <div class="container-page">

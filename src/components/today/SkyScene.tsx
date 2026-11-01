@@ -24,6 +24,7 @@ export function SkyScene({
   now,
   events,
   moon,
+  class: cls,
   children,
 }: {
   /** Minutes since midnight. */
@@ -31,6 +32,8 @@ export function SkyScene({
   events: SunEvents;
   /** Moon phase, 0 new to 0.5 full. */
   moon: number;
+  /** Extra classes, e.g. a smaller variant. */
+  class?: string;
   children?: preact.ComponentChildren;
 }) {
   const box = useRef<HTMLDivElement>(null);
@@ -76,7 +79,7 @@ export function SkyScene({
   return (
     <div
       ref={box}
-      class="sky"
+      class={cls ? `sky ${cls}` : 'sky'}
       style={{ '--sky-top': top, '--sky-horizon': horizon, '--sky-day': (1 - dark).toFixed(2) }}
     >
       <svg class="sky-svg" viewBox={`0 0 ${w} ${h}`} aria-hidden="true">

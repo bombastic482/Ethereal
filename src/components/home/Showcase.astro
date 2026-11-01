@@ -1,0 +1,162 @@
+---
+/**
+ * The home page's tour of the app: Train, Eat and Progress, each shown with the real thing
+ * rather than a stock icon. The workout figure is the same animation engine the player uses;
+ * the plate and the trend are drawn here at build time.
+ */
+import { Figure } from '@/components/train/Figure';
+import { Icon } from '@/components/ui/Icon';
+import { exerciseById } from '@/lib/train/exercises';
+import { withBase } from '@/lib/url';
+
+const squat = exerciseById('squat')!;
+const ladder = ['wall-push-up', 'knee-push-up', 'push-up'].map((id) => exerciseById(id)!);
+
+// A month of weigh-ins: a steady loss with daily water noise, and the smoothed line through it.
+const W = 320;
+const H = 150;
+let seed = 7;
+const noise = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280 - 0.5) * 1.6;
+const days = Array.from({ length: 30 }, (_, i) => 92 - i * 0.14 + noise());
+// A centred average, so the line runs through the middle of the dots rather than lagging them.
+const trend = days.map((_, i) => {
+  const win = days.slice(Math.max(0, i - 4), i + 5);
+  return win.reduce((n, v) => n + v, 0) / win.length;
+});
+const lo = Math.min(...days) - 0.3;
+const hi = Math.max(...days) + 0.3;
+const x = (i: number) => 12 + (i / 29) * (W - 24);
+const y = (v: number) => 10 + ((hi - v) / (hi - lo)) * (H - 20);
+const line = trend.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+const drop = (trend[0]! - trend[29]!).toFixed(1);
+---
+
+<section class="container-page mt-20 sm:mt-28" aria-labelledby="tour">
+  <div class="max-w-2xl">
+    <p class="eyebrow">One calm day</p>
+    <h2 id="tour" class="font-display text-4xl tracking-tight text-balance sm:text-5xl">
+      Move, eat, see it working.
+    </h2>
+    <p class="text-muted mt-3 text-lg">
+      Three parts of one plan, each shaped around your day and your body, never a stranger's.
+    </p>
+  </div>
+
+  <div class="tour mt-10">
+    <article class="surface tour-train reveal">
+      <div class="tour-copy">
+        <p class="tour-kicker">
+          <Icon name="dumbbell" size={15} /> Train
+        </p>
+        <h3 class="tour-title">Home workouts that grow with you</h3>
+        <p class="text-muted">
+          Short floor sessions with a demo for every move, a guided player that counts you in and
+          talks you through, and ladders that step up only when you are ready.
+        </p>
+      </div>
+      <div class="tour-stage">
+        <Figure
+          client:visible
+          keys={squat.keys}
+          muscles={squat.muscles}
+          align="bottom"
+          label="Bodyweight squat, animated"
+          class="h-full w-full"
+        />
+      </div>
+      <ol class="tour-ladder" aria-label="A push-up ladder">
+        {ladder.map((e, i) => (
+          <li>
+            <span class="tour-ladder-fig">
+              <Figure
+                client:visible
+                keys={e.keys}
+                props={e.props}
+                speed={0.8}
+                label={e.name}
+                class="h-full w-full"
+              />
+            </span>
+            <span class="text-xs font-semibold">{e.name}</span>
+            {i < ladder.length - 1 && (
+              <span class="tour-ladder-arrow" aria-hidden="true">
+                <Icon name="chevron" size={14} />
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+      <a class="tour-link" href={withBase('/train/')}>
+        Start training <Icon name="arrow" size={16} />
+      </a>
+    </article>
+
+    <article class="surface tour-eat reveal">
+      <div class="tour-copy">
+        <p class="tour-kicker">
+          <Icon name="utensils" size={15} /> Eat
+        </p>
+        <h3 class="tour-title">Food that fits your day</h3>
+        <p class="text-muted">
+          Log in a tap, by barcode, by recipe, or by hand when someone else cooked. Protein first,
+          everything else in proportion.
+        </p>
+      </div>
+      <svg
+        viewBox="0 0 160 160"
+        class="tour-plate"
+        role="img"
+        aria-label="A balanced plate: half vegetables, a quarter protein, a quarter carbs"
+      >
+        <circle cx="80" cy="80" r="74" class="plate-rim"></circle>
+        <circle cx="80" cy="80" r="62" class="plate-base"></circle>
+        <path d="M80 80 L80 22 A58 58 0 0 0 80 138 Z" class="plate-veg"></path>
+        <path d="M80 80 L80 22 A58 58 0 0 1 138 80 Z" class="plate-protein"></path>
+        <path d="M80 80 L138 80 A58 58 0 0 1 80 138 Z" class="plate-carb"></path>
+        <text x="50" y="84" class="plate-label" text-anchor="middle">
+          Veg
+        </text>
+        <text x="106" y="62" class="plate-label" text-anchor="middle">
+          Protein
+        </text>
+        <text x="106" y="106" class="plate-label" text-anchor="middle">
+          Carbs
+        </text>
+      </svg>
+      <a class="tour-link" href={withBase('/eat/')}>
+        Plan your plate <Icon name="arrow" size={16} />
+      </a>
+    </article>
+
+    <article class="surface tour-progress reveal">
+      <div class="tour-copy">
+        <p class="tour-kicker">
+          <Icon name="chart" size={15} /> Progress
+        </p>
+        <h3 class="tour-title">A trend that sees through the noise</h3>
+        <p class="text-muted">
+          Daily weigh-ins bounce with water and salt. The line underneath is what is really
+          happening, and it decides what changes next.
+        </p>
+      </div>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        class="tour-trend"
+        role="img"
+        aria-label={`Weight trend down ${drop} kg in a month`}
+      >
+        {days.map((d, i) => (
+          <circle cx={x(i)} cy={y(d)} r="2.6" class="trend-dot" />
+        ))}
+        <path d={line} class="trend-line chart-line" pathLength="1"></path>
+        <circle cx={x(29)} cy={y(trend[29]!)} r="5" class="trend-end chart-end"></circle>
+      </svg>
+      <p class="tour-stat">
+        <span class="tabular">−{drop} kg</span> trend this month
+      </p>
+      <a class="tour-link" href={withBase('/progress/')}>
+        See your progress <Icon name="arrow" size={16} />
+      </a>
+    </article>
+  </div>
+</section>
