@@ -11,6 +11,11 @@ export interface WeighIn {
   chestCm?: number;
   armCm?: number;
   thighCm?: number;
+  /** Smart-scale readings, when you have them. */
+  bodyFatPct?: number;
+  muscleKg?: number;
+  waterPct?: number;
+  visceral?: number;
   note?: string;
 }
 

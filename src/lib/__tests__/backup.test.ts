@@ -30,6 +30,9 @@ describe('backup', () => {
 
     train.trainStore.patch({ setup: program.defaultSetup('2026-10-01', 2), voice: true });
     life.lifeStore.patch({ name: 'Ali', goals: ['get-stronger'], wake: '06:30' });
+    const body = await import('../body');
+    body.saveMeasure({ date: '2026-10-01', neckCm: 40, waistCm: 103 });
+    body.bodyStore.patch({ targetBodyFat: 17 });
     log.upsertEntry({ date: '2026-10-01', weightKg: 82.4 });
     fs.addFood({
       date: '2026-10-01',
@@ -76,6 +79,9 @@ describe('backup', () => {
       goals: ['get-stronger'],
       wake: '06:30',
     });
+    const body2 = await import('../body');
+    expect(body2.bodyStore.get().measures[0]?.waistCm).toBe(103);
+    expect(body2.bodyStore.get().targetBodyFat).toBe(17);
   });
 
   it('rejects foreign payloads and tolerates old backups without a diary', async () => {

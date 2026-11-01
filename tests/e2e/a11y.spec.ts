@@ -15,6 +15,7 @@ const PAGES = [
   '/recipes/shakshuka-with-feta/',
   '/start/',
   '/progress/',
+  '/progress/body/',
   '/eat/',
   '/train/',
   '/train/exercises/',

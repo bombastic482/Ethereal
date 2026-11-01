@@ -31,6 +31,11 @@ function WeightTrackerInner() {
   const [arm, setArm] = useState<number | null>(null);
   const [thigh, setThigh] = useState<number | null>(null);
   const [note, setNote] = useState('');
+  const [scale, setScale] = useState(false);
+  const [bodyFat, setBodyFat] = useState<number | null>(null);
+  const [muscle, setMuscle] = useState<number | null>(null);
+  const [water, setWater] = useState<number | null>(null);
+  const [visceral, setVisceral] = useState<number | null>(null);
   const [range, setRange] = useState<Range>('90');
   const [flash, setFlash] = useState<string | null>(null);
 
@@ -79,8 +84,14 @@ function WeightTrackerInner() {
     const waistCm = waist === null ? undefined : round(imperial ? inToCm(waist) : waist, 1);
     const cm = (v: number | null) => (v === null ? undefined : round(imperial ? inToCm(v) : v, 1));
     const extras = { hipsCm: cm(hips), chestCm: cm(chest), armCm: cm(arm), thighCm: cm(thigh) };
+    const scaleReadings = {
+      bodyFatPct: bodyFat ?? undefined,
+      muscleKg: muscle === null ? undefined : round(imperial ? lbToKg(muscle) : muscle, 1),
+      waterPct: water ?? undefined,
+      visceral: visceral ?? undefined,
+    };
     const extraEntries = Object.fromEntries(
-      Object.entries(extras).filter(([, v]) => v !== undefined),
+      Object.entries({ ...extras, ...scaleReadings }).filter(([, v]) => v !== undefined),
     );
     upsertEntry({
       date,
@@ -92,6 +103,10 @@ function WeightTrackerInner() {
     setFlash(`Saved ${w(weightKg)} for ${date}`);
     setNote('');
     setWaist(null);
+    setBodyFat(null);
+    setMuscle(null);
+    setWater(null);
+    setVisceral(null);
     setTimeout(() => setFlash(null), 2500);
   };
 
@@ -214,6 +229,71 @@ function WeightTrackerInner() {
                 suffix={imperial ? 'in' : 'cm'}
                 onChange={setThigh}
               />
+            </div>
+          )}
+          <button
+            type="button"
+            class="text-brand-700 dark:text-brand-300 justify-self-start text-sm font-semibold"
+            onClick={() => setScale((v) => !v)}
+            aria-expanded={scale}
+          >
+            {scale ? 'Hide' : 'Add'} smart scale readings
+          </button>
+          {scale && (
+            <div class="grid grid-cols-2 gap-4">
+              <NumberField
+                id="tr-bf"
+                label="Body fat"
+                value={bodyFat}
+                placeholder="28"
+                onClear={() => setBodyFat(null)}
+                min={3}
+                max={70}
+                step={0.1}
+                suffix="%"
+                onChange={setBodyFat}
+              />
+              <NumberField
+                id="tr-muscle"
+                label="Muscle mass"
+                value={muscle}
+                placeholder={imperial ? '140' : '62'}
+                onClear={() => setMuscle(null)}
+                min={imperial ? 20 : 10}
+                max={imperial ? 400 : 180}
+                step={0.1}
+                suffix={imperial ? 'lb' : 'kg'}
+                onChange={setMuscle}
+              />
+              <NumberField
+                id="tr-water"
+                label="Body water"
+                value={water}
+                placeholder="52"
+                onClear={() => setWater(null)}
+                min={20}
+                max={80}
+                step={0.1}
+                suffix="%"
+                onChange={setWater}
+              />
+              <NumberField
+                id="tr-visceral"
+                label="Visceral fat"
+                value={visceral}
+                placeholder="10"
+                onClear={() => setVisceral(null)}
+                min={1}
+                max={60}
+                step={1}
+                inputMode="numeric"
+                onChange={setVisceral}
+                hint="The scale's rating"
+              />
+              <p class="text-subtle col-span-2 text-xs">
+                Home scales guess body fat from a tiny current, and read high or low for a given
+                person. Weigh in the same way each time and watch the direction, not the number.
+              </p>
             </div>
           )}
           <div>

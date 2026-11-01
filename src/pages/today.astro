@@ -1,5 +1,6 @@
 ---
 import TodayScreen from '@/components/calculators/TodayScreen';
+import Milestones from '@/components/body/Milestones';
 import TodayPlan from '@/components/today/TodayPlan';
 import Tour from '@/components/Tour.astro';
 import AppLayout from '@/layouts/AppLayout.astro';
@@ -16,5 +17,6 @@ import AppLayout from '@/layouts/AppLayout.astro';
 >
   <TodayPlan client:load />
   <TodayScreen client:load />
+  <Milestones client:idle celebrateOnly />
   <Tour />
 </AppLayout>

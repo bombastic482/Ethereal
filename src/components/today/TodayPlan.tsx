@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { bodyStore } from '@/lib/body';
 import { activity, exerciseKcal } from '@/lib/calc/exercise';
 import {
   buildDay,
@@ -32,6 +33,7 @@ const ICON: Record<DayKind, IconName> = {
   walk: 'walk',
   weigh: 'scale',
   photo: 'camera',
+  measure: 'ruler',
   wind: 'leaf',
   sleep: 'bed',
   busy: 'clock',
@@ -79,6 +81,7 @@ function TodayPlanInner() {
   const [diary] = diaryStore.use();
   const [weights] = logStore.use();
   const [{ ticks }] = dayStore.use();
+  const [body] = bodyStore.use();
   const [profile] = useProfile();
   const [date, setDate] = useState('');
   const [now, setNow] = useState(0);
@@ -147,10 +150,18 @@ function TodayPlanInner() {
       logged,
       weighed: weights.entries.some((e) => e.date === date),
       photoDue,
+      measureDue: (() => {
+        const last = body.measures.at(-1)?.date;
+        return (
+          !last ||
+          Date.parse(`${date}T00:00:00Z`) - Date.parse(`${last}T00:00:00Z`) >=
+            (life.photoWeeks * 7 - 1) * 864e5
+        );
+      })(),
       ticks: new Set(ticks[date] ?? []),
       minutesOf: (d) => d.getHours() * 60 + d.getMinutes(),
     });
-  }, [date, life, train, diary.food, weights.entries, ticks, lastPhoto]);
+  }, [date, life, train, diary.food, weights.entries, ticks, lastPhoto, body.measures]);
 
   if (!day)
     return <div class="surface mb-8 h-[54rem] animate-pulse sm:h-[46rem]" aria-hidden="true" />;
@@ -393,6 +404,12 @@ function NowCard({
             <Icon name="scale" size={18} /> Weigh in
           </a>
         );
+      case 'measure':
+        return (
+          <a class="btn btn-primary h-12 px-5" href={withBase('/progress/body/')}>
+            <Icon name="ruler" size={18} /> Measure
+          </a>
+        );
       case 'photo':
         return (
           <a class="btn btn-primary h-12 px-5" href={withBase('/track/#photos')}>
@@ -407,7 +424,7 @@ function NowCard({
         );
     }
   })();
-  const hasOwnAction = ['meal', 'workout', 'weigh', 'photo'].includes(item.kind);
+  const hasOwnAction = ['meal', 'workout', 'weigh', 'photo', 'measure'].includes(item.kind);
   return (
     <div class={`now-card now-${item.kind} surface overflow-hidden`} aria-live="polite">
       <div class="flex items-start gap-4 p-5 sm:p-6">

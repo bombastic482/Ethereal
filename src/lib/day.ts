@@ -17,6 +17,7 @@ export type DayKind =
   | 'walk'
   | 'weigh'
   | 'photo'
+  | 'measure'
   | 'wind'
   | 'sleep'
   | 'busy';
@@ -59,6 +60,8 @@ export interface DayContext {
   weighed: boolean;
   /** A progress photo is due today. */
   photoDue: boolean;
+  /** Tape measurements are due today. */
+  measureDue?: boolean;
   /** Items ticked by hand today. */
   ticks: ReadonlySet<string>;
   /** Convert a Date to local minutes since midnight (injected so tests can fix the zone). */
@@ -305,6 +308,15 @@ export function buildDay(ctx: DayContext): DayItem[] {
         time: fromMinutes(toMinutes(life.weighTime) + 5),
         title: 'Progress photo',
         detail: 'Same spot, same light: front and side.',
+      });
+    }
+    if (ctx.measureDue) {
+      add({
+        id: 'measure',
+        kind: 'measure',
+        time: fromMinutes(toMinutes(life.weighTime) + 10),
+        title: 'Tape measurements',
+        detail: 'Neck and waist: two minutes, and a body-fat estimate.',
       });
     }
   }

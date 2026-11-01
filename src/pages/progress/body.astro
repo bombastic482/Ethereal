@@ -1,0 +1,15 @@
+---
+import BodyHub from '@/components/body/BodyHub';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Body Composition"
+  description="Measure body fat at home with a tape measure and the U.S. Navy method, track fat and lean mass, add smart-scale readings, and set a physique target. Private, free."
+  path="/progress/body/"
+  heading="Body"
+  lede="The scale says how much you weigh. This says what it is made of."
+  section="progress"
+>
+  <BodyHub client:load />
+</AppLayout>

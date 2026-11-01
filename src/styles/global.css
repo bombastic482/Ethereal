@@ -1134,3 +1134,117 @@
     transition: none;
   }
 }
+
+/* Body: tape-measure guide */
+.tape-stage {
+  display: grid;
+  place-items: center;
+  border-radius: 1.5rem;
+  padding: 1rem;
+  background:
+    radial-gradient(90% 70% at 50% 100%, oklch(63% 0.15 160 / 0.14), transparent 70%),
+    var(--bg-muted);
+}
+.tape-stage-sm {
+  padding: 0.75rem;
+}
+.tape-figure {
+  width: 100%;
+  max-width: 9rem;
+  height: auto;
+}
+.tape-stage-sm .tape-figure {
+  max-width: 6.5rem;
+}
+.tape-body > * {
+  fill: color-mix(in oklab, var(--fg) 14%, transparent);
+}
+.tape-line {
+  fill: none;
+  stroke: var(--color-brand-500);
+  stroke-width: 2.4;
+  stroke-dasharray: 3 2.2;
+  animation: tape-in 0.5s var(--ease-spring) backwards;
+}
+.tape-dot {
+  fill: var(--color-brand-500);
+}
+@keyframes tape-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.6);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tape-line {
+    animation: none;
+  }
+}
+
+/* Milestones */
+.milestone {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem;
+  border-radius: 1rem;
+  background: var(--bg-muted);
+}
+.milestone-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.9rem;
+  color: var(--fg-subtle);
+  background: color-mix(in oklab, var(--fg) 7%, transparent);
+}
+.milestone-on {
+  color: white;
+  background: linear-gradient(135deg, oklch(80% 0.15 85), oklch(68% 0.17 60));
+  box-shadow: 0 8px 22px -10px oklch(68% 0.17 60);
+}
+.milestone-bar {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--fg) 10%, transparent);
+  overflow: hidden;
+}
+.milestone-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand-500);
+  transform-origin: left;
+}
+.milestone-toast {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  width: min(26rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 1.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 60px -20px oklch(0% 0 0 / 0.45);
+  animation: var(--animate-pop);
+}
+@media (min-width: 768px) {
+  .milestone-toast {
+    bottom: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .milestone-toast {
+    animation: none;
+  }
+}

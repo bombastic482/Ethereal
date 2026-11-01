@@ -52,6 +52,7 @@ export const SECTIONS: Record<
     pages: [
       { href: '/progress/', label: 'Overview' },
       { href: '/track/', label: 'Weight & photos' },
+      { href: '/progress/body/', label: 'Body' },
       { href: '/review/', label: 'Weekly review' },
     ],
   },
