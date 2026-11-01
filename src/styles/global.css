@@ -2204,3 +2204,169 @@
     animation: none;
   }
 }
+
+/* Collapsing large title: the page title slides into the bar once it scrolls away */
+.site-header .container-page {
+  position: relative;
+}
+.header-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  max-width: 50%;
+  transform: translate(-50%, -30%);
+  opacity: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.35s var(--ease-out-quint);
+}
+.site-header[data-titled] .header-title {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+@media (max-width: 767px) {
+  .brand-word {
+    transition: opacity 0.2s ease;
+  }
+  .site-header[data-titled] .brand-word {
+    opacity: 0;
+  }
+}
+
+/* Side rail for the app sections, from tablets up */
+.rail {
+  display: none;
+}
+@media (min-width: 768px) {
+  .rail {
+    position: fixed;
+    z-index: 30;
+    left: 0;
+    top: 4rem;
+    bottom: 0;
+    width: 5.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem 0.6rem 1.25rem;
+    border-right: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    overflow-y: auto;
+  }
+  body.has-rail > main,
+  body.has-rail > footer {
+    padding-left: 5.5rem;
+  }
+}
+@media (min-width: 1280px) {
+  .rail {
+    width: 15rem;
+    padding-inline: 0.9rem;
+  }
+  body.has-rail > main,
+  body.has-rail > footer {
+    padding-left: 15rem;
+  }
+  body.has-rail .section-nav {
+    display: none;
+  }
+}
+.rail-list {
+  display: grid;
+  gap: 0.3rem;
+}
+.rail-item {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 0.3rem;
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--fg-muted);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.18s var(--ease-spring);
+}
+.rail-item:hover {
+  color: var(--fg);
+  background: var(--bg-muted);
+}
+.rail-item:active {
+  transform: scale(0.96);
+}
+.rail-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.85rem;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.rail-on {
+  color: var(--fg);
+}
+.rail-on .rail-icon {
+  color: white;
+  background:
+    radial-gradient(120% 120% at 20% 0%, oklch(100% 0 0 / 0.3), transparent 50%),
+    linear-gradient(140deg, var(--color-brand-400), var(--color-brand-600));
+  box-shadow: 0 10px 22px -10px var(--color-brand-500);
+}
+.rail-quiet .rail-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+.rail-sub {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .rail-item {
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 650;
+  }
+  .rail-sub {
+    display: grid;
+    gap: 0.1rem;
+    margin: 0.25rem 0 0.5rem 1.6rem;
+    padding-left: 1.4rem;
+    border-left: 2px solid color-mix(in oklab, var(--color-brand-500) 30%, transparent);
+  }
+  .rail-subitem {
+    display: block;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.6rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+  .rail-subitem:hover {
+    color: var(--fg);
+    background: var(--bg-muted);
+  }
+  .rail-sub-on {
+    color: var(--color-brand-700);
+    background: oklch(63% 0.15 var(--brand-h) / 0.1);
+  }
+  [data-theme='dark'] .rail-sub-on {
+    color: var(--color-brand-200);
+  }
+}

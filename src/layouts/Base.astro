@@ -2,6 +2,7 @@
 import { BASE, withBase } from '@/lib/url';
 import '@/styles/global.css';
 import Footer from '@/components/Footer.astro';
+import AppRail from '@/components/AppRail.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import TabBar from '@/components/TabBar.astro';
@@ -71,7 +72,7 @@ const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
       })();
     </script>
   </head>
-  <body class="flex min-h-svh flex-col pb-20 md:pb-0">
+  <body class:list={['flex min-h-svh flex-col pb-20 md:pb-0', section && 'has-rail']}>
     <a
       href="#main"
       class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
@@ -79,6 +80,7 @@ const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
       Skip to content
     </a>
     <Header />
+    {section && <AppRail section={section} path={Astro.url.pathname.slice(BASE.length) || '/'} />}
     <main id="main" class:list={['flex-1', cls]} transition:animate="fade">
       <slot />
     </main>

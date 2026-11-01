@@ -31,10 +31,14 @@ const youActive = section === 'you';
       aria-label={`${SITE.name} home`}
     >
       <Logo size={32} id="logo-header" />
-      <span class="font-display text-xl leading-none">{SITE.name}</span>
+      <span class="font-display brand-word text-xl leading-none">{SITE.name}</span>
     </a>
+    <span class="header-title" aria-hidden="true" data-header-title></span>
 
-    <nav class="hidden items-center gap-1 md:flex" aria-label="Primary">
+    <nav
+      class:list={['hidden items-center gap-1', section ? 'md:hidden' : 'md:flex']}
+      aria-label="Primary"
+    >
       {NAV.map((item) => (
         <a
           href={withBase(item.href)}
@@ -135,11 +139,33 @@ const youActive = section === 'you';
     b.dataset.bound = '1';
     b.addEventListener('click', () => window.dispatchEvent(new Event('ethereal:palette')));
   }
+  // Large title: once the page's own title scrolls under the bar, it appears in the bar.
+  let titleObserver: IntersectionObserver | null = null;
+  function bindTitle() {
+    titleObserver?.disconnect();
+    const header = document.querySelector<HTMLElement>('.site-header');
+    const slot = document.querySelector<HTMLElement>('[data-header-title]');
+    const title = document.querySelector<HTMLElement>('.page-title');
+    if (!header || !slot) return;
+    delete header.dataset.titled;
+    if (!title) return;
+    slot.textContent = title.textContent?.trim() ?? '';
+    titleObserver = new IntersectionObserver(
+      ([e]) => {
+        if (e)
+          header.toggleAttribute('data-titled', !e.isIntersecting && e.boundingClientRect.top < 64);
+      },
+      { rootMargin: '-64px 0px 0px 0px' },
+    );
+    titleObserver.observe(title);
+  }
   bindMenu();
   bindPalette();
+  bindTitle();
   document.addEventListener('astro:page-load', () => {
     bindPalette();
     bindMenu();
+    bindTitle();
     // Close the mobile menu after navigating.
     const nav = document.getElementById('mobile-nav');
     const toggle = document.getElementById('nav-toggle');
