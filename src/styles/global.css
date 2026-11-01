@@ -3122,6 +3122,18 @@
   .prayer-strip {
     margin: 0.5rem 2rem 0;
   }
+  .prayer-chip {
+    padding: 0.7rem 0.5rem;
+  }
+  .prayer-name {
+    font-size: 0.8125rem;
+  }
+  .prayer-time {
+    font-size: 1.125rem;
+  }
+  .prayer-when {
+    font-size: 0.75rem;
+  }
 }
 .prayer-chip {
   display: grid;
