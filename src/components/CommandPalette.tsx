@@ -97,11 +97,15 @@ export default function CommandPalette({ guides = [] }: Props) {
       window.removeEventListener('ethereal:palette', onOpen);
     };
   }, []);
+  // The box is emptied as the launcher closes, never after it opens: whatever you type the
+  // instant it appears is kept.
   useEffect(() => {
-    if (!open) return;
-    setQ('');
-    setSel(0);
-    setTimeout(() => input.current?.focus(), 20);
+    if (!open) {
+      setQ('');
+      setSel(0);
+      return;
+    }
+    input.current?.focus();
     loadFoods().then(() => setFoods(searchFoods('', 0)));
   }, [open]);
 
@@ -222,6 +226,7 @@ export default function CommandPalette({ guides = [] }: Props) {
             <Icon name="spark" size={18} class="text-subtle" />
             <input
               ref={input}
+              autoFocus
               class="h-14 w-full bg-transparent text-base outline-none"
               placeholder="Jump to a page, or type a food to log it…"
               value={q}
