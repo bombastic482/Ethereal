@@ -12,6 +12,8 @@ interface Props<T extends string> {
   onChange: (v: T) => void;
   columns?: number;
   class?: string;
+  /** A name for the group when there is no visible label. */
+  ariaLabel?: string;
 }
 
 /** Accessible radio group rendered as a pill/segmented control. */
@@ -23,6 +25,7 @@ export function Segmented<T extends string>({
   onChange,
   columns,
   class: cls,
+  ariaLabel,
 }: Props<T>) {
   const grid = columns ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` } : undefined;
   const n = options.length;
@@ -34,7 +37,7 @@ export function Segmented<T extends string>({
   // back to colouring the active cell.
   const slide = !columns && n > 1;
   return (
-    <fieldset class={cls}>
+    <fieldset class={cls} aria-label={label ? undefined : ariaLabel}>
       {label && <legend class="label">{label}</legend>}
       <div
         class={`bg-muted relative grid gap-1 rounded-2xl p-1 ${columns ? '' : 'auto-cols-fr grid-flow-col'}`}

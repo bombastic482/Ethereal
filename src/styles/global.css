@@ -3522,6 +3522,160 @@
   line-height: 1.45;
 }
 
+/* Today's Food section: heading, two quiet chips, a day stepper, then a compact summary. */
+.food {
+  margin-top: 0.5rem;
+}
+.food-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.food-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.food-title-day {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--fg-muted);
+}
+.food-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.food-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.9rem;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-muted);
+  background: var(--bg-muted);
+}
+.food-chip > svg:first-child {
+  color: var(--color-brand-600);
+}
+[data-theme='dark'] .food-chip > svg:first-child {
+  color: var(--color-brand-300);
+}
+.food-chip-link {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.food-chip-link:hover {
+  color: var(--fg);
+  background: color-mix(in oklab, var(--fg) 9%, var(--bg-muted));
+}
+.food-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: var(--bg-muted);
+}
+.food-nav-btn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: var(--fg-muted);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.food-nav-btn:hover:not(:disabled) {
+  color: var(--fg);
+  background: var(--bg-elevated);
+}
+.food-nav-btn:disabled {
+  opacity: 0.35;
+}
+.food-nav-day {
+  min-width: 4.25rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  text-align: center;
+  white-space: nowrap;
+}
+.food-summary {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+.food-summary-top {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.food-stats {
+  display: grid;
+  flex: 1;
+  gap: 0.55rem;
+}
+.food-stats > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border);
+}
+.food-stats > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+.food-stats dt {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+}
+.food-stats dd {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.food-stats dd span {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--fg-subtle);
+}
+.food-macros {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1.25rem;
+}
+@media (min-width: 768px) {
+  .food-summary {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem 1.75rem;
+  }
+  .food-summary-top {
+    gap: 1.5rem;
+  }
+  .food-stats {
+    min-width: 11rem;
+  }
+}
+
 /* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */
 .prayer-strip {
   display: grid;

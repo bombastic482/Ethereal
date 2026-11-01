@@ -299,7 +299,7 @@ test.describe('one daily target', () => {
       return (await page.locator('main').innerText()).match(pattern)![1];
     };
     const onPlan = await target('/progress/', /eat per day\s*([\d,]+)/i);
-    const onToday = await target('/today/', /([\d,]+)\s+target/);
+    const onToday = await target('/today/', /Target\s*([\d,]+)\s*kcal/);
     expect(onToday).toBe(onPlan);
   });
 });

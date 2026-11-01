@@ -148,6 +148,16 @@ const fmtDay = (iso: string, today: string) => {
   });
 };
 
+/** 'Yesterday', or a short weekday and date, for the day stepper. */
+const shortDay = (iso: string, today: string) =>
+  iso === shift(today, -1)
+    ? 'Yesterday'
+    : new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      });
+
 function TodayScreenInner() {
   const [profile] = useProfile();
   const [plan] = planStore.use();
@@ -370,35 +380,63 @@ function TodayScreenInner() {
   }, [day.status, dayFood.length, date, today]);
 
   return (
-    <div class="grid gap-6" ref={root}>
-      {/* Day navigation */}
-      <div class="flex items-center justify-between gap-3">
-        <button
-          type="button"
-          class="btn btn-ghost h-10 w-10 rounded-full p-0"
-          onClick={() => setDate(shift(date, -1))}
-          aria-label="Previous day"
-        >
-          ‹
-        </button>
-        <div class="text-center">
-          <p class="text-lg font-bold tracking-tight">{fmtDay(date, today)}</p>
-          {streak > 1 && (
-            <p class="text-brand-700 dark:text-brand-300 text-xs font-semibold">
-              <Icon name="flame" size={12} class="inline" /> {streak}-day logging streak
-            </p>
-          )}
+    <div class="food grid gap-5" ref={root} role="region" aria-labelledby="food-h">
+      {/* One Food section: a heading, the streak and the weight trend, and a small day stepper. */}
+      <header class="food-head">
+        <div class="min-w-0">
+          <h2 id="food-h" class="food-title">
+            Food
+            {date !== today && <span class="food-title-day">{fmtDay(date, today)}</span>}
+          </h2>
+          <div class="food-chips">
+            {streak > 1 && (
+              <span class="food-chip">
+                <Icon name="flame" size={13} /> {streak}-day streak
+              </span>
+            )}
+            {date === today && (
+              <a href={withBase('/track/')} class="food-chip food-chip-link">
+                <Icon name="scale" size={13} />
+                {trend ? (
+                  <>
+                    {formatWeight(trend.kg, profile.units)}
+                    {trend.perWeek !== null && (
+                      <span class="text-subtle">
+                        {trend.perWeek > 0 ? '↓' : '↑'}
+                        {formatWeight(Math.abs(trend.perWeek), profile.units, 2)}/wk
+                      </span>
+                    )}
+                    {trend.weighedToday ? <Icon name="check" size={13} /> : <span>Weigh in</span>}
+                  </>
+                ) : (
+                  'Weigh in'
+                )}
+                <span class="sr-only">. Opens the weight tracker.</span>
+              </a>
+            )}
+          </div>
         </div>
-        <button
-          type="button"
-          class="btn btn-ghost h-10 w-10 rounded-full p-0"
-          onClick={() => setDate(shift(date, 1))}
-          disabled={date >= today}
-          aria-label="Next day"
-        >
-          ›
-        </button>
-      </div>
+        <div class="food-nav" role="group" aria-label="Choose a day">
+          <button
+            type="button"
+            class="food-nav-btn"
+            onClick={() => setDate(shift(date, -1))}
+            aria-label="Previous day"
+          >
+            <Icon name="chevron" size={16} class="rotate-180" />
+          </button>
+          <span class="food-nav-day">{date === today ? 'Today' : shortDay(date, today)}</span>
+          <button
+            type="button"
+            class="food-nav-btn"
+            onClick={() => setDate(shift(date, 1))}
+            disabled={date >= today}
+            aria-label="Next day"
+          >
+            <Icon name="chevron" size={16} />
+          </button>
+        </div>
+      </header>
 
       {notice && (
         <div
@@ -436,69 +474,46 @@ function TodayScreenInner() {
           </button>
         </div>
       )}
-      {date === today && (
-        <a
-          href={withBase('/track/')}
-          class="surface-muted flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
-        >
-          <span class="flex min-w-0 items-center gap-2">
-            <Icon name="scale" size={16} class="text-brand-700 dark:text-brand-300 shrink-0" />
-            {trend ? (
-              <span class="truncate">
-                <span class="font-semibold">Trend {formatWeight(trend.kg, profile.units)}</span>
-                {trend.perWeek !== null && (
-                  <span class="text-muted">
-                    {' '}
-                    · {trend.perWeek > 0 ? '↓' : '↑'}{' '}
-                    {formatWeight(Math.abs(trend.perWeek), profile.units, 2)}/wk
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span class="text-muted">No weigh-ins yet</span>
-            )}
-          </span>
-          <span class="text-brand-700 dark:text-brand-300 shrink-0 text-xs font-semibold">
-            {trend?.weighedToday ? 'Weighed in ✓' : 'Weigh in →'}
-          </span>
-          <span class="sr-only">. Opens the weight tracker.</span>
-        </a>
-      )}
-
-      {/* Ring + macros */}
-      <section
-        class="surface grid gap-6 p-5 sm:grid-cols-[auto_1fr] sm:items-center sm:p-6"
-        aria-label="Calories and macros"
-      >
-        <Ring
-          value={day.progress}
-          size={190}
-          tone={remainingTone}
-          label={`${formatNumber(day.eaten.kcal)} of ${formatNumber(day.target.kcal)} kcal`}
-        >
-          <div>
-            <p
-              class={`font-display tabular text-5xl tracking-tight ${day.remaining.kcal < 0 ? 'text-rose-600 dark:text-rose-300' : ''}`}
-            >
-              <CountUp value={Math.abs(day.remaining.kcal)} />
-            </p>
-            <p class="text-subtle text-xs font-semibold">
-              {day.remaining.kcal < 0 ? 'kcal over' : 'kcal left'}
-            </p>
-          </div>
-        </Ring>
-        <div class="grid gap-4">
-          <div class="text-muted flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <span>
-              <strong class="text-fg tabular">{formatNumber(day.eaten.kcal)}</strong> eaten
-            </span>
-            <span>
-              <strong class="text-fg tabular">{formatNumber(day.burned)}</strong> burned
-            </span>
-            <span>
-              <strong class="text-fg tabular">{formatNumber(day.target.kcal)}</strong> target
-            </span>
-          </div>
+      {/* The day's numbers at a glance: what is left in the ring, the sums beside it, macros under. */}
+      <section class="surface food-summary" aria-label="Calories and macros">
+        <div class="food-summary-top">
+          <Ring
+            value={day.progress}
+            size={136}
+            stroke={12}
+            tone={remainingTone}
+            label={`${formatNumber(day.eaten.kcal)} of ${formatNumber(day.target.kcal)} kcal`}
+          >
+            <div>
+              <p
+                class={`font-display tabular text-[2rem] leading-none tracking-tight ${day.remaining.kcal < 0 ? 'text-rose-600 dark:text-rose-300' : ''}`}
+              >
+                <CountUp value={Math.abs(day.remaining.kcal)} />
+              </p>
+              <p class="text-subtle mt-1 text-[11px] font-semibold">
+                {day.remaining.kcal < 0 ? 'kcal over' : 'kcal left'}
+              </p>
+            </div>
+          </Ring>
+          <dl class="food-stats">
+            {(
+              [
+                ['Eaten', day.eaten.kcal],
+                ['Burned', day.burned],
+                ['Target', day.target.kcal],
+              ] as const
+            ).map(([k, v]) => (
+              <div key={k}>
+                <dt>{k}</dt>
+                <dd class="tabular">
+                  {formatNumber(v)}
+                  <span> kcal</span>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div class="food-macros">
           <Bar
             label="Protein"
             value={day.eaten.protein}
@@ -540,7 +555,7 @@ function TodayScreenInner() {
 
       <Segmented
         name="diary-view"
-        label="Diary"
+        ariaLabel="Show"
         options={[
           { value: 'meals', label: 'Meals' },
           { value: 'ideas', label: 'Ideas' },
