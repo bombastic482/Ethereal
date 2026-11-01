@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { bodyStore } from '@/lib/body';
 import { activity, exerciseKcal } from '@/lib/calc/exercise';
 import { buildDay, dayStore, missedItems, nowItem, toggleTick, type DayItem } from '@/lib/day';
@@ -221,7 +221,7 @@ function TodayPlanInner() {
             center={
               picked ? (
                 <>
-                  <span class={`dial-center-icon dial-${picked.kind}`}>
+                  <span class={`dial-center-icon kind-${picked.kind}`}>
                     <KindIcon kind={picked.kind} size={18} />
                   </span>
                   <span class="dial-center-time">{clock(picked.time)}</span>
@@ -357,39 +357,95 @@ function Row({
   current?: boolean;
   onTick: () => void;
 }) {
+  // Swipe right to tick. Vertical movement hands the gesture back to the page scroll.
+  const canSwipe = !item.passive && !item.auto;
+  const [dx, setDx] = useState(0);
+  const drag = useRef<{ x: number; y: number; locked: boolean; moved: boolean } | null>(null);
+  const THRESHOLD = 72;
+  const end = () => {
+    const d = drag.current;
+    drag.current = null;
+    if (d?.locked && dx >= THRESHOLD) {
+      haptic([10, 30, 10]);
+      onTick();
+    }
+    setDx(0);
+  };
   return (
     <li
-      class={`tl-row ${item.done ? 'tl-done' : ''} ${current ? 'tl-current' : ''} ${item.passive ? 'tl-passive' : ''}`}
+      class={`tl-row kind-${item.kind} ${item.done ? 'tl-done' : ''} ${current ? 'tl-current' : ''} ${item.passive ? 'tl-passive' : ''} ${dx ? 'is-dragging' : ''}`}
+      onPointerDown={(e) => {
+        if (!canSwipe || e.button !== 0) return;
+        drag.current = { x: e.clientX, y: e.clientY, locked: false, moved: false };
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d) return;
+        const mx = e.clientX - d.x;
+        const my = e.clientY - d.y;
+        if (!d.locked) {
+          if (Math.abs(mx) > 10 && Math.abs(mx) > Math.abs(my) * 1.5) {
+            d.locked = true;
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          } else if (Math.abs(my) > 10) {
+            drag.current = null;
+            return;
+          } else return;
+        }
+        d.moved = true;
+        const next = Math.max(0, Math.min(120, mx));
+        if (dx < THRESHOLD && next >= THRESHOLD) haptic(8);
+        setDx(next);
+      }}
+      onPointerUp={end}
+      onPointerCancel={() => {
+        drag.current = null;
+        setDx(0);
+      }}
+      onClickCapture={(e) => {
+        // A swipe that ends over the tick button is not also a tap on it.
+        if (dx > 0) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }}
     >
-      <span class="tl-time tabular">{clock(item.time)}</span>
-      <span class="tl-dot" aria-hidden="true">
-        <Icon name={item.done ? 'check' : KIND_ICON[item.kind]} size={14} />
-      </span>
-      <span class="min-w-0 flex-1">
-        <span class="tl-title block truncate">
-          {item.title}
-          {item.end && <span class="text-subtle font-normal"> · until {clock(item.end)}</span>}
+      {canSwipe && (
+        <span class="tl-swipe" style={{ opacity: Math.min(1, dx / THRESHOLD) }} aria-hidden="true">
+          <Icon name={item.done ? 'reset' : 'check'} size={18} />
         </span>
-        {item.detail && !item.passive && (
-          <span class="text-muted block truncate text-xs">{item.detail}</span>
+      )}
+      <span class="tl-body" style={dx ? { transform: `translateX(${dx}px)` } : undefined}>
+        <span class="tl-time tabular">{clock(item.time)}</span>
+        <span class="tl-dot" aria-hidden="true">
+          <Icon name={item.done ? 'check' : KIND_ICON[item.kind]} size={14} />
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="tl-title block truncate">
+            {item.title}
+            {item.end && <span class="text-subtle font-normal"> · until {clock(item.end)}</span>}
+          </span>
+          {item.detail && !item.passive && (
+            <span class="text-muted block truncate text-xs">{item.detail}</span>
+          )}
+        </span>
+        {!item.passive && (
+          <button
+            type="button"
+            class="tl-tick"
+            aria-pressed={item.done}
+            aria-label={
+              item.auto
+                ? `${item.title}: done from your log`
+                : `${item.title}: ${item.done ? 'done' : 'mark done'}`
+            }
+            disabled={item.auto}
+            onClick={onTick}
+          >
+            <Icon name="check" size={16} />
+          </button>
         )}
       </span>
-      {!item.passive && (
-        <button
-          type="button"
-          class="tl-tick"
-          aria-pressed={item.done}
-          aria-label={
-            item.auto
-              ? `${item.title}: done from your log`
-              : `${item.title}: ${item.done ? 'done' : 'mark done'}`
-          }
-          disabled={item.auto}
-          onClick={onTick}
-        >
-          <Icon name="check" size={16} />
-        </button>
-      )}
     </li>
   );
 }
@@ -486,9 +542,19 @@ function NowCard({
     }
   })();
   const hasOwnAction = ['meal', 'workout', 'weigh', 'photo', 'measure', 'wind'].includes(item.kind);
+  // Through its window when it has one and it is under way; filling over the last hour before
+  // it starts; nothing for things that have already slipped past.
+  const start = toMinutes(item.time);
+  const finish = item.end ? toMinutes(item.end) : null;
+  const progress =
+    finish !== null && now >= start && now < finish
+      ? (now - start) / (finish - start)
+      : start > now && start - now <= 60
+        ? 1 - (start - now) / 60
+        : null;
   return (
     <div
-      class={`now now-${item.kind} ${bare ? '' : 'now-card surface overflow-hidden'}`}
+      class={`now kind-${item.kind} ${bare ? '' : 'now-card surface overflow-hidden'}`}
       role="region"
       aria-label="What's next"
       aria-live="polite"
@@ -508,6 +574,11 @@ function NowCard({
           </p>
           <h3 class="font-display text-3xl leading-tight tracking-tight">{item.title}</h3>
           {item.detail && <p class="text-muted mt-1">{item.detail}</p>}
+          {progress !== null && (
+            <div class="now-bar" aria-hidden="true">
+              <span style={{ '--p': progress.toFixed(3) }} />
+            </div>
+          )}
           <div class="mt-4 flex flex-wrap gap-2">
             {action}
             {hasOwnAction && (

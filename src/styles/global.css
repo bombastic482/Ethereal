@@ -806,6 +806,51 @@
   }
 }
 
+/* One colour per kind of thing in a day, shared by the dial, the Now card and the timeline.
+   Components set class="kind-<kind>" and read var(--k). */
+.kind-wake,
+.kind-meal,
+.kind-med,
+.kind-prayer,
+.kind-wind,
+.kind-sleep,
+.kind-workout,
+.kind-walk,
+.kind-weigh,
+.kind-measure,
+.kind-photo,
+.kind-busy {
+  --k: var(--color-brand-500);
+}
+.kind-meal {
+  --k: oklch(74% 0.15 65);
+}
+.kind-med {
+  --k: oklch(70% 0.15 350);
+}
+.kind-prayer,
+.kind-wind,
+.kind-sleep {
+  --k: oklch(64% 0.13 285);
+}
+.kind-wake {
+  --k: oklch(80% 0.14 85);
+}
+.kind-workout {
+  --k: oklch(66% 0.17 28);
+}
+.kind-walk {
+  --k: oklch(68% 0.14 150);
+}
+.kind-weigh,
+.kind-measure,
+.kind-photo {
+  --k: oklch(64% 0.13 250);
+}
+.kind-busy {
+  --k: color-mix(in oklab, var(--fg) 35%, transparent);
+}
+
 /* Workout player: a full-screen, thumb-first layout. The stage takes what height is left after
    the text and controls, so it fits from a small phone to a desktop. */
 .player {
@@ -1317,19 +1362,29 @@
   height: 3.5rem;
   border-radius: 1.25rem;
   color: white;
-  background: linear-gradient(135deg, var(--color-brand-400), var(--color-brand-600));
-  box-shadow: 0 10px 28px -12px var(--color-brand-500);
+  background: linear-gradient(
+    140deg,
+    color-mix(in oklab, var(--k) 82%, white),
+    color-mix(in oklab, var(--k) 88%, black)
+  );
+  box-shadow: 0 10px 28px -12px var(--k);
 }
-.now-prayer .now-icon,
-.now-sleep .now-icon,
-.now-wind .now-icon {
-  background: linear-gradient(135deg, oklch(62% 0.12 270), oklch(48% 0.14 275));
-  box-shadow: 0 10px 28px -12px oklch(50% 0.14 275);
+/* How far through the moment you are, or how close the next one is. */
+.now-bar {
+  height: 4px;
+  margin-top: 0.85rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--k) 16%, var(--bg-muted));
+  overflow: hidden;
 }
-.now-meal .now-icon,
-.now-med .now-icon {
-  background: linear-gradient(135deg, oklch(78% 0.14 70), oklch(66% 0.16 50));
-  box-shadow: 0 10px 28px -12px oklch(66% 0.16 50);
+.now-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--k);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+  transition: transform 1s ease;
 }
 .timeline {
   position: relative;
@@ -1367,8 +1422,8 @@
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 999px;
-  background: var(--bg-muted);
-  color: var(--fg-muted);
+  background: color-mix(in oklab, var(--k, var(--fg)) 14%, transparent);
+  color: color-mix(in oklab, var(--k, var(--fg)) 80%, var(--fg));
 }
 .tl-title {
   font-weight: 600;
@@ -1379,12 +1434,12 @@
 }
 .tl-current .tl-dot {
   color: white;
-  background: var(--color-brand-500);
-  box-shadow: 0 0 0 4px oklch(63% 0.15 var(--brand-h) / 0.2);
+  background: var(--k);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--k) 22%, transparent);
 }
 .tl-done .tl-dot {
   color: white;
-  background: var(--color-brand-500);
+  background: var(--k);
 }
 .tl-done .tl-title {
   color: var(--fg-subtle);
@@ -1417,9 +1472,43 @@
   transform: scale(0.88);
 }
 .tl-tick[aria-pressed='true'] {
-  border-color: var(--color-brand-500);
-  background: var(--color-brand-500);
+  border-color: var(--k, var(--color-brand-500));
+  background: var(--k, var(--color-brand-500));
   color: white;
+}
+/* Swipe right to tick: the row slides over a strip in its own colour with a check. */
+.tl-swipe {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 1.1rem;
+  border-radius: inherit;
+  color: white;
+  background: var(--k, var(--color-brand-500));
+  opacity: 0;
+  pointer-events: none;
+}
+.tl-row {
+  touch-action: pan-y;
+}
+.tl-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: inherit;
+  transition: transform 0.25s var(--ease-spring);
+}
+.tl-row.is-dragging::after {
+  opacity: 0;
+}
+.tl-row.is-dragging .tl-body {
+  transition: none;
+  background: var(--bg-elevated);
+  box-shadow: var(--card-shadow);
 }
 .tl-tick:disabled {
   opacity: 0.7;
@@ -2274,34 +2363,8 @@
   fill: var(--fg-subtle);
 }
 .dial-mark {
-  --k: var(--color-brand-500);
   cursor: pointer;
   outline: none;
-}
-.dial-meal {
-  --k: oklch(74% 0.15 65);
-}
-.dial-med {
-  --k: oklch(70% 0.15 350);
-}
-.dial-prayer,
-.dial-wind,
-.dial-sleep {
-  --k: oklch(64% 0.13 285);
-}
-.dial-wake {
-  --k: oklch(80% 0.14 85);
-}
-.dial-workout {
-  --k: oklch(66% 0.17 28);
-}
-.dial-walk {
-  --k: oklch(68% 0.14 150);
-}
-.dial-weigh,
-.dial-measure,
-.dial-photo {
-  --k: oklch(64% 0.13 250);
 }
 .dial-dot {
   fill: var(--bg-elevated);

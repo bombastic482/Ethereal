@@ -145,7 +145,7 @@ export function DayDial({
           return (
             <g
               key={item.id}
-              class={`dial-mark dial-${item.kind} ${item.done ? 'dial-done' : ''} ${sel ? 'dial-sel' : ''}`}
+              class={`dial-mark kind-${item.kind} ${item.done ? 'dial-done' : ''} ${sel ? 'dial-sel' : ''}`}
               transform={`translate(${x.toFixed(2)},${y.toFixed(2)})`}
               role="button"
               tabIndex={0}

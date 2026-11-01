@@ -61,5 +61,20 @@ test.describe('today plan', () => {
     const day = page.locator('.timeline');
     for (const p of ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']) await expect(day).toContainText(p);
     await expect(day).toContainText('Lights out');
+
+    // The strip under the sky lifts out the next prayer.
+    const strip = page.getByRole('list', { name: 'Prayer times today' });
+    await expect(strip.locator('[aria-current="time"]')).toContainText('Dhuhr');
+
+    // Swiping a row to the right ticks it off.
+    const row = day.locator('li', { hasText: 'Dhuhr' }).first();
+    await row.scrollIntoViewIfNeeded();
+    const box = (await row.boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + 30, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 12; i++) await page.mouse.move(box.x + 30 + i * 9, y);
+    await page.mouse.up();
+    await expect(page.getByRole('button', { name: 'Dhuhr: done' })).toBeVisible();
   });
 });
