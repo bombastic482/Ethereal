@@ -115,7 +115,7 @@ test.describe('day planner', () => {
     const items = planner.getByRole('listitem');
     await expect(items).toHaveCount(4);
     const totals = planner.getByRole('status').first();
-    await expect(totals).toContainText(/vs target/);
+    await expect(totals).toContainText(/vs target|right on target/);
     await expect(totals).toContainText(/target met/);
 
     // Swap lunch; the other three stay.

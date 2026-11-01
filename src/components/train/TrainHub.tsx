@@ -227,14 +227,23 @@ function TrainHubInner() {
       <section class="surface flex flex-wrap items-center gap-3 p-5" aria-label="Training settings">
         <div class="min-w-0 flex-1">
           <p class="font-semibold">
-            {setup.weekdays.length} days a week · {setup.minutes} minutes
+            {setup.weekdays.length === 7 ? 'Every day' : `${setup.weekdays.length} days a week`} ·{' '}
+            {setup.minutes} minutes
           </p>
           <p class="text-muted text-sm">
-            {[...setup.weekdays]
-              .sort((a, b) => a - b)
-              .map((d) => DAY_NAMES[d])
-              .join(', ')}
-            {setup.easyOnLegs ? ' · easy on the legs' : ''}
+            {[
+              setup.weekdays.length === 7
+                ? ''
+                : [...setup.weekdays].sort((a, b) => a - b).join() === '1,2,3,4,5'
+                  ? 'Monday to Friday'
+                  : [...setup.weekdays]
+                      .sort((a, b) => a - b)
+                      .map((d) => DAY_NAMES[d])
+                      .join(', '),
+              setup.easyOnLegs ? 'easy on the legs' : '',
+            ]
+              .filter(Boolean)
+              .join(' · ') || 'Sessions A and B alternate, so each muscle still rests'}
           </p>
         </div>
         <button

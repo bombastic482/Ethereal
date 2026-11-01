@@ -116,7 +116,11 @@ export function TapeScrubber({
         ctx.arc(x, h - 9, 3.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.font = `600 10px ${css.fontFamily}`;
-        ctx.fillText(markerLabel, x, h - 17);
+        // Under the needle the label would be struck through, so it moves beside the dot.
+        if (Math.abs(x - cx) < 18) {
+          ctx.textAlign = 'left';
+          ctx.fillText(markerLabel, x + 7, h - 5.5);
+        } else ctx.fillText(markerLabel, x, h - 17);
       }
     }
     ctx.globalAlpha = 1;

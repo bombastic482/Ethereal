@@ -4204,3 +4204,19 @@
 [data-theme='dark'] .next-move-link {
   color: var(--color-brand-300);
 }
+
+/* Eat: a planned portion other than the recipe as written. */
+.plan-portion {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-brand-800);
+  background: oklch(63% 0.15 var(--brand-h) / 0.14);
+}
+[data-theme='dark'] .plan-portion {
+  color: var(--color-brand-100);
+  background: oklch(63% 0.15 var(--brand-h) / 0.24);
+}

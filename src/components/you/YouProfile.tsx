@@ -711,7 +711,7 @@ function Links() {
       icon: 'dumbbell',
       title: 'Training setup',
       text: setup
-        ? `${setup.weekdays.length} days a week, ${setup.minutes} minutes.`
+        ? `${setup.weekdays.length === 7 ? 'Every day' : `${setup.weekdays.length} days a week`}, ${setup.minutes} minutes.`
         : 'Not set up yet.',
     },
     {

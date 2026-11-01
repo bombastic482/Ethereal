@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { planDay, shoppingList, shoppingListText } from '../day-plan';
+import { atPortion, planDay, portionLabel, shoppingList, shoppingListText } from '../day-plan';
 import { allRecipes, loadRecipes } from '../recipes';
 
 beforeAll(() => loadRecipes());
@@ -12,6 +12,30 @@ describe('day planner', () => {
     expect(Math.abs(p.kcalDelta)).toBeLessThanOrEqual(60);
     expect(p.proteinMet).toBe(true);
     expect(p.totals.protein).toBeGreaterThanOrEqual(128);
+  });
+  it('tunes portions to land a low, protein-heavy target instead of overshooting', () => {
+    const p = planDay(allRecipes(), { kcal: 1262, protein: 151, diet: 'omnivore' })!;
+    expect(p.kcalDelta).toBeLessThanOrEqual(80);
+    expect(p.proteinMet).toBe(true);
+    // Every slot reports its portion, and the slot's recipe is already scaled to it.
+    for (const [slot, r] of Object.entries(p.slots)) {
+      const portion = p.portions[slot as keyof typeof p.portions]!;
+      expect([0.75, 1, 1.25, 1.5]).toContain(portion);
+      expect(r!.foods[0]!.grams).toBeCloseTo(
+        allRecipes().find((x) => x.id === r!.id)!.items[0]!.grams * portion,
+      );
+    }
+    // An easy target needs no tuning at all.
+    const easy = planDay(allRecipes(), { kcal: 1800, protein: 130, diet: 'omnivore' })!;
+    expect(Object.values(easy.portions).every((x) => x === 1)).toBe(true);
+  });
+  it('scales a recipe and names its portion', () => {
+    const r = planDay(allRecipes(), { kcal: 1800, protein: 130, diet: 'omnivore' })!.slots.lunch!;
+    const big = atPortion(r, 1.5);
+    expect(big.totals.kcal).toBeCloseTo(r.totals.kcal * 1.5);
+    expect(big.foods.map((f) => f.grams)).toEqual(r.foods.map((f) => f.grams * 1.5));
+    expect(atPortion(r, 1)).toBe(r);
+    expect([0.75, 1, 1.25, 1.5].map(portionLabel)).toEqual(['¾', '1', '1¼', '1½']);
   });
   it('respects diet, time, locks, exclusions and skipped slots', () => {
     const vegan = planDay(allRecipes(), {

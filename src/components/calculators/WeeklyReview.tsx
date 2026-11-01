@@ -351,10 +351,20 @@ function WeeklyReviewInner() {
                 />
               </div>
             )}
-            {avgSteps !== null && (
+            {(avgSteps !== null || (tEnd && tStart)) && (
               <p class="text-subtle mt-4 text-xs">
-                Average {formatNumber(avgSteps)} steps on {stepsDays.length} logged day
-                {stepsDays.length === 1 ? '' : 's'}.
+                {tEnd && tStart && (
+                  <>
+                    Trend {w(tStart.trendKg)} → {w(tEnd.trendKg)} over{' '}
+                    {daysBetween(tStart.date, tEnd.date)} days.{' '}
+                  </>
+                )}
+                {avgSteps !== null && (
+                  <>
+                    Average {formatNumber(avgSteps)} steps on {stepsDays.length} logged day
+                    {stepsDays.length === 1 ? '' : 's'}.
+                  </>
+                )}
               </p>
             )}
           </section>
@@ -384,7 +394,7 @@ function WeeklyReviewInner() {
                   )}
                   {!report.recommendedCalories && (
                     <p class="text-brand-700 dark:text-brand-300 mt-3 text-sm font-semibold">
-                      Keep the same target.
+                      Keep the same target{t ? `: ${formatNumber(t.kcal)} kcal a day` : ''}.
                     </p>
                   )}
                 </>
@@ -399,7 +409,9 @@ function WeeklyReviewInner() {
                   class="text-brand-700 dark:text-brand-300 font-semibold"
                   href={withBase('/eat/#dayplan-h')}
                 >
-                  Plan next week's meals around the new target →
+                  {report?.recommendedCalories || plan.calorieOverride !== null
+                    ? "Plan next week's meals around the new target →"
+                    : "Plan next week's meals →"}
                 </a>
               </p>
               {expenditure && (
@@ -541,12 +553,6 @@ function WeeklyReviewInner() {
               {note.savedOn && <span class="text-subtle text-xs">Saved {fmt(note.savedOn)}</span>}
             </div>
           </section>
-          {tEnd && tStart && (
-            <p class="text-subtle text-xs">
-              Trend {w(tStart.trendKg)} → {w(tEnd.trendKg)} over{' '}
-              {daysBetween(tStart.date, tEnd.date)} days.
-            </p>
-          )}
         </>
       )}
     </div>

@@ -24,6 +24,7 @@ function WeightTrackerInner() {
   const [log] = logStore.use();
   const imperial = profile.units === 'imperial';
   const today = todayIso();
+  const [shown, setShown] = useState(7);
 
   const [date, setDate] = useState(today);
   const [weight, setWeight] = useState<number | null>(null);
@@ -347,7 +348,7 @@ function WeightTrackerInner() {
                   label="Trend weight"
                   value={w(latestTrend ?? latest.weightKg)}
                   tone="brand"
-                  sub={`Latest ${w(latest.weightKg)} · ${fmtDate(latest.date)}`}
+                  sub={`Latest ${w(latest.weightKg)}, ${latest.date === today ? 'today' : fmtDate(latest.date)}`}
                 />
                 <Stat label="7 days" value={fmtChange(d7)} />
                 <Stat label="30 days" value={fmtChange(d30)} />
@@ -500,7 +501,7 @@ function WeightTrackerInner() {
             <ul class="mt-3 grid gap-1 text-sm">
               {[...entries]
                 .reverse()
-                .slice(0, 14)
+                .slice(0, shown)
                 .map((e) => (
                   <li key={e.date} class="border-line flex items-center gap-3 border-t py-2">
                     <span class="text-subtle w-28 shrink-0">{fmtDate(e.date)}</span>
@@ -522,6 +523,15 @@ function WeightTrackerInner() {
                   </li>
                 ))}
             </ul>
+            {entries.length > shown && (
+              <button
+                type="button"
+                class="btn btn-ghost mt-2 w-full text-sm"
+                onClick={() => setShown((n) => n + 21)}
+              >
+                Show more ({entries.length - shown} older)
+              </button>
+            )}
           </section>
         </div>
       )}

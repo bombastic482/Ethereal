@@ -3,6 +3,7 @@ import { shift } from '@/lib/calc/streaks';
 import {
   planDay,
   planWeek,
+  portionLabel,
   shoppingListText,
   SLOTS,
   weekShoppingText,
@@ -443,7 +444,14 @@ function DayPlannerInner() {
               return (
                 <li key={slot} class="border-line flex flex-col gap-2 rounded-2xl border p-4">
                   <div class="flex items-center justify-between gap-2">
-                    <span class="text-subtle text-xs font-semibold">{LABEL[slot]}</span>
+                    <span class="text-subtle text-xs font-semibold">
+                      {LABEL[slot]}
+                      {(day.portions[slot] ?? 1) !== 1 && (
+                        <span class="plan-portion">
+                          {portionLabel(day.portions[slot]!)} portion
+                        </span>
+                      )}
+                    </span>
                     <span class="text-subtle tabular text-xs">{r.minutes} min</span>
                   </div>
                   <a
@@ -492,8 +500,9 @@ function DayPlannerInner() {
               <span class="tabular font-semibold">{kcal.toLocaleString('en-US')}</span> kcal
               <span class="text-subtle">
                 {' '}
-                ({day.kcalDelta > 0 ? '+' : ''}
-                {day.kcalDelta} vs target)
+                {Math.abs(day.kcalDelta) <= 20
+                  ? '(right on target)'
+                  : `(${day.kcalDelta > 0 ? '+' : ''}${day.kcalDelta} vs target)`}
               </span>
             </span>
             <span>

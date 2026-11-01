@@ -1,7 +1,9 @@
 /**
  * Plans a whole day from the starter recipes: one breakfast, lunch, dinner and snack whose
- * totals land on the calorie target with at least the protein target. Exhaustive over the
- * (small) recipe space, so the result is the true optimum for the scoring below.
+ * totals land on the calorie target with at least the protein target. The recipe search is
+ * exhaustive over the (small) recipe space; the most promising combinations are then tried at
+ * a few natural portion sizes, so a low target with a lot of protein can still be met (a bigger
+ * snack, a smaller dinner) instead of overshooting.
  */
 import type { CoreNutrients, Diet } from './calc/nutrition';
 import { sum } from './calc/nutrition';
@@ -30,7 +32,10 @@ export interface DayPlanInput {
 }
 
 export interface DayPlan {
+  /** Each slot's recipe, already scaled to its portion (foods and totals). */
   slots: Partial<Record<RecipeMeal, ResolvedRecipe>>;
+  /** The portion each slot is planned at, 1 being the recipe as written. */
+  portions: Partial<Record<RecipeMeal, number>>;
   totals: CoreNutrients;
   /** Signed kcal difference from the target (negative = under). */
   kcalDelta: number;
@@ -38,11 +43,40 @@ export interface DayPlan {
 }
 
 /** Lower is better: miss the calorie target by 1 kcal costs 1; each gram of missing protein costs 12. */
-function score(t: CoreNutrients, input: DayPlanInput): number {
-  const over = t.kcal - input.kcal;
+function cost(kcal: number, protein: number, input: DayPlanInput): number {
+  const over = kcal - input.kcal;
   const kcalCost = over > 0 ? over * 1.6 : -over; // going over is worse than coming in a little under
-  const proteinGap = Math.max(0, input.protein - t.protein);
+  const proteinGap = Math.max(0, input.protein - protein);
   return kcalCost + proteinGap * 12;
+}
+
+/** Portions people actually serve. Anything but the recipe as written costs a little, so it is
+ * only used when it buys a real improvement. */
+export const PORTIONS = [0.75, 1, 1.25, 1.5] as const;
+const PORTION_COST: Record<number, number> = { 0.75: 30, 1: 0, 1.25: 30, 1.5: 55 };
+/** How many of the best as-written combinations get their portions tuned. */
+const TUNE = 250;
+
+/** A recipe at a portion: every ingredient and the totals scaled together. */
+export function atPortion(r: ResolvedRecipe, portion: number): ResolvedRecipe {
+  if (portion === 1) return r;
+  const t = r.totals;
+  return {
+    ...r,
+    foods: r.foods.map((f) => ({ ...f, grams: f.grams * portion })),
+    totals: {
+      kcal: t.kcal * portion,
+      protein: t.protein * portion,
+      carbs: t.carbs * portion,
+      fat: t.fat * portion,
+      fibre: t.fibre * portion,
+    },
+  };
+}
+
+/** "¾", "1¼", "1½": how a portion reads on a card. */
+export function portionLabel(portion: number): string {
+  return ({ 0.75: '¾', 1.25: '1¼', 1.5: '1½', 2: '2' } as Record<number, string>)[portion] ?? '1';
 }
 
 export function planDay(recipes: Recipe[], input: DayPlanInput): DayPlan | null {
@@ -71,33 +105,65 @@ export function planDay(recipes: Recipe[], input: DayPlanInput): DayPlan | null 
   const active = SLOTS.filter((s) => pools[s]);
   if (active.length === 0) return null;
 
-  // Depth-first over slots; prune when calories already exceed target by a wide margin.
-  let best: { pick: ResolvedRecipe[]; s: number } | null = null;
+  // Depth-first over slots, keeping the best few hundred combinations as written. Prune when
+  // calories already exceed what even the smallest portions could bring back.
+  const top: Array<{ pick: ResolvedRecipe[]; s: number }> = [];
   const pick: ResolvedRecipe[] = [];
-  const walk = (i: number, kcalSoFar: number) => {
-    if (kcalSoFar > input.kcal * 1.35) return;
+  const walk = (i: number, kcalSoFar: number, proteinSoFar: number) => {
+    if (kcalSoFar * PORTIONS[0] > input.kcal * 1.35) return;
     if (i === active.length) {
-      const t = sum(pick.map((r) => r.totals));
-      const s = score(t, input);
-      if (!best || s < best.s) best = { pick: [...pick], s };
+      const s = cost(kcalSoFar, proteinSoFar, input);
+      if (top.length < TUNE || s < top[top.length - 1]!.s) {
+        let at = top.length;
+        while (at > 0 && top[at - 1]!.s > s) at--;
+        top.splice(at, 0, { pick: [...pick], s });
+        if (top.length > TUNE) top.pop();
+      }
       return;
     }
     for (const r of pools[active[i]!]!) {
       pick.push(r);
-      walk(i + 1, kcalSoFar + r.totals.kcal);
+      walk(i + 1, kcalSoFar + r.totals.kcal, proteinSoFar + r.totals.protein);
       pick.pop();
     }
   };
-  walk(0, 0);
-  if (!best) return null;
-  const chosen = (best as { pick: ResolvedRecipe[] }).pick;
+  walk(0, 0, 0);
+  if (top.length === 0) return null;
+
+  // Then tune portions for each of them and keep the overall best.
+  let best: { pick: ResolvedRecipe[]; portions: number[]; s: number } | null = null;
+  const portions: number[] = new Array<number>(active.length).fill(1);
+  for (const cand of top) {
+    const tune = (i: number, kcal: number, protein: number, extra: number) => {
+      if (i === cand.pick.length) {
+        const s = cost(kcal, protein, input) + extra;
+        if (!best || s < best.s) best = { pick: cand.pick, portions: [...portions], s };
+        return;
+      }
+      const r = cand.pick[i]!;
+      for (const p of PORTIONS) {
+        portions[i] = p;
+        tune(
+          i + 1,
+          kcal + r.totals.kcal * p,
+          protein + r.totals.protein * p,
+          extra + PORTION_COST[p]!,
+        );
+      }
+    };
+    tune(0, 0, 0, 0);
+  }
+  const won = best as unknown as { pick: ResolvedRecipe[]; portions: number[] };
   const slots: DayPlan['slots'] = {};
+  const sizes: DayPlan['portions'] = {};
   active.forEach((slot, i) => {
-    slots[slot] = chosen[i]!;
+    slots[slot] = atPortion(won.pick[i]!, won.portions[i]!);
+    sizes[slot] = won.portions[i]!;
   });
-  const totals = sum(chosen.map((r) => r.totals));
+  const totals = sum(Object.values(slots).map((r) => r!.totals));
   return {
     slots,
+    portions: sizes,
     totals,
     kcalDelta: Math.round(totals.kcal - input.kcal),
     proteinMet: totals.protein >= input.protein - 2,

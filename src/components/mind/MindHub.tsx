@@ -28,27 +28,34 @@ function MindHubInner() {
 
   return (
     <div class="grid grid-cols-[minmax(0,1fr)] gap-6">
-      <div class="grid gap-4 sm:grid-cols-3">
-        {[
-          [
-            'Mood this week',
-            week ? MOODS[Math.round(week.mood) - 1] : '—',
-            week ? `${week.count} check-ins` : 'Check in on Today',
-          ],
-          [
-            'Energy this week',
-            week ? ENERGY[Math.round(week.energy) - 1] : '—',
-            month ? `Month average ${month.energy}/5` : '',
-          ],
-          ['Recharges', String(recharges), 'Breathing sessions in four weeks'],
-        ].map(([k, v, sub]) => (
-          <div key={k} class="surface p-5">
-            <p class="text-subtle text-xs font-semibold">{k}</p>
-            <p class="font-display mt-1 text-3xl tracking-tight">{v}</p>
-            <p class="text-muted mt-1 text-sm">{sub}</p>
-          </div>
-        ))}
-      </div>
+      <section class="surface p-5 sm:p-6" aria-label="This week">
+        <dl class="grid grid-cols-3 gap-4">
+          {[
+            [
+              'Mood',
+              week ? MOODS[Math.round(week.mood) - 1] : '—',
+              week ? `${week.count} check-in${week.count === 1 ? '' : 's'} this week` : 'this week',
+            ],
+            [
+              'Energy',
+              week ? ENERGY[Math.round(week.energy) - 1] : '—',
+              month ? `${month.energy}/5 over the month` : 'this week',
+            ],
+            ['Recharges', String(recharges), 'in four weeks'],
+          ].map(([k, v, sub]) => (
+            <div key={k} class="min-w-0">
+              <dt class="text-subtle text-xs font-semibold">{k}</dt>
+              <dd class="font-display mt-1 text-2xl tracking-tight sm:text-3xl">{v}</dd>
+              <dd class="text-muted mt-0.5 text-xs sm:text-sm">{sub}</dd>
+            </div>
+          ))}
+        </dl>
+        {!week && (
+          <a class="next-move-link mt-4" href={withBase('/today/')}>
+            Check in on Today <Icon name="arrow" size={15} />
+          </a>
+        )}
+      </section>
 
       <section class="surface p-5 sm:p-6" aria-labelledby="mood-hist-h">
         <h2 id="mood-hist-h" class="text-lg font-bold tracking-tight">
