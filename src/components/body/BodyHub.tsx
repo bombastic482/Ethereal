@@ -20,6 +20,11 @@ import { planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { BodyFigure } from './BodyFigure';
+import { BodyMap } from './BodyMap';
+import { MeasureFlow } from './MeasureFlow';
+import { MeasureResult } from './MeasureResult';
+import { SITES } from './sites';
 import { Gauge } from '../ui/Gauge';
 import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
@@ -33,194 +38,6 @@ const BAND_COLORS = [
   'oklch(68% 0.18 40)',
 ];
 
-interface SiteInfo {
-  label: string;
-  how: string;
-  /** Where the tape sits on the outline: centre x, y and half-width. */
-  tape: [number, number, number];
-}
-
-const SITE: Record<Site, SiteInfo> = {
-  neckCm: {
-    label: 'Neck',
-    how: 'Just below the Adam’s apple, the tape sloping slightly down at the front. Snug, not tight. Look straight ahead and relax your shoulders.',
-    tape: [60, 41, 8],
-  },
-  waistCm: {
-    label: 'Waist at the navel',
-    how: 'Level all the way round, across the navel. Breathe out normally and read it at the end of the breath. No sucking in: the honest number is the useful one.',
-    tape: [60, 110, 23],
-  },
-  waistNarrowCm: {
-    label: 'Waist at the narrowest',
-    how: 'At the narrowest point of your waist, usually just above the navel. Breathe out normally and read it at the end of the breath.',
-    tape: [60, 100, 21],
-  },
-  hipsCm: {
-    label: 'Hips',
-    how: 'Around the widest part of your bottom, feet together, tape level.',
-    tape: [60, 130, 27],
-  },
-  chestCm: {
-    label: 'Chest',
-    how: 'Under the armpits and across the nipples, after a normal breath out.',
-    tape: [60, 72, 28],
-  },
-  armCm: {
-    label: 'Upper arm',
-    how: 'Halfway between shoulder and elbow, arm hanging relaxed. Same arm every time.',
-    tape: [26, 80, 7],
-  },
-  thighCm: {
-    label: 'Thigh',
-    how: 'Around the top of the thigh just below the bottom, standing with weight on both feet. Same leg every time.',
-    tape: [47, 152, 11],
-  },
-};
-
-/** A calm front-view outline with the tape drawn where it goes. */
-function Outline({ site }: { site: Site }) {
-  const [cx, cy, rx] = SITE[site].tape;
-  return (
-    <svg viewBox="0 0 120 240" class="tape-figure" aria-hidden="true">
-      <g class="tape-body">
-        <circle cx="60" cy="20" r="13" />
-        <rect x="53" y="30" width="14" height="14" rx="5" />
-        <path d="M32 50 Q60 40 88 50 L86 96 Q82 104 82 112 L86 138 Q60 146 34 138 L38 112 Q38 104 34 96 Z" />
-        <path d="M31 51 Q24 54 22 66 L18 124 Q19 130 24 128 L30 96 L33 70 Z" />
-        <path d="M89 51 Q96 54 98 66 L102 124 Q101 130 96 128 L90 96 L87 70 Z" />
-        <path d="M35 134 L58 136 L56 230 Q50 234 44 230 L36 170 Z" />
-        <path d="M85 134 L62 136 L64 230 Q70 234 76 230 L84 170 Z" />
-      </g>
-      <ellipse class="tape-line" cx={cx} cy={cy} rx={rx} ry={Math.max(2.4, rx * 0.14)} />
-      <circle class="tape-dot" cx={cx + rx} cy={cy} r="2.6" />
-    </svg>
-  );
-}
-
-function TapeGuide({
-  sex,
-  imperial,
-  last,
-  onDone,
-  onCancel,
-}: {
-  sex: 'male' | 'female';
-  imperial: boolean;
-  last: Measure | null;
-  onDone: (m: Measure) => void;
-  onCancel: () => void;
-}) {
-  const required: Site[] =
-    sex === 'male' ? ['neckCm', 'waistCm'] : ['neckCm', 'waistNarrowCm', 'hipsCm'];
-  const optional: Site[] =
-    sex === 'male'
-      ? ['hipsCm', 'chestCm', 'armCm', 'thighCm']
-      : ['waistCm', 'chestCm', 'armCm', 'thighCm'];
-  const steps = [...required, ...optional];
-  const [i, setI] = useState(0);
-  const [values, setValues] = useState<Partial<Record<Site, number>>>({});
-  const [text, setText] = useState('');
-  const site = steps[i]!;
-  const isRequired = required.includes(site);
-  const unit = imperial ? 'in' : 'cm';
-  const prev = last?.[site];
-  const show = (cm: number) => (imperial ? round(cmToIn(cm), 1) : round(cm, 1));
-
-  useEffect(() => {
-    const v = values[site];
-    setText(v !== undefined ? String(show(v)) : '');
-  }, [i]);
-
-  const parsed = Number(text.replace(',', '.'));
-  const valid =
-    text.trim() !== '' &&
-    Number.isFinite(parsed) &&
-    parsed >= (imperial ? 6 : 15) &&
-    parsed <= (imperial ? 100 : 250);
-  const next = (skip = false) => {
-    const nv = { ...values };
-    if (!skip && valid) nv[site] = round(imperial ? inToCm(parsed) : parsed, 1);
-    else delete nv[site];
-    setValues(nv);
-    haptic(10);
-    if (i + 1 < steps.length) setI(i + 1);
-    else onDone({ date: todayIso(), ...nv });
-  };
-
-  return (
-    <section class="surface overflow-hidden" aria-labelledby="tape-h">
-      <div class="grid gap-6 p-5 sm:grid-cols-[11rem_1fr] sm:p-7">
-        <div class="tape-stage">
-          <Outline site={site} />
-        </div>
-        <div>
-          <div class="flex items-center justify-between gap-3">
-            <p class="eyebrow mb-0">
-              {i + 1} of {steps.length} · {isRequired ? 'for body fat' : 'optional'}
-            </p>
-            <button type="button" class="text-muted text-sm hover:underline" onClick={onCancel}>
-              Cancel
-            </button>
-          </div>
-          <div class="mt-2 flex gap-1" aria-hidden="true">
-            {steps.map((s, j) => (
-              <span
-                key={s}
-                class={`h-1 flex-1 rounded-full ${j <= i ? 'bg-brand-500' : 'bg-muted'}`}
-              />
-            ))}
-          </div>
-          <h2 id="tape-h" class="font-display mt-4 text-3xl tracking-tight">
-            {SITE[site].label}
-          </h2>
-          <p class="text-muted mt-2">{SITE[site].how}</p>
-          <form
-            class="mt-5 flex flex-wrap items-end gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (valid) next();
-            }}
-          >
-            <div class="w-40">
-              <label class="label" for="tape-value">
-                {SITE[site].label} ({unit})
-              </label>
-              <input
-                id="tape-value"
-                class="field tabular text-2xl"
-                inputMode="decimal"
-                autoComplete="off"
-                autofocus
-                value={text}
-                placeholder={prev ? String(show(prev)) : ''}
-                onInput={(e) => setText(e.currentTarget.value)}
-              />
-            </div>
-            <button type="submit" class="btn btn-primary h-12" disabled={!valid}>
-              {i + 1 < steps.length ? 'Next' : 'See result'} <Icon name="arrow" size={16} />
-            </button>
-            <button type="button" class="btn btn-ghost h-12" onClick={() => next(true)}>
-              {isRequired ? 'Skip' : 'Skip this one'}
-            </button>
-          </form>
-          {prev && (
-            <p class="text-subtle mt-2 text-sm">
-              Last time: {show(prev)} {unit}
-            </p>
-          )}
-          {i === 0 && (
-            <p class="text-subtle mt-4 text-sm">
-              Use a soft tape, on bare skin, standing relaxed. Morning before food gives the most
-              repeatable numbers. Measure twice; if they differ, take the smaller.
-            </p>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function BodyHubInner() {
   const [profile] = useProfile();
   const [log] = logStore.use();
@@ -228,6 +45,7 @@ function BodyHubInner() {
   const [body, patchBody] = bodyStore.use();
   const [measuring, setMeasuring] = useState(false);
   const [result, setResult] = useState<{
+    prev: Measure | null;
     m: Measure;
     bf: number | null;
     prevBf: number | null;
@@ -272,10 +90,13 @@ function BodyHubInner() {
 
   if (measuring) {
     return (
-      <TapeGuide
+      <MeasureFlow
         sex={profile.sex}
         imperial={imperial}
+        heightCm={profile.heightCm}
+        weightKg={weightOn(log.entries, todayIso()) ?? profile.weightKg}
         last={lastMeasure}
+        lastBf={tape.at(-1)?.bodyFat ?? null}
         onCancel={() => setMeasuring(false)}
         onDone={(m) => {
           const weight = weightOn(log.entries, m.date) ?? profile.weightKg;
@@ -283,7 +104,7 @@ function BodyHubInner() {
           const prevTape = tape.at(-1)?.bodyFat ?? null;
           saveMeasure(m);
           setMeasuring(false);
-          setResult({ m, bf, prevBf: prevTape });
+          setResult({ m, bf, prevBf: prevTape, prev: lastMeasure });
           haptic([15, 40, 15]);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
@@ -297,36 +118,13 @@ function BodyHubInner() {
   return (
     <div class="grid grid-cols-[minmax(0,1fr)] gap-6">
       {result && (
-        <section class="surface now-card p-5 sm:p-6" role="status" aria-labelledby="tape-result-h">
-          <p class="eyebrow">Saved today’s measurements</p>
-          {result.bf !== null ? (
-            <>
-              <h2 id="tape-result-h" class="font-display text-4xl tracking-tight">
-                About {result.bf.toFixed(1)}% body fat
-              </h2>
-              <p class="text-muted mt-1">
-                {result.prevBf !== null
-                  ? result.bf < result.prevBf
-                    ? `Down ${(result.prevBf - result.bf).toFixed(1)} points since last time. That is fat, not water.`
-                    : result.bf > result.prevBf
-                      ? `Up ${(result.bf - result.prevBf).toFixed(1)} points. One reading is noise; the next few will tell.`
-                      : 'The same as last time.'
-                  : 'Your starting point. Measure again in four weeks, same time of day.'}
-              </p>
-            </>
-          ) : (
-            <h2 id="tape-result-h" class="font-display text-3xl tracking-tight">
-              Measurements saved
-            </h2>
-          )}
-          <button
-            type="button"
-            class="text-brand-700 dark:text-brand-300 mt-3 text-sm font-semibold"
-            onClick={() => setResult(null)}
-          >
-            Dismiss
-          </button>
-        </section>
+        <MeasureResult
+          sex={profile.sex}
+          imperial={imperial}
+          weightKg={weightOn(log.entries, result.m.date) ?? profile.weightKg}
+          result={result}
+          onClose={() => setResult(null)}
+        />
       )}
 
       <section
@@ -409,8 +207,13 @@ function BodyHubInner() {
           )}
         </div>
         <div class="grid content-start gap-3">
-          <div class="tape-stage tape-stage-sm hidden sm:grid">
-            <Outline site={profile.sex === 'male' ? 'waistCm' : 'waistNarrowCm'} />
+          <div class="measure-cta-stage hidden sm:block" aria-hidden="true">
+            <BodyFigure
+              sex={profile.sex}
+              site={profile.sex === 'male' ? 'waistCm' : 'waistNarrowCm'}
+              zoom
+              class="h-full w-full"
+            />
           </div>
           <button
             type="button"
@@ -429,6 +232,13 @@ function BodyHubInner() {
           </p>
         </div>
       </section>
+
+      <BodyMap
+        sex={profile.sex}
+        imperial={imperial}
+        measures={body.measures}
+        entries={log.entries}
+      />
 
       {leanKg !== null && (
         <section class="surface grid gap-4 p-5 sm:p-6" aria-labelledby="target-h">
@@ -506,10 +316,10 @@ function BodyHubInner() {
       )}
 
       {body.measures.length > 0 && (
-        <section class="surface p-5 sm:p-6" aria-labelledby="tape-hist-h">
-          <h2 id="tape-hist-h" class="text-lg font-bold tracking-tight">
-            Tape measurements
-          </h2>
+        <details class="surface p-5 sm:p-6">
+          <summary id="tape-hist-h" class="cursor-pointer text-lg font-bold tracking-tight">
+            Every tape reading
+          </summary>
           <div class="mt-3 overflow-x-auto">
             <table class="w-full min-w-[34rem] text-sm">
               <thead>
@@ -527,9 +337,7 @@ function BodyHubInner() {
                     ] as Site[]
                   ).map((s) => (
                     <th key={s} class="py-2 text-right font-semibold">
-                      {SITE[s].label
-                        .replace('Waist at the ', 'Waist, ')
-                        .replace('Upper arm', 'Arm')}
+                      {SITES[s].short}
                     </th>
                   ))}
                 </tr>
@@ -565,7 +373,7 @@ function BodyHubInner() {
             </table>
           </div>
           <p class="text-subtle mt-2 text-xs">In {imperial ? 'inches' : 'centimetres'}.</p>
-        </section>
+        </details>
       )}
 
       <p class="text-subtle text-sm">

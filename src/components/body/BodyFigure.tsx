@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Site } from '@/lib/body';
 
 /**
@@ -165,6 +165,8 @@ function tapeArcs(cx: number, y: number, hw: number) {
 }
 
 const FULL: [number, number, number, number] = [0, 0, W, H];
+const LABELLED: [number, number, number, number] = [-78, 4, W + 156, H - 4];
+const LEFT_SIDE = new Set<Site>(['neckCm', 'waistNarrowCm', 'hipsCm']);
 
 /** The view box that frames a site, or the whole body. */
 function frameFor(sex: 'male' | 'female', site: Site | null): [number, number, number, number] {
@@ -175,6 +177,23 @@ function frameFor(sex: 'male' | 'female', site: Site | null): [number, number, n
   const x = Math.min(W - w, Math.max(0, g.cx - w / 2));
   const y = Math.min(H - h, Math.max(0, g.y - h * 0.48));
   return [x, y, w, h];
+}
+
+/** Sides and heights for labels so they never overlap: at least 30 units apart per side. */
+function placeLabels(labels: Label[], sites: Build['sites']) {
+  const out: Array<{ l: Label; ly: number; right: boolean }> = [];
+  for (const right of [false, true]) {
+    let prev = -Infinity;
+    labels
+      .filter((l) => LEFT_SIDE.has(l.site) !== right)
+      .sort((a, b) => sites[a.site].y - sites[b.site].y)
+      .forEach((l) => {
+        const ly = Math.max(sites[l.site].y, prev + 30);
+        prev = ly;
+        out.push({ l, ly, right });
+      });
+  }
+  return out;
 }
 
 export interface Label {
@@ -206,7 +225,11 @@ export function BodyFigure({
   const outline = smooth([...b.side, ...mirror(b.side).reverse()]);
   const armR = smooth(b.arm);
   const armL = smooth(mirror(b.arm));
-  const target = zoom ? frameFor(sex, site) : FULL;
+  // A unique gradient id: two figures on a page must not share one, or a hidden figure's
+  // gradient blanks the visible one.
+  const skin = useMemo(() => `skin-${sex}-${Math.random().toString(36).slice(2, 8)}`, [sex]);
+  // Labels need room either side of the body.
+  const target = zoom ? frameFor(sex, site) : labels.length ? LABELLED : FULL;
   const [box, setBox] = useState(target);
   const boxRef = useRef(box);
   const raf = useRef(0);
@@ -245,7 +268,7 @@ export function BodyFigure({
       aria-label={site ? 'Where the tape goes' : 'Body measurements'}
     >
       <defs>
-        <linearGradient id={`skin-${sex}`} x1="0" x2="1">
+        <linearGradient id={skin} x1="0" x2="1">
           <stop offset="0" stop-color="var(--body-edge)" />
           <stop offset="0.5" stop-color="var(--body-mid)" />
           <stop offset="1" stop-color="var(--body-edge)" />
@@ -253,10 +276,10 @@ export function BodyFigure({
       </defs>
       {arcs && <path key={`b-${site}`} d={arcs.back} class="tape-back" />}
       <g class="body-shape">
-        <path d={armR} fill={`url(#skin-${sex})`} />
-        <path d={armL} fill={`url(#skin-${sex})`} />
-        <path d={outline} fill={`url(#skin-${sex})`} />
-        <ellipse cx={CX} cy={36} rx={18.5} ry={22.5} fill={`url(#skin-${sex})`} />
+        <path d={armR} fill={`url(#${skin})`} />
+        <path d={armL} fill={`url(#${skin})`} />
+        <path d={outline} fill={`url(#${skin})`} />
+        <ellipse cx={CX} cy={36} rx={18.5} ry={22.5} fill={`url(#${skin})`} />
         {/* Soft landmarks: collarbones, navel, knees. */}
         <path
           d={`M${CX - 24},82 Q${CX - 10},86 ${CX - 3},84 M${CX + 24},82 Q${CX + 10},86 ${CX + 3},84`}
@@ -275,10 +298,9 @@ export function BodyFigure({
           <circle cx={g.cx + g.hw} cy={g.y} r={2.6} class="tape-end" />
         </g>
       )}
-      {labels.map((l, i) => {
+      {placeLabels(labels, b.sites).map(({ l, ly, right }) => {
         const s = b.sites[l.site];
-        const right = s.cx >= CX && (l.site === 'armCm' || i % 2 === 1);
-        const lx = right ? W - 4 : 4;
+        const lx = right ? W + 74 : -74;
         const tx = right ? s.cx + s.hw : s.cx - s.hw;
         const { back, front } = tapeArcs(s.cx, s.y, s.hw);
         return (
@@ -298,14 +320,17 @@ export function BodyFigure({
           >
             <path d={back} class="tape-back tape-back-quiet" />
             <path d={front} class="tape-front tape-front-quiet" />
-            <line x1={tx} y1={s.y} x2={right ? lx - 46 : lx + 46} y2={s.y} class="body-leader" />
-            <text x={lx} y={s.y - 2} text-anchor={right ? 'end' : 'start'} class="body-label-text">
+            <polyline
+              points={`${tx},${s.y} ${right ? tx + 8 : tx - 8},${ly} ${right ? lx - 2 : lx + 2},${ly}`}
+              class="body-leader"
+            />
+            <text x={lx} y={ly - 3} text-anchor={right ? 'end' : 'start'} class="body-label-text">
               {l.text}
             </text>
             {l.sub && (
               <text
                 x={lx}
-                y={s.y + 9}
+                y={ly + 10}
                 text-anchor={right ? 'end' : 'start'}
                 class={`body-label-sub body-${l.tone ?? 'flat'}`}
               >

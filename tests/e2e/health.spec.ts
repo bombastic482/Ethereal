@@ -38,7 +38,11 @@ test.describe('health and family food', () => {
     await ready(page, '/today/');
     await page.getByRole('button', { name: /^Add$/ }).first().click();
     const sheet = page.getByRole('dialog');
-    await sheet.getByRole('radio', { name: 'By hand' }).check({ force: true });
+    await expect(sheet.getByRole('radio', { name: 'Search' })).toBeChecked();
+    await expect(async () => {
+      await sheet.getByRole('radio', { name: 'By hand' }).check();
+      await expect(sheet.getByRole('radio', { name: 'By hand' })).toBeChecked({ timeout: 500 });
+    }).toPass({ timeout: 5000 });
     await sheet.getByRole('button', { name: /half a palm more/i }).click();
     await sheet.getByRole('button', { name: /half a palm more/i }).click();
     await sheet

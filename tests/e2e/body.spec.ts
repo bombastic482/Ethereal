@@ -20,22 +20,32 @@ test.describe('body composition', () => {
     await page.getByRole('button', { name: 'Measure now' }).click();
 
     await expect(page.getByRole('heading', { name: 'Neck' })).toBeVisible();
-    await page.getByLabel('Neck (cm)').fill('40');
-    await page.getByRole('button', { name: /next/i }).click();
+    // Tap the big readout to type; the tape is also a keyboard slider.
+    await page.getByRole('button', { name: /Your reading: .* Tap to type/ }).click();
+    await page.locator('#measure-tape-readout').fill('40');
+    await page.locator('#measure-tape-readout').press('Enter');
+    await page.getByRole('button', { name: /^Next/ }).click();
     await expect(page.getByRole('heading', { name: 'Waist at the navel' })).toBeVisible();
-    await page.getByLabel('Waist at the navel (cm)').fill('103');
-    await page.getByRole('button', { name: /next/i }).click();
-    // The rest are optional: skip them all.
-    for (let i = 0; i < 4; i++) await page.getByRole('button', { name: /skip this one/i }).click();
+    const tape = page.getByRole('slider', { name: 'Your reading' });
+    await tape.focus();
+    await page.keyboard.press('PageUp'); // 96 + 5 = 101
+    await expect(tape).toHaveAttribute('aria-valuenow', '101');
+    // Live body fat appears once neck and waist are in.
+    await expect(page.getByText('Body fat with these numbers')).toBeVisible();
+    await page.getByRole('button', { name: /^Next/ }).click();
+    for (let i = 0; i < 4; i++)
+      await page.getByRole('button', { name: 'Skip', exact: true }).click();
 
-    const result = page.getByRole('status').filter({ hasText: 'Saved today’s measurements' });
-    await expect(result).toContainText(/About (2[6-9]|3[0-2])\.\d% body fat/);
+    const result = page.getByRole('status').filter({ hasText: 'measurements are saved' });
+    await expect(result).toContainText(/(2[4-9]|3[0-2])\.\d%/);
     await expect(page.getByRole('heading', { name: 'What your weight is made of' })).toBeVisible();
 
     await page.getByRole('radio', { name: /Fit · 17%/ }).check({ force: true });
     await expect(page.getByText(/to go$/)).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('cell', { name: '103' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Your measurements' })).toContainText(
+      'Waist 101 cm',
+    );
   });
 
   test('progress shows milestones reached and the next ones', async ({ page }) => {
