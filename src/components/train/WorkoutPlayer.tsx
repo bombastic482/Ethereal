@@ -114,6 +114,15 @@ export default function WorkoutPlayer({
   const [leaving, setLeaving] = useState(false);
   const [howTo, setHowTo] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  /** Taps on the rep pad this step: the first tap starts the count from one. */
+  const [taps, setTaps] = useState(0);
+  /** The short celebration after a set, keyed so each one replays. */
+  const [burst, setBurst] = useState<{
+    id: number;
+    title: string;
+    sub: string;
+    best: boolean;
+  } | null>(null);
   const [{ sound, voice, log }, patchTrain] = trainStore.use();
   const [, setFrame] = useState(0);
 
@@ -175,6 +184,7 @@ export default function WorkoutPlayer({
   useEffect(() => {
     if (!started || finished || !s) return;
     setHowTo(false);
+    setTaps(0);
     timer.current = null;
     if (s.kind === 'rest') {
       startTimer('go', s.sec * 1000);
@@ -195,6 +205,25 @@ export default function WorkoutPlayer({
     }
     setFrame((f) => f + 1);
   }, [step, started, finished]);
+
+  /** A set is in: flash it, and make a fuss when it beats last time. */
+  const celebrate = (v: number) => {
+    if (!s || s.kind !== 'work') return;
+    const before = last?.[s.set];
+    const best = before !== undefined && v > before;
+    const unit = s.p.exercise.unit === 'seconds' ? 's' : ' reps';
+    setBurst({
+      id: Date.now(),
+      title: best ? 'New best' : `Set ${s.set + 1} done`,
+      sub: best ? `${v}${unit}, up from ${before}` : `${v}${unit}`,
+      best,
+    });
+    if (best) {
+      confetti({ x: 0.5, y: 0.35 }, 70);
+      cue(`New best. ${v}.`);
+    }
+    window.setTimeout(() => setBurst((b) => (b && Date.now() - b.id >= 1300 ? null : b)), 1400);
+  };
 
   const advance = () => {
     timer.current = null;
@@ -244,8 +273,11 @@ export default function WorkoutPlayer({
           startTimer('go', secs * 1000 * (ex?.perSide && s.kind !== 'walk' ? 2 : 1));
         } else {
           tone(true);
-          if (s.kind === 'work')
-            setValues((v) => ({ ...v, [step]: v[step] ?? holdSeconds(s, v, step, last) }));
+          if (s.kind === 'work') {
+            const held = values[step] ?? holdSeconds(s, values, step, last);
+            setValues((v) => ({ ...v, [step]: held }));
+            celebrate(held);
+          }
           if (s.kind === 'walk') setValues((v) => ({ ...v, [step]: s.minutes }));
           advance();
         }
@@ -298,6 +330,17 @@ export default function WorkoutPlayer({
   const setValue = (n: number) =>
     setValues((v) => ({ ...v, [step]: Math.max(0, Math.min(300, n)) }));
 
+  /** Tap with each rep: the first tap starts from one, so the pad counts what you actually did. */
+  const countRep = () => {
+    if (!s || s.kind !== 'work') return;
+    const n = taps === 0 ? 1 : (values[step] ?? 0) + 1;
+    setValue(n);
+    setTaps(taps + 1);
+    const hitTarget = n === s.p.low || n === s.p.high;
+    haptic(hitTarget ? [12, 40, 12] : 8);
+    if (hitTarget) tone(n === s.p.high);
+  };
+
   // Keyboard: space for the main action, arrows to change the count, Escape to leave.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -341,6 +384,7 @@ export default function WorkoutPlayer({
         v = Math.min(v, secs);
       } else v ??= startValue(s.p, s.set, last);
       setValues((x) => ({ ...x, [step]: v ?? 0 }));
+      if (v) celebrate(v);
     }
     if (s.kind === 'walk') {
       const t = timer.current;
@@ -463,6 +507,16 @@ export default function WorkoutPlayer({
                   </span>
                 </div>
               )}
+              {t?.phase === 'ready' && left <= 3 && left > 0 && !paused && (
+                <span class="player-countin" key={`in-${left}`} aria-hidden="true">
+                  {left}
+                </span>
+              )}
+              {t?.phase === 'go' && s.kind !== 'rest' && t.total - t.left < 800 && (
+                <span class="player-countin player-go" aria-hidden="true">
+                  Go
+                </span>
+              )}
               {s.kind === 'rest' && t && (
                 <div class="player-rest-ring">
                   <CountRing frac={frac} label={`${left}`} sub="rest" />
@@ -553,13 +607,14 @@ export default function WorkoutPlayer({
                     >
                       <Icon name="minus" size={24} />
                     </button>
-                    <output
-                      class="player-count tabular"
-                      aria-live="polite"
-                      aria-label={`${repValue} reps`}
-                    >
-                      {repValue}
-                    </output>
+                    <RepPad
+                      value={repValue}
+                      low={s.p.low}
+                      high={s.p.high}
+                      counting={taps > 0}
+                      taps={taps}
+                      onTap={countRep}
+                    />
                     <button
                       type="button"
                       class="player-step"
@@ -576,6 +631,11 @@ export default function WorkoutPlayer({
                   >
                     <Icon name="check" size={20} /> Done, {repValue} reps
                   </button>
+                  <p class="text-subtle -mt-1 text-center text-xs">
+                    {taps > 0
+                      ? 'Counting. Tap the number with each rep.'
+                      : 'Tap the number with each rep to count, or set it with − and +.'}
+                  </p>
                 </>
               ) : isTimed(s) && t ? (
                 <>
@@ -677,6 +737,21 @@ export default function WorkoutPlayer({
           </div>
         ) : null}
 
+        {burst && (
+          <div
+            class={`player-burst ${burst.best ? 'player-burst-best' : ''}`}
+            key={burst.id}
+            role="status"
+          >
+            <span class="player-burst-ring" aria-hidden="true" />
+            <span class="player-burst-badge" aria-hidden="true">
+              <Icon name={burst.best ? 'spark' : 'check'} size={30} />
+            </span>
+            <strong>{burst.title}</strong>
+            <span>{burst.sub}</span>
+          </div>
+        )}
+
         {leaving && (
           <div class="player-sheet" role="alertdialog" aria-modal="true" aria-labelledby="leave-h">
             <div class="surface grid w-full max-w-sm gap-3 p-5">
@@ -724,6 +799,62 @@ export default function WorkoutPlayer({
         )}
       </div>
     </Layer>
+  );
+}
+
+/**
+ * The rep count as a big tap target. A ring fills towards the top of the range, with a notch at
+ * the bottom of it, so you can see how close you are without reading numbers mid-set.
+ */
+function RepPad({
+  value,
+  low,
+  high,
+  counting,
+  taps,
+  onTap,
+}: {
+  value: number;
+  low: number;
+  high: number;
+  counting: boolean;
+  taps: number;
+  onTap: () => void;
+}) {
+  const r = 46;
+  const c = 2 * Math.PI * r;
+  const frac = Math.max(0, Math.min(1, value / Math.max(1, high)));
+  const lowAt = (low / Math.max(1, high)) * 360 - 90;
+  const [nx, ny] = [
+    50 + r * Math.cos((lowAt * Math.PI) / 180),
+    50 + r * Math.sin((lowAt * Math.PI) / 180),
+  ];
+  const inRange = value >= low;
+  return (
+    <button
+      type="button"
+      class={`rep-pad ${counting ? 'rep-pad-on' : ''} ${inRange ? 'rep-pad-hit' : ''}`}
+      aria-label={`Count a rep. ${value} reps${counting ? ' counted' : ''}`}
+      onClick={onTap}
+    >
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <circle cx="50" cy="50" r={r} class="rep-pad-track" />
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          class="rep-pad-fill"
+          stroke-dasharray={c}
+          stroke-dashoffset={c * (1 - frac)}
+          transform="rotate(-90 50 50)"
+        />
+        {low < high && <circle cx={nx} cy={ny} r="2.6" class="rep-pad-notch" />}
+      </svg>
+      {taps > 0 && <span class="rep-pad-pulse" key={taps} aria-hidden="true" />}
+      <output class="player-count tabular" aria-live="polite">
+        {value}
+      </output>
+    </button>
   );
 }
 

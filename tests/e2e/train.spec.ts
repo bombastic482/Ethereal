@@ -30,8 +30,12 @@ test.describe('training', () => {
         .click();
     }
     await expect(player.getByText(/Exercise 1 of \d · Set 1 of 2/)).toBeVisible();
+    // Tapping the count starts it from one; the steppers still adjust it.
+    const pad = player.getByRole('button', { name: /^Count a rep/ });
+    for (let i = 0; i < 3; i++) await pad.click();
     await player.getByRole('button', { name: 'One more rep' }).click();
-    await player.getByRole('button', { name: /^done, \d+ reps$/i }).click();
+    await player.getByRole('button', { name: 'Done, 4 reps' }).click();
+    await expect(player.getByRole('status').filter({ hasText: 'Set 1 done' })).toBeVisible();
     await expect(player.getByText('Up next')).toBeVisible();
     await expect(player.getByRole('timer')).toBeVisible();
 
