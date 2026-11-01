@@ -1,17 +1,20 @@
 ---
 import TodayScreen from '@/components/calculators/TodayScreen';
+import TodayPlan from '@/components/today/TodayPlan';
 import Tour from '@/components/Tour.astro';
 import AppLayout from '@/layouts/AppLayout.astro';
 ---
 
 <AppLayout
   title="Today"
-  description="Log meals, scan barcodes, track exercise and water, and watch your calorie ring and macros fill up against your plan. Private, works offline."
+  description="Your day, planned around you: what to do now, meals, workout, prayers and medicines at the right times, plus a food diary with barcode scanning. Private, works offline."
   path="/today/"
   heading="Today"
   lede="Log what you eat, see what's left, and get a nudge toward what to eat next."
   section="today"
+  bare
 >
+  <TodayPlan client:load />
   <TodayScreen client:load />
   <Tour />
 </AppLayout>

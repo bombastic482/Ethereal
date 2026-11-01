@@ -223,6 +223,16 @@ function TodayScreenInner() {
     if (f) setFocusFood(f[1]!);
     setAdding(mealForTime(new Date().getHours()));
   }, []);
+  // The Now card on Today asks for a specific meal's sheet.
+  useEffect(() => {
+    const onAdd = (e: Event) => {
+      const meal = (e as CustomEvent<{ meal?: Meal }>).detail?.meal;
+      setDate(today);
+      setAdding(meal ?? mealForTime(new Date().getHours()));
+    };
+    window.addEventListener('ethereal:add-food', onAdd);
+    return () => window.removeEventListener('ethereal:add-food', onAdd);
+  }, [today]);
   const [exAdding, setExAdding] = useState(false);
   const [dbReady, setDbReady] = useState(false);
   const [showKeys, setShowKeys] = useState(false);

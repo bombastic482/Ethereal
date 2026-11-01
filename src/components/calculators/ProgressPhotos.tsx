@@ -78,7 +78,7 @@ export default function ProgressPhotos() {
     });
 
   return (
-    <section class="surface p-5 sm:p-6" aria-label="Progress photos">
+    <section id="photos" class="surface scroll-mt-24 p-5 sm:p-6" aria-label="Progress photos">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 class="font-bold tracking-tight">Progress photos</h3>

@@ -67,6 +67,12 @@ function TrainHubInner() {
   const [playing, setPlaying] = useState(false);
   const [today, setToday] = useState('');
   useEffect(() => setToday(todayIso()), []);
+  // /train/#start (from the Now card on Today) opens the player straight away.
+  useEffect(() => {
+    if (!today || location.hash !== '#start') return;
+    history.replaceState(history.state, '', location.pathname + location.search);
+    if (trainStore.get().setup) setPlaying(true);
+  }, [today]);
 
   const { setup, log, current } = state;
   const weightKg = planProfile(profile, weights.entries).weightKg;

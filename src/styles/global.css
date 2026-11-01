@@ -981,3 +981,152 @@
   background: linear-gradient(135deg, var(--color-brand-400), var(--color-brand-600));
   animation: var(--animate-pop);
 }
+
+/* Today plan: Now card and timeline */
+.today-plan {
+  grid-template-columns: minmax(0, 1fr);
+}
+.plan-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  overflow: hidden;
+}
+.plan-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-brand-400), var(--color-brand-600));
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-spring);
+}
+.now-card {
+  position: relative;
+  background:
+    radial-gradient(120% 140% at 0% 0%, oklch(63% 0.15 160 / 0.16), transparent 55%),
+    var(--bg-elevated);
+  animation: var(--animate-row);
+}
+.now-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1.25rem;
+  color: white;
+  background: linear-gradient(135deg, var(--color-brand-400), var(--color-brand-600));
+  box-shadow: 0 10px 28px -12px var(--color-brand-500);
+}
+.now-prayer .now-icon,
+.now-sleep .now-icon,
+.now-wind .now-icon {
+  background: linear-gradient(135deg, oklch(62% 0.12 270), oklch(48% 0.14 275));
+  box-shadow: 0 10px 28px -12px oklch(50% 0.14 275);
+}
+.now-meal .now-icon,
+.now-med .now-icon {
+  background: linear-gradient(135deg, oklch(78% 0.14 70), oklch(66% 0.16 50));
+  box-shadow: 0 10px 28px -12px oklch(66% 0.16 50);
+}
+.timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.tl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: 0.9rem;
+}
+.timeline .tl-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: calc(0.5rem + 4.25rem + 0.75rem + 0.875rem - 1px);
+  top: calc(50% + 0.875rem);
+  bottom: calc(-50% + 0.875rem);
+  width: 2px;
+  background: var(--bg-muted);
+}
+.tl-time {
+  flex: none;
+  width: 4.25rem;
+  font-size: 0.8rem;
+  color: var(--fg-subtle);
+  text-align: right;
+}
+.tl-dot {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  color: var(--fg-muted);
+}
+.tl-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.tl-current {
+  background: oklch(63% 0.15 160 / 0.08);
+}
+.tl-current .tl-dot {
+  color: white;
+  background: var(--color-brand-500);
+  box-shadow: 0 0 0 4px oklch(63% 0.15 160 / 0.2);
+}
+.tl-done .tl-dot {
+  color: white;
+  background: var(--color-brand-500);
+}
+.tl-done .tl-title {
+  color: var(--fg-subtle);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklab, var(--fg) 25%, transparent);
+}
+.tl-passive .tl-title {
+  font-weight: 500;
+  color: var(--fg-muted);
+}
+.tl-passive .tl-dot {
+  background: transparent;
+  border: 2px dashed color-mix(in oklab, var(--fg) 15%, transparent);
+}
+.tl-tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 2px solid var(--border-strong);
+  color: transparent;
+  transition:
+    transform 0.18s var(--ease-spring),
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.tl-tick:active {
+  transform: scale(0.88);
+}
+.tl-tick[aria-pressed='true'] {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-500);
+  color: white;
+}
+.tl-tick:disabled {
+  opacity: 0.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  .now-card {
+    animation: none;
+  }
+  .plan-progress > span {
+    transition: none;
+  }
+}
