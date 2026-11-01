@@ -84,7 +84,7 @@ const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
     <main id="main" class:list={['flex-1', cls]} transition:animate="fade">
       <slot />
     </main>
-    <Footer />
+    <Footer compact={section !== undefined} />
     <TabBar />
     <script>
       import { startCounting } from '@/lib/analytics';

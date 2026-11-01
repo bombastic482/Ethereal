@@ -73,12 +73,30 @@ function TimeField({
   label,
   value,
   onChange,
+  row = false,
 }: {
   id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
+  /** Label and field side by side, for a list of times. */
+  row?: boolean;
 }) {
+  if (row)
+    return (
+      <div class="flex items-center justify-between gap-3 px-4 py-2.5">
+        <label class="font-semibold" for={id}>
+          {label}
+        </label>
+        <input
+          id={id}
+          type="time"
+          class="field h-10 w-36 py-0"
+          value={value}
+          onChange={(e) => e.currentTarget.value && onChange(e.currentTarget.value)}
+        />
+      </div>
+    );
   return (
     <div>
       <label class="label" for={id}>
@@ -236,25 +254,31 @@ function Day({ life, patch }: { life: Life; patch: (p: Partial<Life>) => void })
           onChange={(sleep) => patch({ sleep })}
         />
       </div>
-      <div class="grid grid-cols-3 gap-3">
-        <TimeField
-          id="you-breakfast"
-          label="Breakfast"
-          value={life.meals.breakfast}
-          onChange={(breakfast) => patch({ meals: { ...life.meals, breakfast } })}
-        />
-        <TimeField
-          id="you-lunch"
-          label="Lunch"
-          value={life.meals.lunch}
-          onChange={(lunch) => patch({ meals: { ...life.meals, lunch } })}
-        />
-        <TimeField
-          id="you-dinner"
-          label="Dinner"
-          value={life.meals.dinner}
-          onChange={(dinner) => patch({ meals: { ...life.meals, dinner } })}
-        />
+      <div>
+        <p class="label">Meals</p>
+        <div class="surface-muted divide-y divide-[var(--border)] rounded-2xl">
+          <TimeField
+            row
+            id="you-breakfast"
+            label="Breakfast"
+            value={life.meals.breakfast}
+            onChange={(breakfast) => patch({ meals: { ...life.meals, breakfast } })}
+          />
+          <TimeField
+            row
+            id="you-lunch"
+            label="Lunch"
+            value={life.meals.lunch}
+            onChange={(lunch) => patch({ meals: { ...life.meals, lunch } })}
+          />
+          <TimeField
+            row
+            id="you-dinner"
+            label="Dinner"
+            value={life.meals.dinner}
+            onChange={(dinner) => patch({ meals: { ...life.meals, dinner } })}
+          />
+        </div>
       </div>
       <div>
         <p class="label">Busy blocks (work, study, commute)</p>

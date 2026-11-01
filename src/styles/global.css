@@ -2892,6 +2892,36 @@
   color: var(--color-brand-200);
 }
 
+/* The one-line footer on app screens */
+.app-footer {
+  margin-top: 3rem;
+  padding: 1.25rem 0 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--fg-subtle);
+}
+.app-footer .container-page {
+  display: grid;
+  gap: 0.5rem;
+}
+@media (min-width: 1024px) {
+  .app-footer .container-page {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2rem;
+  }
+}
+.app-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+.app-footer a:hover {
+  color: var(--fg);
+  text-decoration: underline;
+}
+
 /* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */
 .prayer-strip {
   display: grid;

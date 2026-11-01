@@ -14,6 +14,8 @@ export type Section = 'today' | 'train' | 'eat' | 'progress' | 'you';
 interface SectionPage {
   href: string;
   label: string;
+  /** A shorter label for the phone tab row, when the full one would not fit. */
+  short?: string;
 }
 
 /**
@@ -51,9 +53,9 @@ export const SECTIONS: Record<
     icon: 'chart',
     pages: [
       { href: '/progress/', label: 'Overview' },
-      { href: '/track/', label: 'Weight & photos' },
+      { href: '/track/', label: 'Weight & photos', short: 'Weight' },
       { href: '/progress/body/', label: 'Body' },
-      { href: '/review/', label: 'Weekly review' },
+      { href: '/review/', label: 'Weekly review', short: 'Review' },
     ],
   },
   you: {

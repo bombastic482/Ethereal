@@ -5,155 +5,191 @@ import Logo from '@/components/Logo.astro';
 import { SITE } from '@/lib/site';
 import { TOOLS } from '@/lib/tools';
 
+interface Props {
+  /**
+   * App screens get one quiet line instead of the site map: the rail and tab bar already reach
+   * everything, and an app should end where its content ends.
+   */
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
 const year = new Date().getFullYear();
+const small = [
+  { href: '/disclaimer/', label: 'Disclaimer' },
+  { href: '/privacy/', label: 'Privacy' },
+  { href: '/terms/', label: 'Terms' },
+  { href: '/about/', label: 'About' },
+];
 ---
 
-<footer class="border-line mt-24 border-t">
-  <div class="container-page grid gap-10 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
-    <div class="max-w-sm">
-      <a href={withBase('/')} class="flex items-center gap-2.5 font-bold tracking-tight">
-        <Logo size={32} id="logo-footer" />
-        <span class="font-display text-xl leading-none">{SITE.name}</span>
-      </a>
-      <p class="text-muted mt-4 text-sm leading-relaxed">{SITE.description}</p>
-      <p class="text-subtle mt-4 flex items-center gap-2 text-xs">
-        <Icon name="lock" size={14} /> Everything runs in your browser. Nothing you type is sent
-        anywhere.
+{compact ? (
+  <footer class="app-footer">
+    <div class="container-page">
+      <p>
+        General education, not medical advice. Under 18, pregnant, or with a history of disordered
+        eating? Use Ethereal alongside a professional.
       </p>
+      <nav aria-label="Legal">
+        <span>
+          © {year} {SITE.name}
+        </span>
+        {small.map((l) => (
+          <a href={withBase(l.href)}>{l.label}</a>
+        ))}
+      </nav>
     </div>
-    <div>
-      <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Calculators</h2>
-      <ul class="grid gap-2 text-sm">
-        {TOOLS.map((t) => (
+  </footer>
+) : (
+  <footer class="border-line mt-24 border-t">
+    <div class="container-page grid gap-10 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
+      <div class="max-w-sm">
+        <a href={withBase('/')} class="flex items-center gap-2.5 font-bold tracking-tight">
+          <Logo size={32} id="logo-footer" />
+          <span class="font-display text-xl leading-none">{SITE.name}</span>
+        </a>
+        <p class="text-muted mt-4 text-sm leading-relaxed">{SITE.description}</p>
+        <p class="text-subtle mt-4 flex items-center gap-2 text-xs">
+          <Icon name="lock" size={14} /> Everything runs in your browser. Nothing you type is sent
+          anywhere.
+        </p>
+      </div>
+      <div>
+        <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Calculators</h2>
+        <ul class="grid gap-2 text-sm">
+          {TOOLS.map((t) => (
+            <li>
+              <a class="text-muted hover:text-fg" href={withBase(`/tools/${t.slug}/`)}>
+                {t.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Learn</h2>
+        <ul class="grid gap-2 text-sm">
           <li>
-            <a class="text-muted hover:text-fg" href={withBase(`/tools/${t.slug}/`)}>
-              {t.name}
+            <a class="text-muted hover:text-fg" href={withBase('/guides/')}>
+              All guides
             </a>
           </li>
-        ))}
-      </ul>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/recipes/')}>
+              Starter recipes
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/eating-out/')}>
+              Eating out
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-muted hover:text-fg"
+              href={withBase('/guides/calorie-deficit-explained/')}
+            >
+              Calorie deficit
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/guides/protein-for-fat-loss/')}>
+              Protein for fat loss
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/guides/weight-loss-plateaus/')}>
+              Breaking plateaus
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Site</h2>
+        <ul class="grid gap-2 text-sm">
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/train/')}>
+              Train at home
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/train/exercises/')}>
+              Exercise library
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/progress/')}>
+              Progress
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/track/')}>
+              Weight tracker
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/review/')}>
+              Weekly review
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/settings/')}>
+              Settings &amp; data
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/compare/')}>
+              Compare with other apps
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/about/')}>
+              About &amp; methodology
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/disclaimer/')}>
+              Medical disclaimer
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/privacy/')}>
+              Privacy
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/terms/')}>
+              Terms
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/changelog/')}>
+              What's new
+            </a>
+          </li>
+          <li>
+            <a
+              class="text-muted hover:text-fg"
+              href="https://github.com/bombastic482/Ethereal/issues"
+              rel="noopener"
+            >
+              Report a problem
+            </a>
+          </li>
+          <li>
+            <a class="text-muted hover:text-fg" href={withBase('/sitemap-index.xml')}>
+              Sitemap
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <div>
-      <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Learn</h2>
-      <ul class="grid gap-2 text-sm">
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/guides/')}>
-            All guides
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/recipes/')}>
-            Starter recipes
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/eating-out/')}>
-            Eating out
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/guides/calorie-deficit-explained/')}>
-            Calorie deficit
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/guides/protein-for-fat-loss/')}>
-            Protein for fat loss
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/guides/weight-loss-plateaus/')}>
-            Breaking plateaus
-          </a>
-        </li>
-      </ul>
+    <div class="border-line border-t">
+      <div class="container-page text-subtle flex flex-wrap items-center justify-between gap-2 py-5 text-xs">
+        <p>
+          © {year} {SITE.name}. Educational information, not medical advice.
+        </p>
+        <p>Built for speed: no trackers, no cookies, no account.</p>
+      </div>
     </div>
-    <div>
-      <h2 class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">Site</h2>
-      <ul class="grid gap-2 text-sm">
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/train/')}>
-            Train at home
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/train/exercises/')}>
-            Exercise library
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/progress/')}>
-            Progress
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/track/')}>
-            Weight tracker
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/review/')}>
-            Weekly review
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/settings/')}>
-            Settings &amp; data
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/compare/')}>
-            Compare with other apps
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/about/')}>
-            About &amp; methodology
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/disclaimer/')}>
-            Medical disclaimer
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/privacy/')}>
-            Privacy
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/terms/')}>
-            Terms
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/changelog/')}>
-            What's new
-          </a>
-        </li>
-        <li>
-          <a
-            class="text-muted hover:text-fg"
-            href="https://github.com/bombastic482/Ethereal/issues"
-            rel="noopener"
-          >
-            Report a problem
-          </a>
-        </li>
-        <li>
-          <a class="text-muted hover:text-fg" href={withBase('/sitemap-index.xml')}>
-            Sitemap
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div class="border-line border-t">
-    <div class="container-page text-subtle flex flex-wrap items-center justify-between gap-2 py-5 text-xs">
-      <p>
-        © {year} {SITE.name}. Educational information, not medical advice.
-      </p>
-      <p>Built for speed: no trackers, no cookies, no account.</p>
-    </div>
-  </div>
-</footer>
+  </footer>
+)}

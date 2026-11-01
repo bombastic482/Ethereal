@@ -30,7 +30,14 @@ const active = pages
         aria-current={p.href === active ? 'page' : undefined}
         data-astro-prefetch="hover"
       >
-        {p.label}
+        {p.short ? (
+          <>
+            <span class="sm:hidden">{p.short}</span>
+            <span class="hidden sm:inline">{p.label}</span>
+          </>
+        ) : (
+          p.label
+        )}
       </a>
     ))}
   </nav>
