@@ -40,7 +40,7 @@ Most health apps do one thing, charge a subscription for it, and leave you to wo
 
 Today opens under a living sky that follows your real time of day and your city's sun, from a lavender first light to a deep indigo night with the moon in tonight's phase. Beneath it is your day, planned around you: the thing to do now, with one button to do it, and the rest of the day in order. Tell it when you wake, eat and work once, and it does the planning.
 
-- **A day dial and a Now card.** Every moment sits on a dial of your waking day, in its own colour. The Now card counts down to what is next: log lunch, start the workout, weigh in, or tick it done. Swipe a row to tick it off.
+- **A Now card and a day track.** The Now card counts down to what is next: log lunch, start the workout, weigh in, or tick it done. Under it, your waking day is one fine line, filled up to now, with every moment as a dot in its own colour. Swipe a row to tick it off.
 - **Your whole day in one line.** Meals, medicines at the right time, prayer times calculated on the device (with the next one counting down under the sky), training placed clear of work and meals, winding down and sleep.
 - **No guilt.** Missed something? Catch me up gathers it: tick what you did, let the rest go. Fasting moves meals to suhoor and iftar and training to after iftar.
 
