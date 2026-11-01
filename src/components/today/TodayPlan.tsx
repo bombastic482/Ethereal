@@ -9,12 +9,15 @@ import { logStore } from '@/lib/log';
 import { listPhotos, photosSupported } from '@/lib/photos';
 import { planProfile, todayIso } from '@/lib/plan';
 import { prayerTimes } from '@/lib/prayer';
+import { DEFAULT_EVENTS, eventsFrom, moonPhase } from '@/lib/sky';
 import { useProfile } from '@/lib/profile';
 import { buildWorkout, weekOf } from '@/lib/train/program';
 import { trainStore } from '@/lib/train/store';
 import { withBase } from '@/lib/url';
 import TodayMind from '../mind/TodayMind';
 import { DayDial, KIND_ICON, KindIcon } from './DayDial';
+import { PrayerStrip } from './PrayerStrip';
+import { SkyScene } from './SkyScene';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 
@@ -143,7 +146,29 @@ function TodayPlanInner() {
     });
   }, [date, life, train, diary.food, weights.entries, ticks, lastPhoto, body.measures]);
 
-  if (!day)
+  // The sky needs the sun's day even when prayers are off; a set city makes it exact.
+  const sky = useMemo(() => {
+    if (!date) return null;
+    const p = life.prayer;
+    if (p.lat === null || p.lon === null) return { events: DEFAULT_EVENTS, prayers: null };
+    const t = prayerTimes(date, p.lat, p.lon, {
+      method: p.method,
+      asr: p.asr,
+      ramadan: life.fasting,
+    });
+    const m = (d: Date) => d.getHours() * 60 + d.getMinutes();
+    const mins = {
+      fajr: m(t.fajr),
+      sunrise: m(t.sunrise),
+      dhuhr: m(t.dhuhr),
+      asr: m(t.asr),
+      maghrib: m(t.maghrib),
+      isha: m(t.isha),
+    };
+    return { events: eventsFrom(mins), prayers: p.on ? mins : null };
+  }, [date, life.prayer, life.fasting]);
+
+  if (!day || !sky)
     return <div class="surface mb-8 h-[54rem] animate-pulse sm:h-[46rem]" aria-hidden="true" />;
 
   const current = nowItem(day, now);
@@ -165,6 +190,28 @@ function TodayPlanInner() {
   return (
     <section class="today-plan mb-8 grid gap-4" aria-labelledby="plan-h">
       <div class="today-hero surface">
+        <SkyScene now={now} events={sky.events} moon={moonPhase(new Date(`${date}T21:00:00`))}>
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="sky-eyebrow">
+                {new Date(`${date}T12:00:00`).toLocaleDateString('en', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
+              </p>
+              <h2 id="plan-h" class="sky-title">
+                {greeting(now, life.name)}
+              </h2>
+              {firstGoal && <p class="sky-sub">Working on: {firstGoal.label.toLowerCase()}</p>}
+            </div>
+            <a class="sky-chip" href={withBase('/you/#day')} aria-label="Edit my day">
+              <Icon name="edit" size={14} />
+              <span class="sky-chip-label">Edit my day</span>
+            </a>
+          </div>
+        </SkyScene>
+        {sky.prayers && <PrayerStrip times={sky.prayers} now={now} />}
         <div class="today-hero-grid">
           <DayDial
             items={day}
@@ -206,33 +253,7 @@ function TodayPlanInner() {
             }
           />
           <div class="min-w-0">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p class="eyebrow mb-1">
-                  {new Date(`${date}T12:00:00`).toLocaleDateString('en', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                  })}
-                </p>
-                <h2
-                  id="plan-h"
-                  class="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl"
-                >
-                  {greeting(now, life.name)}
-                </h2>
-                {firstGoal && (
-                  <p class="text-muted mt-1 text-sm">Working on: {firstGoal.label.toLowerCase()}</p>
-                )}
-              </div>
-              <a
-                class="text-brand-700 dark:text-brand-300 text-sm font-semibold"
-                href={withBase('/you/#day')}
-              >
-                Edit my day
-              </a>
-            </div>
-            <div class="mt-5">
+            <div>
               {current ? (
                 <NowCard
                   bare

@@ -273,8 +273,7 @@ export function TapeScrubber({
             setTyping(true);
           }}
         >
-          <span class="tabular">{shown.toFixed(dp)}</span>
-          <span class="tape-unit">{unit}</span>
+          <span class="tabular">{shown.toFixed(dp)}</span> <span class="tape-unit">{unit}</span>
         </button>
       )}
       <div

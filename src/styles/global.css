@@ -2206,24 +2206,22 @@
 
 /* Today: hero with the day dial */
 .today-hero {
-  padding: 1.25rem;
-  background:
-    radial-gradient(90% 120% at 0% 0%, oklch(63% 0.15 var(--brand-h) / 0.12), transparent 55%),
-    var(--bg-elevated);
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg-elevated);
   animation: var(--animate-rise);
 }
 [data-theme='dark'] .today-hero {
-  background:
-    radial-gradient(90% 120% at 0% 0%, oklch(55% 0.14 var(--brand-h) / 0.16), transparent 55%),
-    linear-gradient(180deg, oklch(19% 0.01 255), oklch(16.5% 0.009 255));
+  background: oklch(19% 0.01 255);
 }
 .today-hero-grid {
   display: grid;
   gap: 1.25rem;
   align-items: center;
+  padding: 1.25rem;
 }
 @media (min-width: 768px) {
-  .today-hero {
+  .today-hero-grid {
     padding: 1.75rem 2rem 1.75rem 1.25rem;
   }
   .today-hero-grid {
@@ -2429,6 +2427,225 @@
   }
 }
 
+/* The living sky at the top of Today. Colours come from the real minute (see lib/sky.ts); the
+   bottom melts into the card, so sky and content read as one surface. */
+.today-hero {
+  --hero-bg: var(--bg-elevated);
+}
+[data-theme='dark'] .today-hero {
+  --hero-bg: oklch(19% 0.01 255);
+}
+.sky {
+  position: relative;
+  height: 13.5rem;
+  color: white;
+  background:
+    radial-gradient(120% 70% at 50% 100%, var(--sky-horizon), transparent 70%),
+    linear-gradient(
+      180deg,
+      var(--sky-top),
+      color-mix(in oklab, var(--sky-top) 45%, var(--sky-horizon))
+    );
+  isolation: isolate;
+  overflow: hidden;
+}
+.sky::after {
+  /* The dissolve into the card. */
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 38%;
+  background: linear-gradient(180deg, transparent, var(--hero-bg));
+  pointer-events: none;
+}
+[data-theme='dark'] .sky {
+  filter: brightness(0.82) saturate(0.92);
+}
+.sky-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.sky-content {
+  position: relative;
+  z-index: 1;
+  padding: 1.25rem 1.25rem 0;
+  text-shadow: 0 1px 24px oklch(25% 0.06 270 / 0.3);
+}
+@media (min-width: 768px) {
+  .sky {
+    height: 15rem;
+  }
+  .sky-content {
+    padding: 1.75rem 2rem 0;
+  }
+}
+.sky-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.82;
+}
+.sky-title {
+  margin-top: 0.3rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 7.4vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.sky-sub {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  opacity: 0.86;
+}
+.sky-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: white;
+  text-shadow: none;
+  background: oklch(100% 0 0 / 0.14);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.2);
+  backdrop-filter: blur(10px);
+  transition: background 0.2s;
+}
+.sky-chip:hover {
+  background: oklch(100% 0 0 / 0.24);
+}
+@media (max-width: 639px) {
+  .sky-chip {
+    padding: 0.55rem;
+  }
+  .sky-chip-label {
+    display: none;
+  }
+}
+.sky-hill {
+  fill: white;
+}
+.sky-hill-far {
+  opacity: calc(0.06 + 0.12 * var(--sky-day));
+}
+.sky-hill-near {
+  opacity: calc(0.08 + 0.16 * var(--sky-day));
+}
+.sky-star {
+  fill: white;
+  animation: sky-twinkle 4.5s ease-in-out infinite;
+}
+.sky-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sky-breathe 7s ease-in-out infinite;
+}
+@keyframes sky-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes sky-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-star,
+  .sky-glow {
+    animation: none;
+  }
+}
+
+/* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */
+.prayer-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: 0.25rem 1.25rem 0;
+  padding: 0.25rem;
+  border-radius: 1.1rem;
+  background: var(--bg-muted);
+}
+@media (min-width: 768px) {
+  .prayer-strip {
+    margin: 0.5rem 2rem 0;
+  }
+}
+.prayer-chip {
+  display: grid;
+  justify-items: center;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.875rem;
+  text-align: center;
+  line-height: 1.2;
+}
+.prayer-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+.prayer-time {
+  margin-top: 0.1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+.prayer-when {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-brand-700);
+}
+[data-theme='dark'] .prayer-when {
+  color: var(--color-brand-300);
+}
+.prayer-when:empty {
+  display: none;
+}
+.prayer-past .prayer-name,
+.prayer-past .prayer-time {
+  color: var(--fg-subtle);
+}
+.prayer-next {
+  background: var(--bg-elevated);
+  box-shadow:
+    inset 0 1px 0 var(--card-highlight),
+    0 6px 18px -10px oklch(30% 0.05 var(--brand-h) / 0.45);
+  animation: var(--animate-pop);
+}
+.prayer-next .prayer-name {
+  color: var(--fg);
+}
+@media (max-width: 380px) {
+  .prayer-time {
+    font-size: 0.8125rem;
+  }
+  .prayer-when {
+    font-size: 0.625rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prayer-next {
+    animation: none;
+  }
+}
+
 /* Collapsing large title: the page title slides into the bar once it scrolls away */
 .site-header .container-page {
   position: relative;
@@ -2464,44 +2681,80 @@
   }
 }
 
-/* Side rail for the app sections, from tablets up */
+/* The app frame from tablets up: a full-height side rail holds the brand and every section;
+   the top bar and the page sit to its right, sharing one content column. --rail-w is the only
+   number that sets the frame. */
+:root {
+  --rail-w: 0px;
+}
+@media (min-width: 768px) {
+  :root {
+    --rail-w: 5.5rem;
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --rail-w: 15rem;
+  }
+}
 .rail {
   display: none;
 }
 @media (min-width: 768px) {
   .rail {
     position: fixed;
-    z-index: 30;
-    left: 0;
-    top: 4rem;
-    bottom: 0;
-    width: 5.5rem;
+    z-index: 45;
+    inset: 0 auto 0 0;
+    width: var(--rail-w);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding: 1rem 0.6rem 1.25rem;
+    gap: 1rem;
+    padding: 0 0.6rem 1.25rem;
     border-right: 1px solid var(--border);
-    background: color-mix(in oklab, var(--bg) 82%, transparent);
+    background: color-mix(in oklab, var(--bg) 86%, transparent);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     overflow-y: auto;
   }
+  .rail > .rail-extra {
+    margin-top: auto;
+  }
   body.has-rail > main,
-  body.has-rail > footer {
-    padding-left: 5.5rem;
+  body.has-rail > footer,
+  body.has-rail .site-header {
+    padding-left: var(--rail-w);
   }
 }
 @media (min-width: 1280px) {
   .rail {
-    width: 15rem;
     padding-inline: 0.9rem;
-  }
-  body.has-rail > main,
-  body.has-rail > footer {
-    padding-left: 15rem;
   }
   body.has-rail .section-nav {
     display: none;
+  }
+}
+.rail-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  height: 4rem;
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.rail-brand-word {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .rail-brand {
+    justify-content: flex-start;
+    padding-left: 0.5rem;
+  }
+  .rail-brand-word {
+    display: inline;
   }
 }
 .rail-list {

@@ -37,6 +37,7 @@ export type IconName =
   | 'minus'
   | 'chevron'
   | 'leaf'
+  | 'edit'
   | 'bell'
   | 'timer'
   | 'volume'
@@ -93,6 +94,7 @@ const PATHS: Record<IconName, string> = {
   minus: 'M5 12h14',
   chevron: 'M9 6l6 6-6 6',
   leaf: 'M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19c3-4 6-6.5 9.5-8.5',
+  edit: 'M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3ZM14 8l3 3',
   bell: 'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Zm4 4.5a2 2 0 0 0 4 0',
   timer: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm0-8V9.5M10 2.5h4M19 6l1.5-1.5',
   volume: 'M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5ZM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11',
