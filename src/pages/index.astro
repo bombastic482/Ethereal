@@ -1,7 +1,6 @@
 ---
 import { withBase } from '@/lib/url';
 import HeroPreview from '@/components/HeroPreview';
-import HomeSky from '@/components/home/HomeSky';
 import Showcase from '@/components/home/Showcase.astro';
 import Faq from '@/components/Faq.astro';
 import { Icon } from '@/components/ui/Icon';
@@ -87,14 +86,11 @@ const faq = [
 
 <Base title={SITE.name} description={SITE.description} path="/">
   <section class="home-hero">
-    <div class="home-hero-sky" aria-hidden="true">
-      <HomeSky client:load />
-    </div>
-    <div class="container-page pt-14 pb-28 sm:pt-20 sm:pb-40">
+    <div class="container-page pt-14 pb-16 sm:pt-20 sm:pb-24">
       <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <div class="max-w-2xl text-center lg:text-left">
           <h1 class="home-title">
-            Become who you’re <span class="home-title-soft">working toward.</span>
+            Become who you’re <span class="home-title-accent">working toward.</span>
           </h1>
           <p class="home-lede">
             A calm coach for your whole self: home workouts that grow with you, food that fits your
@@ -102,16 +98,34 @@ const faq = [
             device.
           </p>
           <div class="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-            <a href={withBase('/start/')} class="btn home-cta h-12 px-6 text-base">
+            <a href={withBase('/start/')} class="btn btn-primary h-12 px-6 text-base">
               Build my plan <Icon name="arrow" size={18} />
             </a>
-            <a href={withBase('/train/')} class="btn home-cta-quiet h-12 px-6 text-base">
+            <a href={withBase('/train/')} class="btn btn-secondary h-12 px-6 text-base">
               <Icon name="dumbbell" size={18} /> Start training
             </a>
           </div>
           <p class="home-note">Two minutes. No account. Free, and it stays that way.</p>
         </div>
         <div class="animate-rise relative [animation-delay:150ms]">
+          <div class="home-float home-float-a" aria-hidden="true">
+            <span class="home-float-icon">
+              <Icon name="scale" size={16} />
+            </span>
+            <span>
+              <span class="block font-bold tracking-tight">−0.6 kg this week</span>
+              <span class="text-subtle block text-xs">the trend, not the scale</span>
+            </span>
+          </div>
+          <div class="home-float home-float-b" aria-hidden="true">
+            <span class="home-float-icon">
+              <Icon name="spark" size={16} />
+            </span>
+            <span>
+              <span class="block font-bold tracking-tight">12 reps, a new best</span>
+              <span class="text-subtle block text-xs">next time: full push-ups</span>
+            </span>
+          </div>
           <HeroPreview client:load />
         </div>
       </div>

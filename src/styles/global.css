@@ -2678,43 +2678,33 @@
   }
 }
 
-/* Home hero: the page opens in the same living sky as Today, at the visitor's time of day.
-   Under it, a quiet night shows until the real sky fades in, and the bottom melts into the page. */
+/* Home hero: Ethereal's own light, a soft brand glow over the page, with the phone tour. */
 .home-hero {
-  --hero-bg: var(--bg);
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  color: white;
-  background: linear-gradient(180deg, oklch(24% 0.06 272), oklch(33% 0.07 288) 62%, var(--bg));
+  background:
+    radial-gradient(
+      56rem 30rem at 50% -12%,
+      oklch(88% 0.085 var(--brand-h) / 0.55),
+      transparent 70%
+    ),
+    radial-gradient(
+      28rem 24rem at 100% 34%,
+      oklch(94% 0.05 var(--brand-h) / 0.75),
+      transparent 70%
+    ),
+    radial-gradient(24rem 20rem at 0% 80%, oklch(94% 0.04 200 / 0.5), transparent 70%);
 }
-.home-hero-sky {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-.sky-home {
-  height: 100%;
-  /* Deeper than Today's sky: the words sit low in it, so the pale horizon is kept for the very
-     bottom, where the page takes over. */
-  background: linear-gradient(
-    180deg,
-    var(--sky-top),
-    color-mix(in oklab, var(--sky-top) 78%, var(--sky-horizon)) 62%,
-    var(--sky-horizon) 88%
-  );
-  animation: sky-in 0.9s ease both;
-}
-.sky-home::after {
-  height: 16%;
-}
-.hero-phone-screen {
-  color: var(--fg);
-}
-@keyframes sky-in {
-  from {
-    opacity: 0;
-  }
+[data-theme='dark'] .home-hero {
+  background:
+    radial-gradient(
+      56rem 30rem at 50% -12%,
+      oklch(48% 0.12 var(--brand-h) / 0.28),
+      transparent 70%
+    ),
+    radial-gradient(28rem 24rem at 100% 34%, oklch(42% 0.1 var(--brand-h) / 0.2), transparent 70%),
+    radial-gradient(24rem 20rem at 0% 80%, oklch(40% 0.08 220 / 0.16), transparent 70%);
 }
 .home-title {
   font-family: var(--font-display);
@@ -2723,16 +2713,21 @@
   line-height: 1;
   letter-spacing: -0.035em;
   text-wrap: balance;
-  text-shadow: 0 2px 30px oklch(25% 0.06 270 / 0.25);
 }
-.home-title-soft {
-  color: oklch(94% 0.06 165);
+.home-title-accent {
+  background: linear-gradient(120deg, var(--color-brand-600), var(--color-brand-400) 75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme='dark'] .home-title-accent {
+  background-image: linear-gradient(120deg, var(--color-brand-400), var(--color-brand-200) 75%);
 }
 .home-lede {
   margin-top: 1.5rem;
   font-size: 1.125rem;
   line-height: 1.6;
-  color: oklch(100% 0 0 / 0.86);
+  color: var(--fg-muted);
   text-wrap: pretty;
 }
 @media (min-width: 640px) {
@@ -2743,28 +2738,274 @@
 .home-note {
   margin-top: 1.25rem;
   font-size: 0.8125rem;
-  color: oklch(100% 0 0 / 0.82);
-  text-shadow: 0 1px 12px oklch(25% 0.06 270 / 0.35);
+  color: var(--fg-subtle);
 }
-.home-cta {
-  color: oklch(20% 0.02 260);
-  background: white;
-  box-shadow: 0 12px 30px -12px oklch(20% 0.06 270 / 0.6);
+.home-float {
+  position: absolute;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem 0.6rem 0.6rem;
+  border-radius: 1.1rem;
+  font-size: 0.875rem;
+  background: color-mix(in oklab, var(--bg-elevated) 88%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 1px 0 var(--card-highlight),
+    var(--card-shadow);
+  animation: var(--animate-float);
 }
-.home-cta:hover {
-  background: oklch(97% 0.01 260);
+@media (min-width: 640px) {
+  .home-float {
+    display: flex;
+  }
 }
-.home-cta-quiet {
-  color: white;
-  background: oklch(100% 0 0 / 0.14);
-  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.24);
-  backdrop-filter: blur(10px);
+.home-float-a {
+  top: 7rem;
+  left: -1rem;
 }
-.home-cta-quiet:hover {
-  background: oklch(100% 0 0 / 0.22);
+.home-float-b {
+  right: -1rem;
+  bottom: 0.5rem;
+  animation-delay: 1.4s;
+}
+@media (min-width: 1024px) {
+  .home-float-a {
+    left: -4rem;
+  }
+  .home-float-b {
+    right: -2.25rem;
+  }
+}
+.home-float-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.7rem;
+  color: var(--color-brand-700);
+  background: oklch(63% 0.15 var(--brand-h) / 0.14);
+}
+[data-theme='dark'] .home-float-icon {
+  color: var(--color-brand-200);
 }
 @media (prefers-reduced-motion: reduce) {
-  .sky-home {
+  .home-float {
+    animation: none;
+  }
+}
+
+/* The phone tour: three screens stacked, the live one faded in. */
+.hero-phone-screen {
+  position: relative;
+  height: 33.5rem;
+}
+.hero-screen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s var(--ease-spring);
+  pointer-events: none;
+}
+.hero-screen.is-on {
+  opacity: 1;
+  transform: none;
+}
+.hero-screen-pad {
+  padding: 1.25rem 1rem 1rem;
+}
+.hero-screen-eyebrow {
+  margin-bottom: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--color-brand-700);
+}
+[data-theme='dark'] .hero-screen-eyebrow {
+  color: var(--color-brand-300);
+}
+.hero-track {
+  position: relative;
+  height: 1.1rem;
+  margin: 0 0.4rem;
+}
+.hero-track::before,
+.hero-track-fill {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 2px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+}
+.hero-track::before {
+  right: 0;
+  background: color-mix(in oklab, var(--fg) 12%, transparent);
+}
+.hero-track-fill {
+  background: color-mix(in oklab, var(--fg) 55%, transparent);
+}
+.hero-track-dot {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 2px var(--color-brand-500);
+  transform: translate(-50%, -50%);
+  transition: background 0.3s ease;
+}
+.hero-track-dot.is-done {
+  background: var(--color-brand-500);
+}
+.hero-phone-tick.is-pop {
+  animation: tick-pop 0.5s var(--ease-spring);
+}
+.hero-meal {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s var(--ease-spring);
+}
+.hero-meal:not(.is-in) {
+  opacity: 0.55;
+}
+.hero-meal.is-in {
+  animation: var(--animate-pop);
+}
+.hero-train-stage {
+  height: 12.5rem;
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(110% 90% at 50% 100%, oklch(63% 0.15 28 / 0.14), transparent 60%),
+    var(--bg-muted);
+}
+.hero-reps {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 6.5rem;
+  aspect-ratio: 1;
+  margin: 0.85rem auto 0;
+}
+.hero-reps svg {
+  position: absolute;
+  inset: 0;
+}
+.hero-reps-track,
+.hero-reps-fill {
+  fill: none;
+  stroke-width: 6;
+}
+.hero-reps-track {
+  stroke: color-mix(in oklab, var(--fg) 9%, transparent);
+}
+.hero-reps-fill {
+  stroke: oklch(66% 0.17 28);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s var(--ease-spring);
+}
+.hero-reps > span {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 700;
+  animation: var(--animate-pop);
+}
+.hero-best {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: oklch(60% 0.15 60);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s var(--ease-spring);
+}
+.hero-best.is-in {
+  opacity: 1;
+  transform: none;
+}
+.hero-echo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.9rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  background: oklch(80% 0.1 85 / 0.14);
+}
+.hero-echo > svg {
+  flex: none;
+  margin-top: 0.1rem;
+  color: oklch(62% 0.14 70);
+}
+.hero-screen-col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.hero-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 2.75rem;
+  margin-top: auto;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--bg);
+  background: var(--fg);
+}
+.hero-pager {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.1rem;
+}
+.hero-pager-dot {
+  position: relative;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--fg) 18%, transparent);
+  transition: width 0.35s var(--ease-spring);
+}
+.hero-pager-dot.is-on {
+  width: 1.75rem;
+}
+.hero-pager-dot > span {
+  position: absolute;
+  inset: 0;
+  background: var(--color-brand-500);
+  transform-origin: left;
+}
+.hero-pager-dot.is-on:not(:has(span)) {
+  background: var(--color-brand-500);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-screen,
+  .hero-meal,
+  .hero-best,
+  .hero-pager-dot {
+    transition: none;
+  }
+  .hero-meal.is-in,
+  .hero-reps > span,
+  .hero-phone-tick.is-pop {
     animation: none;
   }
 }
