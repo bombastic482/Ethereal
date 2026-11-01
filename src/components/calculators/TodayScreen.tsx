@@ -579,8 +579,8 @@ function TodayScreenInner() {
                   <div>
                     <h2 class="font-bold tracking-tight">{m.label}</h2>
                     <p class="text-subtle text-xs">
-                      <span class="tabular">{formatNumber(n.kcal)}</span> kcal · {n.protein} g
-                      protein · guide {formatNumber(budget)} kcal
+                      <span class="tabular">{formatNumber(n.kcal)}</span> kcal ·{' '}
+                      {Math.round(n.protein)} g protein · guide {formatNumber(budget)} kcal
                     </p>
                   </div>
                   <div class="flex items-center gap-1">
@@ -606,13 +606,21 @@ function TodayScreenInner() {
                     )}
                     <button
                       type="button"
-                      class="btn btn-primary h-9 px-3 text-sm"
+                      class="btn btn-tonal h-9 px-3.5 text-sm"
                       onClick={() => setAdding(m.key)}
                     >
-                      <Icon name="spark" size={14} /> Add
+                      <Icon name="plus" size={15} /> Add
                     </button>
                   </div>
                 </header>
+                {items.length > 0 && budget > 0 && (
+                  <div class="meal-fill" aria-hidden="true">
+                    <span
+                      class={n.kcal > budget * 1.15 ? 'is-over' : ''}
+                      style={{ width: `${Math.min(100, (100 * n.kcal) / budget)}%` }}
+                    />
+                  </div>
+                )}
                 {items.length > 0 ? (
                   <ul class="stagger mt-3 grid gap-1">
                     {items.map((e, i) => (
@@ -911,14 +919,15 @@ function FoodRow({ entry, index = 0 }: { entry: FoodEntry; index?: number }) {
             {entry.brand && <span class="text-subtle font-normal"> · {entry.brand}</span>}
           </span>
           <span class="text-subtle block text-xs">
-            {fmtGrams(entry.grams, imperial)} · P {n.protein} · C {n.carbs} · F {n.fat}
+            {fmtGrams(entry.grams, imperial)} · P {Math.round(n.protein)} · C {Math.round(n.carbs)}{' '}
+            · F {Math.round(n.fat)}
           </span>
         </button>
         <span class="tabular font-semibold">{formatNumber(n.kcal)}</span>
         {key && (
           <button
             type="button"
-            class={`btn btn-ghost h-8 px-2 text-xs ${fav ? 'text-amber-500' : ''}`}
+            class={`btn btn-ghost h-8 px-2 text-xs ${fav ? 'text-amber-500' : 'fav-off'}`}
             onClick={() => toggleFavourite(key)}
             aria-label={fav ? 'Remove from favourites' : 'Add to favourites'}
             aria-pressed={fav}
@@ -993,6 +1002,14 @@ function AddFoodSheet({
   const [remoteState, setRemoteState] = useState<'idle' | 'loading' | 'error' | 'offline'>('idle');
   const [picked, setPicked] = useState<Candidate | null>(null);
   const [diary] = diaryStore.use();
+  const [foodsReady, setFoodsReady] = useState(false);
+  useEffect(() => {
+    loadFoods()
+      .then(() => setFoodsReady(true))
+      .catch(() => {
+        /* offline without the database: favourites from custom foods still show */
+      });
+  }, []);
   // Deep-linked food: pick it as soon as the database is in.
   useEffect(() => {
     if (!focusFood) return;
@@ -1077,7 +1094,40 @@ function AddFoodSheet({
       .filter((c): c is Candidate => !!c)
       .slice(0, 12);
     return { favs, recents };
-  }, [diary.favourites, diary.recent, diary.customFoods]);
+  }, [diary.favourites, diary.recent, diary.customFoods, foodsReady]);
+
+  // What you usually have at this meal, at the amount you usually have it: one tap to log it
+  // again. Counted from earlier days only, and only foods eaten here at least twice.
+  const usual = useMemo(() => {
+    const seen = new Map<string, number[]>();
+    for (const e of diary.food) {
+      if (e.meal !== meal || e.date === date) continue;
+      const key = e.barcode ?? e.foodId;
+      if (!key) continue;
+      const g = seen.get(key) ?? [];
+      g.push(e.grams);
+      seen.set(key, g);
+    }
+    return [...seen.entries()]
+      .filter(([, g]) => g.length >= 2)
+      .sort((a, b) => b[1].length - a[1].length)
+      .slice(0, 6)
+      .map(([key, g]) => {
+        const c = resolveKey(key);
+        if (!c) return null;
+        const sorted = [...g].sort((a, b) => a - b);
+        const grams = Math.round(sorted[Math.floor(sorted.length / 2)]!);
+        return {
+          ...c,
+          servings: [
+            { label: `Your usual ${grams} g`, grams },
+            ...c.servings.filter((x) => x.grams !== grams),
+          ],
+        };
+      })
+      .filter((c): c is Candidate => !!c);
+  }, [diary.food, meal, date, foodsReady]);
+  const usualKeys = new Set(usual.map((c) => c.foodId ?? c.barcode));
 
   const onBarcode = async (code: string) => {
     setScanMsg('Looking up ' + code + '…');
@@ -1169,6 +1219,13 @@ function AddFoodSheet({
                     />
                     {!q && (
                       <>
+                        {usual.length > 0 && (
+                          <CandidateList
+                            title={`Your usual ${MEALS.find((m) => m.key === meal)?.label.toLowerCase() ?? meal}`}
+                            items={usual}
+                            onPick={setPicked}
+                          />
+                        )}
                         {quickLists.favs.length > 0 && (
                           <CandidateList
                             title="Favourites"
@@ -1176,14 +1233,17 @@ function AddFoodSheet({
                             onPick={setPicked}
                           />
                         )}
-                        {quickLists.recents.length > 0 && (
+                        {quickLists.recents.some((c) => !usualKeys.has(c.foodId ?? c.barcode)) && (
                           <CandidateList
                             title="Recent"
-                            items={quickLists.recents}
+                            items={quickLists.recents.filter(
+                              (c) => !usualKeys.has(c.foodId ?? c.barcode),
+                            )}
                             onPick={setPicked}
                           />
                         )}
-                        {quickLists.favs.length + quickLists.recents.length === 0 && (
+                        {usual.length + quickLists.favs.length + quickLists.recents.length ===
+                          0 && (
                           <p class="text-subtle text-sm">
                             Try "chicken", "oats", "greek yogurt" or a brand name. Favourites and
                             recent foods will appear here.

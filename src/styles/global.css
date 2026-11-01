@@ -450,6 +450,19 @@
     }
   }
 }
+@utility btn-tonal {
+  color: var(--color-brand-800);
+  background: oklch(63% 0.15 var(--brand-h) / 0.13);
+  @media (hover: hover) {
+    &:hover {
+      background: oklch(63% 0.15 var(--brand-h) / 0.22);
+    }
+  }
+  [data-theme='dark'] & {
+    color: var(--color-brand-100);
+    background: oklch(63% 0.15 var(--brand-h) / 0.2);
+  }
+}
 @utility btn-ghost {
   background: transparent;
   color: var(--fg-muted);
@@ -4219,4 +4232,34 @@
 [data-theme='dark'] .plan-portion {
   color: var(--color-brand-100);
   background: oklch(63% 0.15 var(--brand-h) / 0.24);
+}
+
+/* Today: how much of a meal's share of the day is eaten, as a hairline under its heading. */
+.meal-fill {
+  height: 3px;
+  margin-top: 0.7rem;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  overflow: hidden;
+}
+.meal-fill > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand-500);
+  transform-origin: left;
+  animation: journey-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.meal-fill > span.is-over {
+  background: var(--color-accent-500);
+}
+.fav-off {
+  color: var(--fg-subtle);
+  opacity: 0.55;
+}
+@media (prefers-reduced-motion: reduce) {
+  .meal-fill > span {
+    animation: none;
+  }
 }

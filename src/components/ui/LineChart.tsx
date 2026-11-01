@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'preact/hooks';
+import { useId, useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 interface Point {
   x: number;
@@ -35,16 +35,20 @@ export function LineChart({
   const gradient = `area-${useId()}`;
   const [hover, setHover] = useState<number | null>(null);
   const [width, setWidth] = useState(640);
-  useEffect(() => {
+  // Measured before the first paint, so the chart never visibly jumps to its real size.
+  useLayoutEffect(() => {
     const el = box.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
+    if (!el) return;
+    if (el.clientWidth > 0) setWidth(Math.max(260, el.clientWidth));
+    if (typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver(([e]) => {
       const w = Math.round(e!.contentRect.width);
       if (w > 0) setWidth(Math.max(260, w));
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+    // Re-attach when the chart first appears (it renders nothing with fewer than two points).
+  }, [points.length >= 2]);
   if (points.length < 2) return null;
   const W = width;
   const H = Math.round(Math.min(260, Math.max(180, W * 0.42)));
