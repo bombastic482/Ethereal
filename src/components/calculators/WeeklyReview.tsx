@@ -3,7 +3,7 @@ import { estimateExpenditure } from '@/lib/calc/expenditure';
 import { topFoods } from '@/lib/calc/breakdown';
 import { buildInsights } from '@/lib/calc/insights';
 import { adherencePercent, summariseDay } from '@/lib/calc/nutrition';
-import { currentStreak, longestStreak, shift } from '@/lib/calc/streaks';
+import { shift } from '@/lib/calc/streaks';
 import { assessProgress, daysBetween, trendSeries } from '@/lib/calc/trend';
 import { formatNumber, formatWeight, kgToLb, round } from '@/lib/calc/units';
 import { diaryStore, prefsStore } from '@/lib/food-store';
@@ -17,7 +17,7 @@ import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { Icon } from '../ui/Icon';
 import { Stat } from '../ui/Stat';
-import { Heatmap } from '../ui/Heatmap';
+import Rhythm from '../progress/Rhythm';
 import { WeekBars } from '../ui/WeekBars';
 
 import { reflectionStore } from '@/lib/reflections';
@@ -75,24 +75,6 @@ function WeeklyReviewInner() {
     [days, diary.food, diary.exercise, t, prefs.eatBack],
   );
   const logged = per.filter((x) => x.s.eaten.kcal > 0);
-  // Consistency grid: meal slots with food per day over the last 12 weeks.
-  const consistency = useMemo(() => {
-    const slots = new Map<string, Set<string>>();
-    for (const e of diary.food) {
-      const set = slots.get(e.date) ?? new Set<string>();
-      set.add(e.meal);
-      slots.set(e.date, set);
-    }
-    const values: Record<string, number> = {};
-    for (const [d, set] of slots) values[d] = set.size;
-    const dates = [...slots.keys()];
-    return {
-      values,
-      daysLogged: dates.filter((d) => d > shift(today, -84) && d <= today).length,
-      current: currentStreak(dates, today),
-      longest: longestStreak(dates),
-    };
-  }, [diary.food, today]);
   const avg = (f: (x: (typeof per)[number]) => number) =>
     logged.length ? Math.round(logged.reduce((a, x) => a + f(x), 0) / logged.length) : null;
   const adherence = adherencePercent(
@@ -259,8 +241,13 @@ function WeeklyReviewInner() {
           <span class="chip">
             {logged.length}/7 days logged · {weighIns} weigh-ins
           </span>
-          <button type="button" class="btn btn-secondary h-9 px-3 text-sm" onClick={copySummary}>
-            <Icon name={copied ? 'check' : 'copy'} size={14} /> {copied ? 'Copied' : 'Copy summary'}
+          <button
+            type="button"
+            class="btn btn-secondary h-9 px-3 text-sm"
+            onClick={copySummary}
+            aria-label={copied ? 'Summary copied' : "Copy the week's summary"}
+          >
+            <Icon name={copied ? 'check' : 'copy'} size={14} /> {copied ? 'Copied' : 'Copy'}
           </button>
           <span class="sr-only" role="status">
             {copied ? 'Summary copied to the clipboard' : ''}
@@ -270,9 +257,10 @@ function WeeklyReviewInner() {
             class="btn btn-secondary h-9 px-3 text-sm"
             onClick={shareWeek}
             disabled={shareState === 'busy' || per.length === 0}
+            aria-label="Share this week as a card"
           >
             <Icon name={shareState === 'done' ? 'check' : 'spark'} size={14} />{' '}
-            {shareState === 'done' ? 'Shared' : 'Share this week'}
+            {shareState === 'done' ? 'Shared' : 'Share'}
           </button>
           <button
             type="button"
@@ -477,43 +465,8 @@ function WeeklyReviewInner() {
               </ol>
             </section>
           )}
-          <section class="surface p-5 sm:p-6" aria-label="Consistency">
-            <div class="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h3 class="text-lg font-bold tracking-tight">Twelve weeks of showing up</h3>
-                <p class="text-subtle text-xs">
-                  One square per day; darker means more meals logged. Consistency predicts results
-                  better than any single day.
-                </p>
-              </div>
-              <dl class="flex gap-5 text-sm">
-                <div>
-                  <dt class="text-subtle text-xs">Days logged</dt>
-                  <dd class="tabular font-semibold">{consistency.daysLogged} / 84</dd>
-                </div>
-                <div>
-                  <dt class="text-subtle text-xs">Current streak</dt>
-                  <dd class="tabular font-semibold">{consistency.current} d</dd>
-                </div>
-                <div>
-                  <dt class="text-subtle text-xs">Longest</dt>
-                  <dd class="tabular font-semibold">{consistency.longest} d</dd>
-                </div>
-              </dl>
-            </div>
-            <div class="mt-4">
-              <Heatmap
-                values={consistency.values}
-                max={4}
-                end={today}
-                weeks={12}
-                label="Meals logged per day over the last twelve weeks"
-                describe={(d, v) =>
-                  `${v} meal${v === 1 ? '' : 's'} logged on ${new Date(`${d}T00:00:00`).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`
-                }
-              />
-            </div>
-          </section>
+          {/* The same twelve weeks as on Progress, so there is one picture of showing up. */}
+          <Rhythm />
           <section class="surface p-5 sm:p-6" aria-label="Reflection">
             <h3 class="text-lg font-bold tracking-tight">Two lines for future you</h3>
             <p class="text-subtle text-xs">

@@ -172,11 +172,10 @@ test.describe('weekly review', () => {
     await dialog.getByRole('button', { name: /^Add \d+ g$/ }).click();
 
     await ready(page, '/review/');
-    const grid = page.getByRole('region', { name: 'Consistency' });
+    // The same rhythm as on Progress, with today's food already in it.
+    const grid = page.getByRole('region', { name: 'Your rhythm' });
     await expect(grid).toBeVisible();
-    await expect(grid.getByText('Days logged')).toBeVisible();
-    await expect(grid.getByText(/^1 \/ 84$/)).toBeVisible();
-    await expect(grid.getByRole('img', { name: /meals logged per day/i })).toBeVisible();
+    await expect(grid.getByText('Logged food')).toBeVisible();
     await expect(page.getByRole('link', { name: /plan next week's meals/i })).toBeVisible();
 
     const reflection = page.getByRole('region', { name: 'Reflection' });
