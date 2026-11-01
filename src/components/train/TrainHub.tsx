@@ -18,6 +18,7 @@ import {
 } from '@/lib/train/program';
 import { weekStreak } from '@/lib/train/session';
 import { trainStore } from '@/lib/train/store';
+import { isGentleDay, mindStore } from '@/lib/mind';
 import { withBase } from '@/lib/url';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
@@ -65,13 +66,18 @@ function TrainHubInner() {
   const [weights] = logStore.use();
   const [editing, setEditing] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [short, setShort] = useState(false);
+  const [mind] = mindStore.use();
   const [today, setToday] = useState('');
   useEffect(() => setToday(todayIso()), []);
   // /train/#start (from the Now card on Today) opens the player straight away.
   useEffect(() => {
-    if (!today || location.hash !== '#start') return;
+    if (!today || !location.hash.startsWith('#start')) return;
+    const wantShort = location.hash === '#start-short';
     history.replaceState(history.state, '', location.pathname + location.search);
-    if (trainStore.get().setup) setPlaying(true);
+    if (!trainStore.get().setup) return;
+    setShort(wantShort);
+    setPlaying(true);
   }, [today]);
 
   const { setup, log, current } = state;
@@ -100,7 +106,15 @@ function TrainHubInner() {
   const doneToday = log.filter((l) => l.date === today);
   const trainingDay = sessionOn(setup, today) !== null;
   const resume = current && current.date === today ? current : null;
-  const workout = buildWorkout(setup, resume?.session ?? session, resume?.week ?? week);
+  // Back after a long gap: the same moves at week-one volume. A low day offers ten minutes.
+  const lastDate = log[log.length - 1]?.date;
+  const gap = lastDate
+    ? Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${lastDate}T00:00:00Z`)) / 864e5)
+    : 0;
+  const comeback = gap >= 10;
+  const gentle = isGentleDay(mind.checkins.find((c) => c.date === today));
+  const options = resume?.opts ?? { short, comeback };
+  const workout = buildWorkout(setup, resume?.session ?? session, resume?.week ?? week, options);
   const nextDay = (() => {
     for (let i = 1; i <= 7; i++) {
       const d = addDays(today, i);
@@ -121,7 +135,14 @@ function TrainHubInner() {
         trainingDay={trainingDay}
         resuming={!!resume}
         nextDay={nextDay}
+        comebackDays={!resume && comeback ? gap : 0}
+        gentle={!resume && gentle && !short}
+        short={!!options.short}
         onStart={() => setPlaying(true)}
+        onShort={() => {
+          setShort(true);
+          setPlaying(true);
+        }}
       />
 
       <WeekStrip setup={setup} today={today} log={log} />
@@ -233,7 +254,11 @@ function TrainHubInner() {
             date={today}
             weightKg={weightKg}
             resume={resume}
-            onClose={() => setPlaying(false)}
+            options={options}
+            onClose={() => {
+              setPlaying(false);
+              setShort(false);
+            }}
           />
         </Suspense>
       )}
@@ -250,7 +275,11 @@ function TodayCard({
   trainingDay,
   resuming,
   nextDay,
+  comebackDays,
+  gentle,
+  short,
   onStart,
+  onShort,
 }: {
   setup: TrainSetup;
   workout: ReturnType<typeof buildWorkout>;
@@ -260,7 +289,11 @@ function TodayCard({
   trainingDay: boolean;
   resuming: boolean;
   nextDay: string | null;
+  comebackDays: number;
+  gentle: boolean;
+  short: boolean;
   onStart: () => void;
+  onShort: () => void;
 }) {
   const hero = workout.main[0]?.exercise;
   const title = done
@@ -274,11 +307,15 @@ function TodayCard({
     ? `${doneMinutes} minutes in the bank. Eat some protein, drink water, sleep well: that is when the muscle is built.`
     : resuming
       ? 'Your progress is saved. Carry on from the exact set you stopped at.'
-      : trainingDay
-        ? `${workout.main.length} exercises, about ${workout.estimatedMinutes} minutes, all on the floor of your room.`
-        : `Recovery is part of the plan. A ${workout.walkMinutes}-minute walk still helps.${
-            nextDay ? ` Next session ${DAY_LONG[weekdayOf(nextDay)]}.` : ''
-          }`;
+      : comebackDays
+        ? `Welcome back after ${comebackDays} days. Today is lighter on purpose: the same moves, two sets each. Next time, back to normal.`
+        : gentle
+          ? 'A low day. Do the full session if you feel like it once you start, or the ten-minute version. Both count.'
+          : trainingDay
+            ? `${workout.main.length} exercises, about ${workout.estimatedMinutes} minutes, all on the floor of your room.`
+            : `Recovery is part of the plan. A ${workout.walkMinutes}-minute walk still helps.${
+                nextDay ? ` Next session ${DAY_LONG[weekdayOf(nextDay)]}.` : ''
+              }`;
   return (
     <section class="train-hero surface overflow-hidden" aria-labelledby="train-today-h">
       <div class="grid items-center gap-2 sm:grid-cols-[1.1fr_1fr]">
@@ -296,6 +333,11 @@ function TodayCard({
               <button type="button" class="btn btn-primary h-12 px-6 text-base" onClick={onStart}>
                 <Icon name="play" size={18} />
                 {resuming ? 'Resume' : trainingDay ? 'Start workout' : 'Train anyway'}
+              </button>
+            )}
+            {!done && !resuming && (gentle || !trainingDay) && !short && (
+              <button type="button" class="btn btn-secondary h-12 px-5" onClick={onShort}>
+                10-minute version
               </button>
             )}
             {done && (

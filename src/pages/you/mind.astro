@@ -1,0 +1,15 @@
+---
+import MindHub from '@/components/mind/MindHub';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Mind"
+  description="Mood and energy check-ins that shape your day, four-week patterns, guided breathing for calm, focus and sleep, and gentle guardrails against overdoing it."
+  path="/you/mind/"
+  heading="Mind"
+  lede="How you feel is part of the plan, not a side note."
+  section="you"
+>
+  <MindHub client:load />
+</AppLayout>

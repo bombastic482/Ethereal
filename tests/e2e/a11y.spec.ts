@@ -22,6 +22,7 @@ const PAGES = [
   '/train/exercises/push-up/',
   '/you/',
   '/you/health/',
+  '/you/mind/',
   '/track/',
   '/settings/',
   '/about/',

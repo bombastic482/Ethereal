@@ -1390,3 +1390,124 @@
     display: none !important;
   }
 }
+
+/* Breathe */
+.breathe {
+  color: white;
+  background:
+    radial-gradient(80% 60% at 50% 40%, oklch(45% 0.1 200 / 0.6), transparent 70%),
+    linear-gradient(180deg, oklch(24% 0.05 240), oklch(16% 0.03 250));
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  animation: var(--animate-backdrop);
+}
+.breathe-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(18rem, 70vw);
+  aspect-ratio: 1;
+}
+.breathe-orb {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    oklch(88% 0.08 175),
+    oklch(62% 0.13 185) 55%,
+    oklch(45% 0.12 200)
+  );
+  box-shadow:
+    0 0 80px oklch(70% 0.13 180 / 0.45),
+    inset 0 -20px 50px oklch(30% 0.08 220 / 0.5);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  will-change: transform;
+}
+.breathe-ring {
+  position: absolute;
+  inset: -6%;
+  border-radius: 999px;
+  border: 1.5px solid oklch(100% 0 0 / 0.18);
+}
+.breathe-label {
+  margin-top: 2.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .breathe {
+    animation: none;
+  }
+  .breathe-orb {
+    transition: none;
+  }
+}
+
+/* Mood check-in */
+.mood-pick {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 0.2rem;
+  border-radius: 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  background: var(--bg-muted);
+  transition:
+    transform 0.18s var(--ease-spring),
+    background-color 0.15s ease;
+}
+.mood-pick:active {
+  transform: scale(0.93);
+}
+.mood-on {
+  color: var(--fg);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 2px var(--mood);
+}
+.mood-dot {
+  display: block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: var(--mood);
+}
+.mood-1 {
+  --mood: oklch(64% 0.15 30);
+}
+.mood-2 {
+  --mood: oklch(72% 0.14 60);
+}
+.mood-3 {
+  --mood: oklch(80% 0.12 95);
+}
+.mood-4 {
+  --mood: oklch(72% 0.14 150);
+}
+.mood-5 {
+  --mood: oklch(64% 0.15 170);
+}
+.gentle-card {
+  background:
+    radial-gradient(120% 140% at 0% 0%, oklch(70% 0.1 280 / 0.14), transparent 60%),
+    var(--bg-elevated);
+}
+.comeback-card {
+  background:
+    radial-gradient(120% 140% at 100% 0%, oklch(80% 0.12 85 / 0.18), transparent 60%),
+    var(--bg-elevated);
+}
+.mood-strip {
+  display: grid;
+  grid-template-columns: repeat(28, minmax(0, 1fr));
+  gap: 2px;
+}
+.mood-strip > span {
+  height: 1.4rem;
+  border-radius: 4px;
+  background: var(--mood, color-mix(in oklab, var(--fg) 7%, transparent));
+}

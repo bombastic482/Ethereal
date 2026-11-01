@@ -219,12 +219,24 @@ export function prescribe(
   return { exercise: e, ladder, sets, low, high, restSec };
 }
 
+export interface WorkoutOptions {
+  /** A ten-minute version for low days: three moves, two sets, a short walk. */
+  short?: boolean;
+  /** Back after a long gap: week-one volume again, same moves. */
+  comeback?: boolean;
+}
+
 /** The workout for one session in a given week. */
-export function buildWorkout(setup: TrainSetup, session: Session, week: number): Workout {
-  const starter = week === 1;
+export function buildWorkout(
+  setup: TrainSetup,
+  session: Session,
+  week: number,
+  options: WorkoutOptions = {},
+): Workout {
+  const starter = week === 1 || !!options.comeback;
   const slotCount = setup.minutes === 20 ? 4 : setup.minutes === 30 ? 5 : 6;
-  const count = starter ? Math.min(slotCount, 4) : slotCount;
-  const sets = starter ? 2 : setup.minutes === 45 && week >= 3 ? 4 : 3;
+  const count = options.short ? 3 : starter ? Math.min(slotCount, 4) : slotCount;
+  const sets = options.short || starter ? 2 : setup.minutes === 45 && week >= 3 ? 4 : 3;
   const rest = setup.minutes === 20 ? 45 : 60;
   const seen = new Set<string>();
   const main: Prescription[] = [];
@@ -246,7 +258,15 @@ export function buildWorkout(setup: TrainSetup, session: Session, week: number):
   const warmUp = WARM_UP.map((id) => easy(id, 45));
   const coolDown = COOL_DOWN.map((id) => easy(id, 40));
   const treadmill = setup.equipment.includes('treadmill');
-  const walkMinutes = starter ? 15 : setup.minutes === 20 ? 15 : setup.minutes === 30 ? 20 : 30;
+  const walkMinutes = options.short
+    ? 10
+    : starter
+      ? 15
+      : setup.minutes === 20
+        ? 15
+        : setup.minutes === 30
+          ? 20
+          : 30;
   const walkTip = treadmill
     ? setup.easyOnLegs
       ? 'Treadmill at an easy pace, about 4 km/h, incline 0.'

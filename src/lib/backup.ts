@@ -11,6 +11,7 @@ import { clearPhotos, photosSupported } from './photos';
 import { reflectionStore, type Reflections } from './reflections';
 import { bodyStore, type BodyState } from './body';
 import { healthStore, type HealthState } from './health';
+import { mindStore, type MindState } from './mind';
 import { lifeStore, type Life } from './life';
 import { trainStore, type TrainState } from './train/store';
 
@@ -28,6 +29,7 @@ export interface Backup {
   life?: Life;
   body?: BodyState;
   health?: HealthState;
+  mind?: MindState;
 }
 
 const PROFILE_KEY = 'ethereal:profile:v1';
@@ -56,6 +58,7 @@ export function createBackup(): Backup {
     life: lifeStore.get(),
     body: bodyStore.get(),
     health: healthStore.get(),
+    mind: mindStore.get(),
   };
 }
 
@@ -83,6 +86,7 @@ export function validateBackup(raw: unknown): Backup | null {
     ...(b.life && typeof b.life === 'object' ? { life: b.life } : {}),
     ...(b.body && typeof b.body === 'object' ? { body: b.body } : {}),
     ...(b.health && typeof b.health === 'object' ? { health: b.health } : {}),
+    ...(b.mind && typeof b.mind === 'object' ? { mind: b.mind } : {}),
   };
 }
 
@@ -100,6 +104,7 @@ export function restoreBackup(raw: unknown): boolean {
   if (b.life) lifeStore.restore(b.life);
   if (b.body) bodyStore.restore(b.body);
   if (b.health) healthStore.restore(b.health);
+  if (b.mind) mindStore.restore(b.mind);
   return true;
 }
 
@@ -168,6 +173,7 @@ export async function clearAllData(): Promise<void> {
   lifeStore.reset();
   bodyStore.reset();
   healthStore.reset();
+  mindStore.reset();
   resetProfile();
   try {
     for (const key of Object.keys(localStorage)) {

@@ -32,6 +32,8 @@ interface Props {
   date: string;
   weightKg: number;
   resume?: InProgress | null;
+  /** The variant the session was built with, saved so a resume rebuilds the same steps. */
+  options?: { short?: boolean; comeback?: boolean };
   onClose: () => void;
 }
 
@@ -92,7 +94,15 @@ function stepLabel(s: Step, w: Workout): string {
   }
 }
 
-export default function WorkoutPlayer({ setup, workout, date, weightKg, resume, onClose }: Props) {
+export default function WorkoutPlayer({
+  setup,
+  workout,
+  date,
+  weightKg,
+  resume,
+  options,
+  onClose,
+}: Props) {
   const [main, setMain] = useState<string[]>(
     () => resume?.main ?? workout.main.map((p) => p.exercise.id),
   );
@@ -151,6 +161,7 @@ export default function WorkoutPlayer({ setup, workout, date, weightKg, resume, 
         step,
         values,
         activeMs: activeMs.current,
+        ...(options && (options.short || options.comeback) ? { opts: options } : {}),
       },
     });
   }, [step, values, main, started, finished]);

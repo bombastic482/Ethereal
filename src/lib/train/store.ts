@@ -27,6 +27,8 @@ export interface InProgress {
   values: Record<number, number>;
   /** Active time so far, in ms, excluding pauses. */
   activeMs: number;
+  /** The session's variant, so a resumed short or comeback session keeps its shape. */
+  opts?: { short?: boolean; comeback?: boolean };
 }
 
 export interface TrainState {

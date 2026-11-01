@@ -62,6 +62,7 @@ export const SECTIONS: Record<
     pages: [
       { href: '/you/', label: 'Profile' },
       { href: '/you/health/', label: 'Health' },
+      { href: '/you/mind/', label: 'Mind' },
       { href: '/settings/', label: 'Settings & data' },
     ],
   },

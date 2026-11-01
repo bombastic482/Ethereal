@@ -237,3 +237,24 @@ describe('session steps', async () => {
     expect(weekStreak(log, '2026-11-01', '2026-12-01')).toBe(0);
   });
 });
+
+describe('short and comeback sessions', async () => {
+  const { buildWorkout, defaultSetup } = await import('../program');
+  const setup = { ...defaultSetup('2026-11-01', 2), minutes: 45 as const };
+  it('a short session is three moves, two sets and a short walk', () => {
+    const w = buildWorkout(setup, 'A', 6, { short: true });
+    expect(w.main).toHaveLength(3);
+    expect(w.main.every((p) => p.sets === 2)).toBe(true);
+    expect(w.walkMinutes).toBe(10);
+    expect(w.estimatedMinutes).toBeLessThan(buildWorkout(setup, 'A', 6).estimatedMinutes);
+  });
+  it('a comeback session drops to week-one volume with the same moves', () => {
+    const full = buildWorkout(setup, 'B', 6);
+    const back = buildWorkout(setup, 'B', 6, { comeback: true });
+    expect(back.main.every((p) => p.sets === 2)).toBe(true);
+    expect(back.main.length).toBeLessThanOrEqual(4);
+    expect(back.main.map((p) => p.exercise.id)).toEqual(
+      full.main.slice(0, back.main.length).map((p) => p.exercise.id),
+    );
+  });
+});

@@ -21,6 +21,7 @@ import { useProfile } from '@/lib/profile';
 import { buildWorkout, weekOf } from '@/lib/train/program';
 import { trainStore } from '@/lib/train/store';
 import { withBase } from '@/lib/url';
+import TodayMind from '../mind/TodayMind';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon, type IconName } from '../ui/Icon';
 
@@ -247,6 +248,8 @@ function TodayPlanInner() {
         </div>
       )}
 
+      <TodayMind date={date} />
+
       {missed.length > 0 && (
         <div class="surface-muted rounded-2xl">
           <button
@@ -416,6 +419,16 @@ function NowCard({
             <Icon name="camera" size={18} /> Take photos
           </a>
         );
+      case 'wind':
+        return (
+          <button
+            type="button"
+            class="btn btn-primary h-12 px-5"
+            onClick={() => window.dispatchEvent(new Event('ethereal:breathe'))}
+          >
+            <Icon name="leaf" size={18} /> Breathe for two minutes
+          </button>
+        );
       default:
         return (
           <button type="button" class="btn btn-primary h-12 px-5" onClick={onTick}>
@@ -424,7 +437,7 @@ function NowCard({
         );
     }
   })();
-  const hasOwnAction = ['meal', 'workout', 'weigh', 'photo', 'measure'].includes(item.kind);
+  const hasOwnAction = ['meal', 'workout', 'weigh', 'photo', 'measure', 'wind'].includes(item.kind);
   return (
     <div class={`now-card now-${item.kind} surface overflow-hidden`} aria-live="polite">
       <div class="flex items-start gap-4 p-5 sm:p-6">
