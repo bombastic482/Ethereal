@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useMemo, useRef } from 'preact/hooks';
 import {
   FLOOR,
   loopLength,
@@ -134,6 +134,84 @@ const lineAttrs = (a: Point, b: Point) => ({
   y2: f2(b[1]),
 });
 
+/** The horizontal span a prop occupies, for framing. */
+function propSpan(p: SceneProp): [number, number, number] {
+  switch (p.kind) {
+    case 'door':
+      return [p.x - 30, p.x + 6, 10];
+    case 'wall':
+      return [p.x, p.x + 5, 10];
+    case 'treadmill':
+      return [p.x, p.x + p.w + 4, FLOOR - 70];
+    case 'chair':
+      return [p.x, p.x + p.w, FLOOR - p.h - (p.back === false ? 0 : 26)];
+    case 'bed':
+      return [p.x, p.x + p.w, FLOOR - p.h - 5];
+    case 'mat':
+      return [p.x, p.x + p.w, FLOOR - 2];
+    default:
+      return [p.x, p.x + p.w, FLOOR - p.h];
+  }
+}
+
+/**
+ * A view box that frames the whole movement: every joint over the loop plus the props, padded,
+ * widened to the scene's 11:7 shape and sitting on the floor. Small moves (a plank, a bridge)
+ * then fill the frame instead of floating in it.
+ */
+export function fitBox(
+  keys: readonly Key[],
+  props: readonly SceneProp[] = [],
+): [number, number, number, number] {
+  let x0 = Infinity;
+  let x1 = -Infinity;
+  let y0 = Infinity;
+  const cycle = loopLength(keys);
+  const steps = keys.length < 2 ? 1 : 72;
+  for (let i = 0; i < steps; i++) {
+    const j = solve(poseAt(keys, (cycle * i) / steps));
+    const pts = [
+      j.hip,
+      j.neck,
+      j.shoulder,
+      ...j.arm.n,
+      ...j.arm.f,
+      ...j.leg.n,
+      ...j.leg.f,
+      j.toe.n,
+      j.toe.f,
+    ];
+    for (const [x, y] of pts) {
+      x0 = Math.min(x0, x - 6);
+      x1 = Math.max(x1, x + 6);
+      y0 = Math.min(y0, y - 6);
+    }
+    x0 = Math.min(x0, j.head[0] - 9);
+    x1 = Math.max(x1, j.head[0] + 9);
+    y0 = Math.min(y0, j.head[1] - 9);
+  }
+  for (const p of props) {
+    const [a, b, top] = propSpan(p);
+    x0 = Math.min(x0, a - 2);
+    x1 = Math.max(x1, b + 2);
+    y0 = Math.min(y0, top - 2);
+  }
+  const pad = 10;
+  const bottom = FLOOR + 12;
+  let w = x1 - x0 + pad * 2;
+  let h = bottom - (y0 - pad);
+  // Keep the scene's shape, never zoom in more than 1.8×.
+  const ratio = W / H;
+  if (w / h < ratio) w = h * ratio;
+  else h = w / ratio;
+  if (w < W / 1.8) {
+    w = W / 1.8;
+    h = w / ratio;
+  }
+  const cx = (x0 + x1) / 2;
+  return [cx - w / 2, bottom - h, w, h];
+}
+
 /** The time into the loop at which the figure sits exactly on key `peak`. */
 function peakTime(keys: readonly Key[], peak: number): number {
   const cycle = loopLength(keys);
@@ -265,6 +343,10 @@ export interface FigureProps {
   paused?: boolean;
   /** Draws a towel from the hands to the feet. */
   towel?: boolean;
+  /** Where the scene sits in a box of a different shape: centred, or standing on the bottom. */
+  align?: 'center' | 'bottom';
+  /** Zoom to frame the movement (the default) instead of showing the whole stage. */
+  fit?: boolean;
 }
 
 export function Figure({
@@ -277,6 +359,8 @@ export function Figure({
   class: cls,
   paused = false,
   towel = false,
+  align = 'center',
+  fit = true,
 }: FigureProps) {
   const svg = useRef<SVGSVGElement>(null);
   const segs = useRef<Partial<Record<Seg, SVGLineElement>>>({});
@@ -345,6 +429,10 @@ export function Figure({
     };
   }, [keys, speed, paused, peak]);
 
+  const box = useMemo(
+    () => (fit ? fitBox(keys, props) : ([0, 0, W, H] as [number, number, number, number])),
+    [fit, keys, props],
+  );
   // A faint copy of the starting position, shown only when motion is reduced.
   const ghost = solve(keys[0]!.pose);
   // The first paint (and the server render) shows the working position, so a demo is never
@@ -359,13 +447,14 @@ export function Figure({
   return (
     <svg
       ref={svg}
-      viewBox={`0 0 ${W} ${H}`}
+      viewBox={box.map((n) => n.toFixed(1)).join(' ')}
+      preserveAspectRatio={align === 'bottom' ? 'xMidYMax meet' : 'xMidYMid meet'}
       class={`fig ${cls ?? ''}`}
       role="img"
       aria-label={label}
     >
       <ellipse ref={shadow} {...shadowOf(first)} cy={FLOOR + 1.5} ry={3.2} class="fig-shadow" />
-      <line x1={4} y1={FLOOR} x2={W - 4} y2={FLOOR} class="fig-floor" />
+      <line x1={box[0] + 4} y1={FLOOR} x2={box[0] + box[2] - 4} y2={FLOOR} class="fig-floor" />
       {props.map((p, i) => (
         <Prop key={i} p={p} />
       ))}

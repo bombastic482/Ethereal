@@ -1,7 +1,7 @@
 <a href="https://bombastic482.github.io/Ethereal/">
   <picture>
     <source media="(max-width: 700px)" srcset="docs/readme/hero-mobile.webp" />
-    <img src="docs/readme/hero.webp" width="100%" alt="Ethereal: weight loss, done properly. The complete weight-loss app that runs in your browser, shown on a desktop browser and a phone." />
+    <img src="docs/readme/hero.webp" width="100%" alt="Ethereal: become who you're working toward. A calm coach for your whole self, shown on a desktop browser with Today's plan and a phone in the middle of a workout." />
   </picture>
 </a>
 
@@ -25,16 +25,37 @@
 
 <br />
 
-Most weight-loss apps are a subscription with a database attached. They keep your data, sell your attention and hide the maths.
+Most health apps do one thing, charge a subscription for it, and leave you to work out the rest: which workout, what to eat, when, and whether any of it is working.
 
-**Ethereal is the opposite.** It is a complete weight-loss app that runs in your browser on any phone, tablet or computer: a personal plan, a food diary, a weight trend, recipes, restaurant guides and a weekly review. It is free and private, needs no account, and every formula is open.
+**Ethereal is a calm coach for your whole self.** It plans your day around your life, trains you at home with animated demos that grow with you, keeps your food on track, and shows the trend that matters. It runs in your browser on any phone, tablet or computer. It is free and private, needs no account, and every formula is open.
 
 <picture>
   <source media="(max-width: 700px)" srcset="docs/readme/numbers-mobile.webp" />
-  <img src="docs/readme/numbers.webp" width="100%" alt="1,444 foods searchable offline, 66 high-protein recipes, 155 restaurant dishes at 20 chains, 18 guides, 8 free calculators, and 0 ads or trackers." />
+  <img src="docs/readme/numbers.webp" width="100%" alt="41 animated exercises for a small room, 1,444 foods searchable offline, 66 high-protein recipes, 155 restaurant dishes at 20 chains, 18 guides, and 0 ads or trackers." />
 </picture>
 
 <br />
+
+## Always know the next step
+
+Today opens with your day, planned around you: the thing to do now, with one button to do it, and the rest of the day in order. Tell it when you wake, eat and work once, and it does the planning.
+
+- **A Now card with a countdown.** Log lunch, start the workout, weigh in, or tick it done.
+- **Your whole day in one line.** Meals, medicines at the right time, prayer times calculated on the device, training placed clear of work and meals, winding down and sleep.
+- **No guilt.** Missed something? Catch me up gathers it: tick what you did, let the rest go. Fasting moves meals to suhoor and iftar and training to after iftar.
+
+## Train at home, starting small
+
+A plan built from what you have (a towel, a chair, a bed, or nothing), the days that suit you and where you are starting. Week one is deliberately light, and each move climbs a ladder, from wall push-ups to the real thing.
+
+- **A guided player.** Animated demo, rep counter, timed holds, a rest timer with beeps and optional spoken cues, and the screen kept awake. Close it mid-set and it resumes from the same place.
+- **It moves you up when you're ready.** Hit the top of the range on every set and the next session offers the harder move. Too hard today? Swap down in one tap.
+- **41 exercises with animated demos,** the muscles they work, form cues and the mistakes to avoid. Knees complaining? One switch removes jumping, lunging and deep single-leg work.
+
+<picture>
+  <source media="(max-width: 700px)" srcset="docs/readme/train-mobile.webp" />
+  <img src="docs/readme/train.webp" width="100%" alt="The Train page on a desktop browser with this week, today's session and the move ladders, and the exercise library on a phone with animated demos." />
+</picture>
 
 ## Log a day in seconds
 
@@ -51,7 +72,7 @@ Type what you ate in plain words, scan a barcode, or search 1,444 foods that wor
 
 ## A plan that adapts to you
 
-Three questions give you a calorie target, protein, macros and a realistic goal date. Deficits are capped and floored, so the app never suggests anything reckless.
+A few questions give you a calorie target, protein, macros and a realistic goal date. Deficits are capped and floored, so the app never suggests anything reckless.
 
 - **It learns your real burn.** After a few weeks it measures your actual expenditure from what you ate and how your trend moved.
 - **Every two weeks, one decision.** It compares your real rate with the plan and recommends one specific, capped calorie change.
@@ -91,6 +112,7 @@ Daily weigh-ins are smoothed into a trend, so water weight and one salty dinner 
 | Your data        | Stays on your device   | On their servers                |
 | Ads and trackers | None                   | Common                          |
 | Calorie target   | Adapts every two weeks | Set once                        |
+| Training         | Included, progresses   | A separate app                  |
 | The maths        | Open and documented    | Hidden                          |
 
 The full comparison with MyFitnessPal, Lose It! and MacroFactor is on the [compare page](https://bombastic482.github.io/Ethereal/compare/).
@@ -126,17 +148,20 @@ flowchart LR
   X -.refines.-> T
 ```
 
-| Question             | Method                                                                                                                            |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Maintenance calories | Mifflin-St Jeor by default; Harris-Benedict, or Katch-McArdle from body fat. Activity multipliers 1.2 to 1.9.                     |
-| Daily target         | Deficit capped at 25% of TDEE (550 kcal always allowed); floors of 1,200 kcal (female) and 1,500 kcal (male).                     |
-| Goal date            | A week-by-week projection that recomputes maintenance as you get lighter.                                                         |
-| Trend weight         | Exponential moving average of daily weigh-ins, with a 14-day slope.                                                               |
-| Two-week check       | Trend rate against the planned rate in a toward-goal frame; at most ±250 kcal, never below the floors, 14-day cooldown.           |
-| Measured expenditure | Average intake plus the energy implied by the trend change (7,700 kcal per kg), with a confidence grade.                          |
-| Protein              | 1.6 to 2.2 g per kg of body weight, or per kg of lean mass when body fat is known, spread across meals.                           |
-| Body fat             | U.S. Navy circumference method.                                                                                                   |
-| Insights             | Weekend drift, low-protein meal, fibre, snacks, late eating, eating window, repeat foods, takeaway share. Each needs enough data. |
+| Question             | Method                                                                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Maintenance calories | Mifflin-St Jeor by default; Harris-Benedict, or Katch-McArdle from body fat. Activity multipliers 1.2 to 1.9.                          |
+| Daily target         | Deficit capped at 25% of TDEE (550 kcal always allowed); floors of 1,200 kcal (female) and 1,500 kcal (male).                          |
+| Goal date            | A week-by-week projection that recomputes maintenance as you get lighter.                                                              |
+| Trend weight         | Exponential moving average of daily weigh-ins, with a 14-day slope.                                                                    |
+| Two-week check       | Trend rate against the planned rate in a toward-goal frame; at most ±250 kcal, never below the floors, 14-day cooldown.                |
+| Measured expenditure | Average intake plus the energy implied by the trend change (7,700 kcal per kg), with a confidence grade.                               |
+| Protein              | 1.6 to 2.2 g per kg of body weight, or per kg of lean mass when body fat is known, spread across meals.                                |
+| Body fat             | U.S. Navy circumference method.                                                                                                        |
+| Training             | Two alternating full-body sessions; double progression up exercise ladders; week one at two sets; equipment and knee-friendly filters. |
+| Exercise demos       | A jointed side-view figure posed by angles or by two-bone inverse kinematics, eased between key poses and framed to its motion.        |
+| Prayer times         | Solar declination and equation of time (the PrayTimes method) with eleven authorities' conventions and a high-latitude fallback.       |
+| Insights             | Weekend drift, low-protein meal, fibre, snacks, late eating, eating window, repeat foods, takeaway share. Each needs enough data.      |
 
 Every formula lives in [`src/lib/calc`](src/lib/calc) as a pure function with tests beside it, and the [methodology page](https://bombastic482.github.io/Ethereal/about/) explains each one with its evidence.
 
@@ -148,7 +173,7 @@ Every formula lives in [`src/lib/calc`](src/lib/calc) as a pure function with te
 
 Ethereal is static HTML and JavaScript: no server code, no database, no cookies and no third-party scripts. Page views are counted anonymously with [GoatCounter](https://www.goatcounter.com): the page address, the referring site and the screen size, never anything you enter, and never with Do Not Track, Global Privacy Control or the switch in Settings turned off. The only other network call, and an optional one, is to Open Food Facts when you scan a barcode or search packaged products.
 
-Your plan, diary, weigh-ins and preferences live in `localStorage`, and progress photos in IndexedDB. Settings exports, imports and deletes all of it. Shared plan links carry the plan in the URL fragment, which never reaches a server.
+Your plan, diary, weigh-ins, training, profile and preferences live in `localStorage`, and progress photos in IndexedDB. Settings exports, imports and deletes all of it. Shared plan links carry the plan in the URL fragment, which never reaches a server. Prayer times are calculated on the device; a shared location is rounded to about a kilometre and kept only there.
 
 </details>
 
@@ -156,13 +181,13 @@ Your plan, diary, weigh-ins and preferences live in `localStorage`, and progress
 <summary><b>Quality bar</b></summary>
 <br />
 
-| Check                 | What it covers                                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 152 unit tests        | Every calculation, the trend and adjustment engine, insights, CSV import, the planner and food search.              |
-| 120 end-to-end tests  | Desktop and phone: onboarding, diary, planner, review, import, eating out, the tab bar, and an accessibility sweep. |
-| Lighthouse CI         | Performance budgets on a simulated slow phone; key pages score 100.                                                 |
-| Data validators       | Every food and recipe checked for shape, plausibility and energy consistency on each build.                         |
-| Type check and format | `astro check` in strict mode and Prettier across the tree.                                                          |
+| Check                 | What it covers                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 186 unit tests        | Every calculation, the trend and adjustment engine, insights, CSV import, the planners, food search, the exercise figures, training progression, prayer times and the day plan. |
+| 146 end-to-end tests  | Desktop and phone: first run, Today's plan, a workout from setup to diary, diary, planner, review, import, eating out, the tab bar, and an accessibility sweep.                 |
+| Lighthouse CI         | Performance budgets on a simulated slow phone; key pages score 100.                                                                                                             |
+| Data validators       | Every food and recipe checked for shape, plausibility and energy consistency on each build.                                                                                     |
+| Type check and format | `astro check` in strict mode and Prettier across the tree.                                                                                                                      |
 
 </details>
 
@@ -176,9 +201,13 @@ Your plan, diary, weigh-ins and preferences live in `localStorage`, and progress
 src/
   lib/calc/        the calculation engine: energy, macros, protein, timeline, trend,
                    expenditure, insights, streaks, chains (with tests)
-  lib/             stores, profile, plan, diary, food search, recipes, planner, importer
+  lib/train/       figure engine (inverse kinematics), 41 exercises, program builder,
+                   session sequencing, audio and wake lock (with tests)
+  lib/             stores, profile, life profile, day planner, prayer times, plan,
+                   diary, food search, recipes, meal planner, importer
   data/            1,444 foods in six lazy chunks, and the recipes
-  components/      Preact islands (diary, plan, review, calculators) and Astro UI
+  components/      Preact islands (today, train, you, diary, plan, review, calculators)
+                   and Astro UI
   pages/           every route
   content/         18 guides
 tests/e2e/         Playwright suites

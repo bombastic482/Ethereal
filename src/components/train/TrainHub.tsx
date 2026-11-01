@@ -314,6 +314,8 @@ function TodayCard({
               peak={hero.peak}
               towel={hero.towel}
               label={hero.name}
+              align="bottom"
+              fit
               class="h-full w-full"
             />
           </div>

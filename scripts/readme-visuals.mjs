@@ -119,6 +119,58 @@ const seed = ({ days, meals, foods }) => {
   );
   localStorage.setItem('ethereal:log:v1', JSON.stringify({ entries: weights.reverse() }));
   localStorage.setItem(
+    'ethereal:life:v1',
+    JSON.stringify({
+      name: 'Sara',
+      goals: ['lose-fat', 'get-stronger', 'sleep-better'],
+      why: 'Keep up with my kids and feel strong again.',
+      wake: '06:45',
+      sleep: '23:00',
+      meals: { breakfast: '07:30', lunch: '12:40', dinner: '19:30' },
+      busy: [{ id: 'w', label: 'Work', start: '08:30', end: '16:30', days: [0, 1, 2, 3, 4, 5, 6] }],
+      meds: [{ id: 'd', name: 'Vitamin D', dose: '1000 IU', rule: 'with-food', times: [] }],
+      ready: true,
+    }),
+  );
+  // Training: three weeks in, every day a training day so today always has a session.
+  const session = (n) => ({
+    id: `w${n}`,
+    date: iso(daysAgo(n * 2 + 1)),
+    session: n % 2 ? 'A' : 'B',
+    week: 3 - Math.floor(n / 3),
+    minutes: 27,
+    kcal: 160,
+    feel: 2,
+    sets: [
+      { exerciseId: 'knee-push-up', value: 12 },
+      { exerciseId: 'knee-push-up', value: 11 },
+      { exerciseId: 'squat', value: 14 },
+      { exerciseId: 'squat', value: 13 },
+    ],
+  });
+  localStorage.setItem(
+    'ethereal:train:v1',
+    JSON.stringify({
+      setup: {
+        equipment: ['towel', 'chair', 'bed'],
+        weekdays: [0, 1, 2, 3, 4, 5, 6],
+        minutes: 30,
+        level: 2,
+        easyOnLegs: false,
+        startedOn: iso(daysAgo(17)),
+        rungs: { push: 'knee-push-up', squat: 'squat', pull: 'towel-row', plank: 'plank' },
+      },
+      log: [5, 4, 3, 2, 1, 0].map(session),
+      voice: false,
+      sound: true,
+      current: null,
+    }),
+  );
+  localStorage.setItem(
+    'ethereal:day:v1',
+    JSON.stringify({ ticks: { [iso(today)]: ['wake', 'med-d-07:30'] } }),
+  );
+  localStorage.setItem(
     'ethereal:diary:v1',
     JSON.stringify({
       food,
@@ -220,20 +272,38 @@ const scrollToChain = (name, offset) => (p) =>
     [name, offset],
   );
 
+// Into a workout: start it, skip the warm-up, and stop on the first working set.
+const intoWorkout = async (p) => {
+  await p.getByRole('button', { name: /start workout|train anyway/i }).click();
+  await p.getByRole('button', { name: /^start$/i }).click();
+  for (let i = 0; i < 2; i++) {
+    await p.waitForTimeout(300);
+    await p
+      .getByRole('dialog', { name: 'Workout' })
+      .getByRole('button', { name: /skip|done/i })
+      .last()
+      .click();
+  }
+  await p.waitForTimeout(900);
+};
 const desktopShots = [
   // [name, path, frame, action]
-  ['d-today', '/today/', { until: 'Type what you ate' }],
+  ['d-today', '/today/', { until: 'See the whole day' }],
   ['d-search', '/today/', { until: 'Type what you ate' }, searchFor('chicken breast')],
-  ['d-plan', '/plan/', { until: 'Fine-tune macros' }],
+  ['d-train', '/train/', { until: 'Plus a two-minute warm-up' }],
+  ['d-plan', '/progress/', { until: 'Fine-tune macros' }],
   ['d-review', '/review/', { until: 'Average ' }],
   ['d-eatout', '/eating-out/', { heading: "Nando's" }],
 ];
 const phoneShots = [
   // [name, path, action]
   ['m-today', '/today/'],
-  ['m-plan', '/plan/'],
+  ['m-diary', '/today/', scrollToSelector('[aria-label="Calories and macros"]', 150)],
+  ['m-player', '/train/', intoWorkout],
+  ['m-library', '/train/exercises/', scrollTo(260)],
+  ['m-plan', '/progress/'],
   ['m-search', '/today/', searchFor('chicken')],
-  ['m-planner', '/plan/', scrollToSelector('#dayplan-h', 120)],
+  ['m-planner', '/eat/', scrollToSelector('#dayplan-h', 120)],
   ['m-track', '/track/', scrollTo(640)],
   ['m-review', '/review/'],
   ['m-recipe', '/recipes/shakshuka-with-feta/'],
@@ -241,6 +311,10 @@ const phoneShots = [
 ];
 const open = async (device, path) => {
   const ctx = await browser.newContext({ ...device, colorScheme: 'dark' });
+  // A fixed early evening, so the Now card always shows the same moment of the same day.
+  const evening = new Date();
+  evening.setHours(18, 5, 0, 0);
+  await ctx.clock.setFixedTime(evening);
   await ctx.addInitScript(seed, demo);
   await ctx.addInitScript(() => localStorage.setItem('ethereal:theme', 'dark'));
   const page = await ctx.newPage();
@@ -397,32 +471,32 @@ const pairCard = (a, b) => {
 };
 
 const stats = [
+  ['41', 'Exercises', 'animated, for a small room'],
   ['1,444', 'Foods', 'searchable offline'],
   ['66', 'Recipes', 'high in protein'],
   ['155', 'Restaurant dishes', 'at 20 chains, ranked'],
   ['18', 'Guides', 'with the evidence'],
-  ['8', 'Calculators', 'free, no sign-up'],
   ['0', 'Ads or trackers', 'and no account'],
 ];
 const stat = ([n, l, s], { n: ns, l: ls, s: ss, accent }) =>
   `<div class="stat"><div class="n${accent ? ' grad' : ''}" style="font-size:${ns}px">${n}</div><div class="l" style="font-size:${ls}px">${l}</div><div class="s" style="font-size:${ss}px">${s}</div></div>`;
 
-const heroGroup = group('d-today', 'm-plan', {
+const heroGroup = group('d-today', 'm-player', {
   side: 'right',
   top: 456,
   winW: 1080,
   phoneW: 300,
   overlap: 70,
 });
-const heroPair = pair('m-plan', 'm-today', 560);
+const heroPair = pair('m-today', 'm-player', 560);
 const scenes = {
   hero: card(
     1600,
     heroGroup.bottom + 72,
     '--gx:50%;--gy:-12%;--gw:1400px;--gh:760px',
     `<div class="center" style="top:72px">${brand(30)}
-      <h1 style="margin-top:44px;font-size:100px">Weight loss, <span class="grad">done properly.</span></h1>
-      <p class="lede" style="margin-top:26px;font-size:29px">The complete weight-loss app that runs in your browser. Free, private, no account.</p>
+      <h1 style="margin-top:44px;font-size:96px">Become who you’re <span class="grad">working toward.</span></h1>
+      <p class="lede" style="margin-top:26px;font-size:29px">A calm coach for your whole self: training, food, progress and your day. Free, private, no account.</p>
       <div class="pills" style="margin-top:36px"><span class="pill go">Open the app →</span><span class="pill ghost">Works on any phone or computer</span></div></div>` +
       heroGroup.html,
   ),
@@ -431,12 +505,14 @@ const scenes = {
     heroPair.bottom + 56,
     '--gx:50%;--gy:-6%;--gw:900px;--gh:700px',
     `<div class="center" style="top:64px">${brand(30)}
-      <h1 style="margin-top:44px;font-size:86px">Weight loss,<br><span class="grad">done properly.</span></h1>
-      <p class="lede" style="margin-top:26px;font-size:30px;max-width:640px">The complete weight-loss app that runs in your browser. Free, private, no account.</p></div>` +
+      <h1 style="margin-top:44px;font-size:80px">Become who<br>you’re <span class="grad">working toward.</span></h1>
+      <p class="lede" style="margin-top:26px;font-size:30px;max-width:660px">A calm coach for your whole self. Free, private, no account.</p></div>` +
       heroPair.html,
   ),
-  diary: feature('d-search', 'm-today', 'right'),
-  'diary-mobile': pairCard('m-today', 'm-search'),
+  train: feature('d-train', 'm-library', 'left'),
+  'train-mobile': pairCard('m-player', 'm-library'),
+  diary: feature('d-search', 'm-diary', 'right'),
+  'diary-mobile': pairCard('m-diary', 'm-search'),
   plan: feature('d-plan', 'm-planner', 'left'),
   'plan-mobile': pairCard('m-plan', 'm-planner'),
   track: feature('d-review', 'm-track', 'right'),
@@ -447,7 +523,7 @@ const scenes = {
     1600,
     360,
     '--gx:50%;--gy:-40%;--gw:1400px;--gh:420px',
-    `<div style="position:absolute;inset:0 72px;display:grid;grid-template-columns:1.2fr 1fr 1.35fr 1fr 1.1fr 1.2fr;column-gap:30px;align-items:center">${stats
+    `<div style="position:absolute;inset:0 72px;display:grid;grid-template-columns:1.3fr 1.15fr 1fr 1.45fr 1fr 1.2fr;column-gap:30px;align-items:center">${stats
       .map((s, i) => stat(s, { n: 70, l: 21, s: 17, accent: i === stats.length - 1 }))
       .join('')}</div>`,
   ),

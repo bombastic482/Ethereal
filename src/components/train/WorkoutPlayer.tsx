@@ -440,6 +440,8 @@ export default function WorkoutPlayer({ setup, workout, date, weightKg, resume, 
                   towel={ex.towel}
                   paused={paused}
                   speed={s.kind === 'rest' ? 0.8 : 1}
+                  align="bottom"
+                  fit
                   label={`${ex.name}, animated demonstration`}
                   class="h-full w-full"
                 />
@@ -486,34 +488,33 @@ export default function WorkoutPlayer({ setup, workout, date, weightKg, resume, 
               ) : (
                 <>
                   <h2 class="font-display text-3xl tracking-tight">{s.p.exercise.name}</h2>
-                  <p class="text-muted mt-1">{s.p.exercise.cues[0]}</p>
+                  <ol class="mt-2 grid gap-1.5 text-sm">
+                    {s.p.exercise.cues.map((c, i) => (
+                      <li key={c} class="flex gap-2.5">
+                        <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-5 w-5 flex-none place-items-center rounded-full text-[11px] font-bold">
+                          {i + 1}
+                        </span>
+                        <span class="text-muted">{c}</span>
+                      </li>
+                    ))}
+                  </ol>
                   <button
                     type="button"
                     class="text-brand-700 dark:text-brand-300 mt-2 text-sm font-semibold"
                     aria-expanded={howTo}
                     onClick={() => setHowTo(!howTo)}
                   >
-                    {howTo ? 'Hide tips' : 'How to do it'}
+                    {howTo ? 'Hide common mistakes' : 'Common mistakes'}
                   </button>
                   {howTo && (
-                    <div class="mt-2 grid gap-3 text-sm">
-                      <ul class="grid gap-1.5">
-                        {s.p.exercise.cues.map((c) => (
-                          <li key={c} class="flex gap-2">
-                            <Icon name="check" size={16} class="text-brand-600 mt-0.5 flex-none" />
-                            {c}
-                          </li>
-                        ))}
-                      </ul>
-                      <ul class="grid gap-1.5">
-                        {s.p.exercise.mistakes.map((c) => (
-                          <li key={c} class="text-muted flex gap-2">
-                            <Icon name="warn" size={16} class="mt-0.5 flex-none text-amber-600" />
-                            {c}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <ul class="mt-2 grid gap-1.5 text-sm">
+                      {s.p.exercise.mistakes.map((c) => (
+                        <li key={c} class="text-muted flex gap-2">
+                          <Icon name="warn" size={16} class="mt-0.5 flex-none text-amber-600" />
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </>
               )}
@@ -765,7 +766,7 @@ function Intro({
   const items = [...workout.warmUp, ...workout.main, ...workout.coolDown];
   return (
     <div class="player-body">
-      <div class="player-info overflow-y-auto">
+      <div class="player-info flex-1 overflow-y-auto">
         <p class="eyebrow mb-1">{resume ? 'Pick up where you left off' : 'Ready when you are'}</p>
         <h2 class="font-display text-4xl tracking-tight">
           Session {workout.session}, about {workout.estimatedMinutes} minutes
