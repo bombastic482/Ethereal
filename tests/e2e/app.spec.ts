@@ -294,6 +294,15 @@ test.describe('one daily target', () => {
           lastAdjustedOn: null,
         }),
       );
+      // Every target Today ever paints, to catch a frame drawn from default data.
+      const w = window as unknown as { __targets: string[] };
+      w.__targets = [];
+      new MutationObserver(() => {
+        const m = (document.querySelector('main')?.textContent ?? '').match(
+          /Target\s*([\d,]+)\s*kcal/,
+        );
+        if (m && w.__targets.at(-1) !== m[1]) w.__targets.push(m[1]!);
+      }).observe(document, { subtree: true, childList: true, characterData: true });
     });
     const target = async (path: string, pattern: RegExp) => {
       await page.goto(path);
@@ -304,5 +313,9 @@ test.describe('one daily target', () => {
     const onPlan = await target('/progress/', /eat per day\s*([\d,]+)/i);
     const onToday = await target('/today/', /Target\s*([\d,]+)\s*kcal/);
     expect(onToday).toBe(onPlan);
+    // ...and it never showed any other number on the way.
+    expect(
+      await page.evaluate(() => (window as unknown as { __targets: string[] }).__targets),
+    ).toEqual([onPlan]);
   });
 });

@@ -2,7 +2,8 @@
  * Tiny persistent store factory on top of localStorage with a subscribe/hook API.
  * All user data (profile, plan, weigh-ins) lives in the browser only.
  */
-import { useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
+import { ClientOnly } from './client-only';
 
 export interface Store<T> {
   key: string;
@@ -75,7 +76,10 @@ export function createStore<T extends object>(
     return () => listeners.delete(fn);
   };
   const use = (): [T, (partial: Partial<T>) => void] => {
-    const [state, setState] = useState<T>(defaults);
+    // Server-rendered islands must start from the defaults the server used; client-only ones
+    // start from the saved value so nothing wrong is ever painted.
+    const live = useContext(ClientOnly);
+    const [state, setState] = useState<T>(() => (live ? get() : defaults));
     useEffect(() => {
       setState(get());
       const off = subscribe(setState);

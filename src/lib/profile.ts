@@ -3,7 +3,8 @@
  * localStorage record, so a visitor only ever types their stats once.
  * Nothing leaves the browser.
  */
-import { useEffect, useState } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
+import { ClientOnly } from './client-only';
 import type { ActivityLevel } from './calc/energy';
 import type { Sex, UnitSystem } from './calc/units';
 
@@ -74,7 +75,8 @@ export function updateProfile(patch: Partial<Profile>): Profile {
 
 /** Hook: returns the live profile and a patch function. Hydration-safe (defaults on the server). */
 export function useProfile(): [Profile, (patch: Partial<Profile>) => void] {
-  const [state, setState] = useState<Profile>(DEFAULT_PROFILE);
+  const live = useContext(ClientOnly);
+  const [state, setState] = useState<Profile>(() => (live ? current() : DEFAULT_PROFILE));
   useEffect(() => {
     setState(current());
     const l = (p: Profile) => setState(p);

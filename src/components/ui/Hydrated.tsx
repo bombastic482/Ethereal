@@ -1,5 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
+import { ClientOnly } from '@/lib/client-only';
 
 /**
  * Shows `fallback` until the browser has taken over, then the real thing.
@@ -19,7 +20,12 @@ export function Hydrated({
 }) {
   const [ready, setReady] = useState(false);
   useEffect(() => setReady(true), []);
-  return <>{ready ? children : fallback}</>;
+  // Children here never render on the server, so their stores can start from saved data.
+  return ready ? (
+    <ClientOnly.Provider value={true}>{children}</ClientOnly.Provider>
+  ) : (
+    <>{fallback}</>
+  );
 }
 
 /** A calm placeholder card while personal data loads. */
