@@ -2985,6 +2985,89 @@
   text-decoration: underline;
 }
 
+/* Your rhythm: twelve weeks of days, shaded by how many habits each held */
+.rhythm {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+}
+.rhythm-days {
+  display: grid;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--fg-subtle);
+}
+.rhythm-days span {
+  display: flex;
+  align-items: center;
+}
+.rhythm-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+}
+.rhythm-week {
+  display: grid;
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem;
+}
+.rhythm-cell {
+  aspect-ratio: 1;
+  max-height: 1.75rem;
+  border-radius: 0.35rem;
+  background: color-mix(
+    in oklab,
+    var(--color-brand-500) calc(var(--s, 0) * 22% + 0%),
+    var(--bg-muted)
+  );
+  transition:
+    transform 0.2s var(--ease-spring),
+    box-shadow 0.2s ease;
+}
+.rhythm-cell:hover:not(:disabled) {
+  transform: scale(1.12);
+}
+.rhythm-cell.is-today {
+  box-shadow: inset 0 0 0 1.5px var(--color-brand-600);
+}
+.rhythm-cell.is-sel {
+  box-shadow:
+    0 0 0 2px var(--bg-elevated),
+    0 0 0 3.5px var(--fg);
+}
+.rhythm-cell.is-future {
+  opacity: 0.35;
+}
+.rhythm-detail {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: var(--bg-muted);
+  font-size: 0.875rem;
+}
+.rhythm-habit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg-subtle);
+  background: var(--bg-elevated);
+}
+.rhythm-habit.is-on {
+  color: var(--color-brand-700);
+  background: oklch(63% 0.15 var(--brand-h) / 0.14);
+}
+[data-theme='dark'] .rhythm-habit.is-on {
+  color: var(--color-brand-200);
+}
+
 /* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */
 .prayer-strip {
   display: grid;
