@@ -2,28 +2,33 @@
 import { withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
 import Base from '@/layouts/Base.astro';
-import { TOOLS } from '@/lib/tools';
+import { SECTIONS } from '@/lib/site';
+
+// The way back is the app itself: one link per section, plus the guides and tools.
+const links = [
+  ...Object.values(SECTIONS).map((s) => ({ href: s.pages[0]!.href, label: s.label, icon: s.icon })),
+  { href: '/guides/', label: 'Guides', icon: 'book' as const },
+  { href: '/tools/', label: 'Tools', icon: 'pie' as const },
+];
 ---
 
-<Base
-  title="Page not found"
-  description="That page does not exist. Here is the way back to the calculators."
-  noindex
->
+<Base title="Page not found" description="That page does not exist. Here is the way back." noindex>
   <div class="container-page py-24 text-center">
     <p class="chip">404</p>
     <h1 class="mt-6 font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">
       Nothing here.
     </h1>
-    <p class="text-muted mt-4">The page may have moved. Try one of the calculators instead.</p>
-    <div class="mt-8 flex flex-wrap justify-center gap-2">
-      {TOOLS.slice(0, 4).map((t) => (
-        <a href={withBase(`/tools/${t.slug}/`)} class="btn btn-secondary text-sm">
-          <Icon name={t.icon} size={16} />
-          {t.short}
-        </a>
+    <p class="text-muted mt-4">The page may have moved. Pick up from one of these.</p>
+    <ul class="mx-auto mt-8 flex max-w-xl flex-wrap justify-center gap-2">
+      {links.map((l) => (
+        <li>
+          <a href={withBase(l.href)} class="btn btn-secondary text-sm">
+            <Icon name={l.icon} size={16} />
+            {l.label}
+          </a>
+        </li>
       ))}
-    </div>
+    </ul>
     <a href={withBase('/')} class="btn btn-primary mt-8">
       Back home
     </a>

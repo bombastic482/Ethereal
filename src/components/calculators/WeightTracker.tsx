@@ -402,8 +402,8 @@ function WeightTrackerInner() {
             <div class="text-muted text-sm">
               <p class="text-fg text-lg font-bold tracking-tight">No weigh-ins yet</p>
               <p class="mt-2">
-                Log today's weight on the left. Daily entries plus a smoothed trend are the only
-                honest way to see what the scale is really doing.
+                Log today's weight to start. Daily entries plus a smoothed trend are the only honest
+                way to see what the scale is really doing.
               </p>
             </div>
           )}

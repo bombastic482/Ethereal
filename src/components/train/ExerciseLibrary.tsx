@@ -64,7 +64,7 @@ export default function ExerciseLibrary() {
       <p class="text-muted mt-3 text-sm" aria-live="polite">
         {list.length} exercises
       </p>
-      <ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul class="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
         {list.map((e) => (
           <li key={e.id}>
             <a
@@ -82,12 +82,12 @@ export default function ExerciseLibrary() {
                   class="h-full w-full"
                 />
               </span>
-              <span class="flex flex-1 flex-col gap-1 p-4">
-                <span class="flex items-baseline justify-between gap-2">
-                  <span class="font-bold tracking-tight">{e.name}</span>
+              <span class="flex flex-1 flex-col gap-1 p-3 sm:p-4">
+                <span class="flex flex-wrap items-baseline justify-between gap-x-2">
+                  <span class="leading-snug font-bold tracking-tight">{e.name}</span>
                   <span class="text-subtle text-xs font-semibold">{LEVEL[e.level]}</span>
                 </span>
-                <span class="text-muted text-sm">{e.summary}</span>
+                <span class="text-muted hidden text-sm sm:block">{e.summary}</span>
               </span>
             </a>
           </li>
