@@ -63,7 +63,7 @@ Type what you ate in plain words, scan a barcode, or search 1,474 foods that wor
 
 - **Plain-language entry.** "2 eggs, a slice of toast and 150g greek yogurt" becomes three logged foods in one tap.
 - **Barcodes.** Packaged products come from Open Food Facts, with Nutri-Score and NOVA grades.
-- **Shortcuts that add up.** Saved meals, favourites, copy yesterday, and a suggestion for what fits next.
+- **Shortcuts that add up.** Your usual for each meal at your usual amount, saved meals, favourites, copy yesterday, and a suggestion for what fits next. Removed something by mistake? Undo.
 
 <picture>
   <source media="(max-width: 700px)" srcset="docs/readme/diary-mobile.webp" />
@@ -76,11 +76,12 @@ A few questions give you a calorie target, protein, macros and a realistic goal 
 
 - **It learns your real burn.** After a few weeks it measures your actual expenditure from what you ate and how your trend moved.
 - **Every two weeks, one decision.** It compares your real rate with the plan and recommends one specific, capped calorie change.
-- **A day planner that hits your numbers.** It picks four recipes that land on your calories and protein. Swap or lock any slot, then log the lot.
+- **One next move.** Progress opens on where you are and the single change most worth making, or tells you to change nothing.
+- **A day planner that hits your numbers.** It picks four recipes, at the portions that land on your calories and protein. Swap or lock any slot, then log the lot.
 
 <picture>
   <source media="(max-width: 700px)" srcset="docs/readme/plan-mobile.webp" />
-  <img src="docs/readme/plan.webp" width="100%" alt="The plan dashboard on a desktop browser with progress toward the goal and the daily targets, and the day planner on a phone." />
+  <img src="docs/readme/plan.webp" width="100%" alt="Progress on a desktop browser: the journey from start to goal with milestones on the line, the one next move, the trend chart and the daily targets; and the day planner on a phone." />
 </picture>
 
 ## See the trend, not the noise
