@@ -472,7 +472,7 @@ const pairCard = (a, b) => {
 
 const stats = [
   ['41', 'Exercises', 'animated, for a small room'],
-  ['1,444', 'Foods', 'searchable offline'],
+  ['1,474', 'Foods', 'searchable offline'],
   ['66', 'Recipes', 'high in protein'],
   ['155', 'Restaurant dishes', 'at 20 chains, ranked'],
   ['18', 'Guides', 'with the evidence'],

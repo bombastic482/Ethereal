@@ -10,6 +10,7 @@ import { DEFAULT_PROFILE, resetProfile, updateProfile, type Profile } from './pr
 import { clearPhotos, photosSupported } from './photos';
 import { reflectionStore, type Reflections } from './reflections';
 import { bodyStore, type BodyState } from './body';
+import { healthStore, type HealthState } from './health';
 import { lifeStore, type Life } from './life';
 import { trainStore, type TrainState } from './train/store';
 
@@ -26,6 +27,7 @@ export interface Backup {
   train?: TrainState;
   life?: Life;
   body?: BodyState;
+  health?: HealthState;
 }
 
 const PROFILE_KEY = 'ethereal:profile:v1';
@@ -53,6 +55,7 @@ export function createBackup(): Backup {
     train: trainStore.get(),
     life: lifeStore.get(),
     body: bodyStore.get(),
+    health: healthStore.get(),
   };
 }
 
@@ -79,6 +82,7 @@ export function validateBackup(raw: unknown): Backup | null {
     ...(b.train && typeof b.train === 'object' ? { train: b.train } : {}),
     ...(b.life && typeof b.life === 'object' ? { life: b.life } : {}),
     ...(b.body && typeof b.body === 'object' ? { body: b.body } : {}),
+    ...(b.health && typeof b.health === 'object' ? { health: b.health } : {}),
   };
 }
 
@@ -95,6 +99,7 @@ export function restoreBackup(raw: unknown): boolean {
   if (b.train) trainStore.restore(b.train);
   if (b.life) lifeStore.restore(b.life);
   if (b.body) bodyStore.restore(b.body);
+  if (b.health) healthStore.restore(b.health);
   return true;
 }
 
@@ -162,6 +167,7 @@ export async function clearAllData(): Promise<void> {
   trainStore.reset();
   lifeStore.reset();
   bodyStore.reset();
+  healthStore.reset();
   resetProfile();
   try {
     for (const key of Object.keys(localStorage)) {

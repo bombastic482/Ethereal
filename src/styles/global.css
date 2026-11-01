@@ -1248,3 +1248,145 @@
     animation: none;
   }
 }
+
+/* Foods to avoid */
+.avoid-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: oklch(52% 0.14 60);
+}
+[data-theme='dark'] .avoid-chip {
+  color: oklch(80% 0.13 75);
+}
+.avoid-note {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.8rem;
+  font-size: 0.85rem;
+  color: oklch(42% 0.12 60);
+  background: oklch(95% 0.05 85);
+}
+.avoid-note > svg {
+  flex: none;
+  margin-top: 0.1rem;
+}
+[data-theme='dark'] .avoid-note {
+  color: oklch(88% 0.08 85);
+  background: oklch(35% 0.06 70 / 0.35);
+}
+
+/* Hand portions */
+.hand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+.hand-on {
+  border-color: var(--color-brand-400);
+  background: oklch(63% 0.15 160 / 0.06);
+}
+.hand-art {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.9rem;
+  color: var(--color-brand-600);
+  background: oklch(63% 0.15 160 / 0.12);
+}
+[data-theme='dark'] .hand-art {
+  color: var(--color-brand-300);
+}
+.hand-step {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  transition: transform 0.15s var(--ease-spring);
+}
+.hand-step:active {
+  transform: scale(0.88);
+}
+.hand-step:disabled {
+  opacity: 0.4;
+}
+.mic-live {
+  animation: mic-pulse 1.4s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+  50% {
+    box-shadow: 0 0 0 6px oklch(63% 0.15 160 / 0.25);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mic-live {
+    animation: none;
+  }
+}
+
+/* Health diary */
+.health-prompt {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1.25rem;
+  color: oklch(38% 0.1 60);
+  background: oklch(95% 0.05 85);
+  border: 1px solid oklch(85% 0.09 80);
+}
+[data-theme='dark'] .health-prompt {
+  color: oklch(90% 0.07 85);
+  background: oklch(32% 0.05 70 / 0.4);
+  border-color: oklch(50% 0.08 75 / 0.5);
+}
+.severity-range {
+  accent-color: oklch(calc(70% - var(--v, 0) * 12%) 0.16 calc(150 - var(--v, 0) * 120));
+}
+.severity-strip {
+  display: grid;
+  grid-template-columns: repeat(28, minmax(0, 1fr));
+  gap: 2px;
+}
+.severity-strip > span {
+  height: 1.1rem;
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--fg) 7%, transparent);
+}
+.severity-strip > span.on {
+  background: oklch(
+    calc(88% - var(--v) * 36%) calc(0.06 + var(--v) * 0.12) calc(85 - var(--v) * 55)
+  );
+}
+@media print {
+  html[data-print='summary'] body > *:not([data-layer]) {
+    display: none !important;
+  }
+  html[data-print='summary'] [data-layer] [role='dialog'] {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+  }
+  html[data-print='summary'] .summary-sheet {
+    max-height: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

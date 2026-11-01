@@ -24,11 +24,12 @@ const counting = GOATCOUNTER_CODE !== '';
       </p>
       <h2>What happens to what you type</h2>
       <p>
-        Your profile, plan, weigh-ins, food diary, saved meals, preferences and weekly reflections
-        are saved in your browser's <code>localStorage</code> under keys starting with{' '}
-        <code>ethereal:</code>. Progress photos are stored in the browser's IndexedDB database named{' '}
-        <code>ethereal-photos</code>, compressed on your device. None of it is ever sent to us or to
-        anyone else; there is no account and no server that could receive it.
+        Your profile, plan, weigh-ins, food diary, saved meals, training, body measurements, health
+        diary, preferences and weekly reflections are saved in your browser's{' '}
+        <code>localStorage</code> under keys starting with <code>ethereal:</code>. Progress photos
+        are stored in the browser's IndexedDB database named <code>ethereal-photos</code>,
+        compressed on your device. None of it is ever sent to us or to anyone else; there is no
+        account and no server that could receive it.
       </p>
       <p>
         You can export everything as a JSON backup, import it on another device, and delete all of
@@ -45,6 +46,17 @@ const counting = GOATCOUNTER_CODE !== '';
         the request like any website you visit; nothing about you, your diary or your profile is
         included. The built-in database of 1,400+ foods and all 66 recipes work without any network
         at all.
+      </p>
+      <h2>Location, prayer times and voice</h2>
+      <p>
+        Prayer times are calculated on your device from the sun's position. If you choose Use my
+        location, your browser asks your permission, and the position is rounded to about a
+        kilometre and kept only on this device. Picking a city from the list shares nothing.
+      </p>
+      <p>
+        The Speak button uses your browser's own speech recognition. Some browsers (Chrome among
+        them) send the audio to their maker's speech service to turn it into text, under that
+        company's privacy terms; Ethereal itself never receives it. Typing works just as well.
       </p>
       <h2>Importing from other apps</h2>
       <p>
@@ -94,7 +106,7 @@ const counting = GOATCOUNTER_CODE !== '';
       <h2>Changes</h2>
       <p>
         If this policy ever changes, the update will be recorded on this page with the date. Last
-        updated: 30 October 2026.
+        updated: 1 November 2026.
       </p>
     </article>
   </div>

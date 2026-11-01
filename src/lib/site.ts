@@ -61,6 +61,7 @@ export const SECTIONS: Record<
     icon: 'user',
     pages: [
       { href: '/you/', label: 'Profile' },
+      { href: '/you/health/', label: 'Health' },
       { href: '/settings/', label: 'Settings & data' },
     ],
   },

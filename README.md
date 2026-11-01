@@ -31,7 +31,7 @@ Most health apps do one thing, charge a subscription for it, and leave you to wo
 
 <picture>
   <source media="(max-width: 700px)" srcset="docs/readme/numbers-mobile.webp" />
-  <img src="docs/readme/numbers.webp" width="100%" alt="41 animated exercises for a small room, 1,444 foods searchable offline, 66 high-protein recipes, 155 restaurant dishes at 20 chains, 18 guides, and 0 ads or trackers." />
+  <img src="docs/readme/numbers.webp" width="100%" alt="41 animated exercises for a small room, 1,474 foods searchable offline, 66 high-protein recipes, 155 restaurant dishes at 20 chains, 18 guides, and 0 ads or trackers." />
 </picture>
 
 <br />
@@ -59,7 +59,7 @@ A plan built from what you have (a towel, a chair, a bed, or nothing), the days 
 
 ## Log a day in seconds
 
-Type what you ate in plain words, scan a barcode, or search 1,444 foods that work offline. The ring shows what is left, and the bars track protein, carbs, fat and fibre against your targets.
+Type what you ate in plain words, scan a barcode, or search 1,474 foods that work offline. The ring shows what is left, and the bars track protein, carbs, fat and fibre against your targets.
 
 - **Plain-language entry.** "2 eggs, a slice of toast and 150g greek yogurt" becomes three logged foods in one tap.
 - **Barcodes.** Packaged products come from Open Food Facts, with Nutri-Score and NOVA grades.
@@ -205,7 +205,7 @@ src/
                    session sequencing, audio and wake lock (with tests)
   lib/             stores, profile, life profile, day planner, prayer times, plan,
                    diary, food search, recipes, meal planner, importer
-  data/            1,444 foods in six lazy chunks, and the recipes
+  data/            1,474 foods in six lazy chunks, and the recipes
   components/      Preact islands (today, train, you, diary, plan, review, calculators)
                    and Astro UI
   pages/           every route

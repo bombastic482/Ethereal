@@ -1,0 +1,15 @@
+---
+import HealthHub from '@/components/you/HealthHub';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Health Diary"
+  description="A private symptom diary with four-week patterns, lab results and blood pressure over time, plain rules for when to see a doctor, and a one-page summary to take to appointments."
+  path="/you/health/"
+  heading="Health"
+  lede="Notice patterns early, and walk into appointments with the facts."
+  section="you"
+>
+  <HealthHub client:load />
+</AppLayout>

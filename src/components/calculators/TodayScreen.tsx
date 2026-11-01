@@ -49,6 +49,10 @@ import { resolveQuickEntry, type ResolvedItem } from '@/lib/quick-parse';
 import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { confetti, haptic, onSwipe } from '@/lib/fx';
+import { avoidHits } from '@/lib/avoid';
+import { lifeStore } from '@/lib/life';
+import { useDictation } from '@/lib/voice';
+import { HandPortions } from './HandPortions';
 import { StarterRecipes } from './StarterRecipes';
 import { RecipeIdea } from './RecipeIdea';
 import { withBase } from '@/lib/url';
@@ -63,7 +67,7 @@ import { Ring } from '../ui/Ring';
 import { Segmented } from '../ui/Segmented';
 import { SelectField } from '../ui/SelectField';
 
-type Tab = 'search' | 'scan' | 'quick' | 'custom' | 'meals';
+type Tab = 'search' | 'scan' | 'quick' | 'custom' | 'meals' | 'hands';
 
 interface Candidate {
   name: string;
@@ -1089,16 +1093,18 @@ function AddFoodSheet({
                     { value: 'search', label: 'Search' },
                     { value: 'scan', label: 'Scan' },
                     { value: 'meals', label: 'Meals' },
+                    { value: 'hands', label: 'By hand' },
                     { value: 'quick', label: 'Quick add' },
                     { value: 'custom', label: 'My foods' },
                   ]}
+                  columns={3}
                   value={tab}
                   onChange={setTab}
                 />
               </div>
               <div class="relative min-h-0 flex-1 overflow-y-auto px-5 pb-6" data-scroll>
                 {tab === 'search' && (
-                  <div class="grid gap-3 pt-4">
+                  <div class="grid grid-cols-[minmax(0,1fr)] gap-3 pt-4">
                     <input
                       type="search"
                       class="field"
@@ -1194,6 +1200,24 @@ function AddFoodSheet({
                     {scanMsg && <p class="text-muted text-sm">{scanMsg}</p>}
                   </div>
                 )}
+                {tab === 'hands' && (
+                  <HandPortions
+                    onAdd={(list) => {
+                      for (const it of list)
+                        addFood({
+                          date,
+                          meal,
+                          name: it.name,
+                          grams: it.grams,
+                          per100g: it.per100g,
+                          source: 'quick',
+                          time: minutesNow(),
+                        });
+                      haptic([10, 30, 10]);
+                      onClose();
+                    }}
+                  />
+                )}
                 {tab === 'quick' && (
                   <QuickAdd
                     onAdd={(name, n) => {
@@ -1253,6 +1277,8 @@ function CandidateList({
   onPick: (c: Candidate) => void;
   empty?: string;
 }) {
+  const [{ avoid }] = lifeStore.use();
+  const hour = new Date().getHours();
   return (
     <div>
       {title && (
@@ -1277,6 +1303,12 @@ function CandidateList({
                       {c.name}
                       {c.brand && <span class="text-subtle font-normal"> · {c.brand}</span>}
                     </span>
+                    {avoid.length > 0 && avoidHits(c.name, avoid, hour).length > 0 && (
+                      <span class="avoid-chip">
+                        <Icon name="warn" size={12} /> On your avoid list:{' '}
+                        {avoidHits(c.name, avoid, hour).join(', ')}
+                      </span>
+                    )}
                     <span class="text-subtle block text-xs">
                       {s.label} · P {n.protein} · C {n.carbs} · F {n.fat}
                     </span>
@@ -1302,6 +1334,12 @@ function PortionPicker({
   onAdd: (grams: number) => void;
 }) {
   const [profile] = useProfile();
+  const [{ avoid }] = lifeStore.use();
+  const hits = avoidHits(
+    `${candidate.name} ${candidate.brand ?? ''}`,
+    avoid,
+    new Date().getHours(),
+  );
   const imperial = profile.units === 'imperial';
   const first = candidate.servings[0] ?? { label: '100 g', grams: 100 };
   const [grams, setGrams] = useState(first.grams);
@@ -1329,6 +1367,15 @@ function PortionPicker({
           {candidate.name}
         </h3>
         {candidate.brand && <p class="text-subtle text-sm">{candidate.brand}</p>}
+        {hits.length > 0 && (
+          <p class="avoid-note" role="note">
+            <Icon name="warn" size={16} />
+            <span>
+              On your avoid list: <strong>{hits.join(', ')}</strong>. Matched from the name; check
+              the label if it matters for an allergy.
+            </span>
+          </p>
+        )}
       </div>
       <div class="flex flex-wrap gap-2">
         {candidate.servings.map((s) => (
@@ -1823,7 +1870,12 @@ function QuickEntry({ date }: { date: string }) {
   const [profile] = useProfile();
   const imperial = profile.units === 'imperial';
   const slot = mealForTime(new Date().getHours());
-  const parse = () => setItems(text.trim() ? resolveQuickEntry(text, searchFoods) : null);
+  const parse = (t = text) => setItems(t.trim() ? resolveQuickEntry(t, searchFoods) : null);
+  // Speak instead of typing: the phrase lands in the box and is parsed as soon as you stop.
+  const voice = useDictation((spoken) => {
+    setText(spoken);
+    parse(spoken);
+  });
   const matched = (items ?? []).filter((i) => i.food);
   const total = sum(matched.map((i) => scale(i.food!.per100g, i.grams)));
   const logAll = () => {
@@ -1859,14 +1911,32 @@ function QuickEntry({ date }: { date: string }) {
           id="quick-entry"
           class="field flex-1"
           placeholder='Type what you ate: "2 eggs, a slice of toast and 150g greek yogurt"'
-          value={text}
+          value={voice.listening ? voice.text : text}
           onInput={(e) => setText((e.target as HTMLInputElement).value)}
           autoComplete="off"
         />
-        <button type="submit" class="btn btn-secondary" disabled={!text.trim()}>
-          <Icon name="spark" size={16} /> Parse
-        </button>
+        <div class="flex gap-2">
+          {voice.supported && (
+            <button
+              type="button"
+              class={`btn ${voice.listening ? 'btn-primary mic-live' : 'btn-secondary'} flex-1 sm:flex-none`}
+              aria-pressed={voice.listening}
+              title={voice.listening ? 'Stop listening' : 'Say what you ate'}
+              onClick={() => (voice.listening ? voice.stop() : voice.start())}
+            >
+              <Icon name="mic" size={16} /> {voice.listening ? 'Listening…' : 'Speak'}
+            </button>
+          )}
+          <button
+            type="submit"
+            class="btn btn-secondary flex-1 sm:flex-none"
+            disabled={!text.trim()}
+          >
+            <Icon name="spark" size={16} /> Parse
+          </button>
+        </div>
       </form>
+      {voice.error && <p class="text-muted mt-2 text-sm">{voice.error}</p>}
       {items && (
         <div class="mt-3 grid gap-2">
           <ul class="grid gap-1 text-sm">
