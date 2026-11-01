@@ -10,7 +10,10 @@ test.describe('plan and tracker', () => {
   test('onboarding builds a plan, dashboard and tracker reflect it', async ({ page }) => {
     await ready(page, '/progress/');
     await expect(page.getByText(/don't have a plan yet/i)).toBeVisible();
-    await page.getByRole('link', { name: /build my plan/i }).click();
+    await page
+      .getByRole('main')
+      .getByRole('link', { name: /build my plan/i })
+      .click();
     await expect(page).toHaveURL(/\/start\/$/);
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 

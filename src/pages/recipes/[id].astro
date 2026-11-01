@@ -90,7 +90,7 @@ const jsonLd = [
       </a>
     </nav>
     <header class="mt-4 max-w-3xl">
-      <p class="text-brand-700 dark:text-brand-300 text-sm font-semibold tracking-wide uppercase">
+      <p class="text-brand-700 dark:text-brand-300 text-sm font-semibold">
         {MEAL_LABEL[r.meal]} · {r.minutes} min{DIET_LABEL[r.diet] ? ` · ${DIET_LABEL[r.diet]}` : ''}
       </p>
       <h1 class="font-display mt-2 text-4xl leading-[1.05] tracking-tight sm:text-5xl">{r.name}</h1>
@@ -127,7 +127,7 @@ const jsonLd = [
           aria-label="Servings"
           data-servings
         >
-          <span class="text-subtle text-xs font-semibold tracking-wide uppercase">Servings</span>
+          <span class="text-subtle text-xs font-semibold">Servings</span>
           {['1', '2', '3', '4'].map((n) => (
             <button
               type="button"
@@ -173,7 +173,7 @@ const jsonLd = [
             ['Fat', `${r0(r.totals.fat)}`, 'g'],
           ].map(([k, v, u]) => (
             <div>
-              <dt class="text-subtle text-xs font-semibold tracking-wide uppercase">{k}</dt>
+              <dt class="text-subtle text-xs font-semibold">{k}</dt>
               <dd class="font-display tabular mt-1 text-3xl">
                 {v}
                 <span class="text-subtle ml-1 text-sm">{u}</span>

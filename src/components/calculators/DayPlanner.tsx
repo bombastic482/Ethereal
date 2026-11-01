@@ -443,9 +443,7 @@ function DayPlannerInner() {
               return (
                 <li key={slot} class="border-line flex flex-col gap-2 rounded-2xl border p-4">
                   <div class="flex items-center justify-between gap-2">
-                    <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-                      {LABEL[slot]}
-                    </span>
+                    <span class="text-subtle text-xs font-semibold">{LABEL[slot]}</span>
                     <span class="text-subtle tabular text-xs">{r.minutes} min</span>
                   </div>
                   <a

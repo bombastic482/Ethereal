@@ -167,7 +167,7 @@ function BodyHubInner() {
                   ['Waist', waist ? len(waist) : '—'],
                 ].map(([k, v]) => (
                   <div key={k} class="surface-muted rounded-2xl p-3">
-                    <dt class="text-subtle text-[11px] font-semibold uppercase">{k}</dt>
+                    <dt class="text-subtle text-[11px] font-semibold">{k}</dt>
                     <dd class="font-display tabular mt-1 text-xl">{v}</dd>
                   </div>
                 ))}
@@ -323,7 +323,7 @@ function BodyHubInner() {
           <div class="mt-3 overflow-x-auto">
             <table class="w-full min-w-[34rem] text-sm">
               <thead>
-                <tr class="text-subtle text-left text-xs uppercase">
+                <tr class="text-subtle text-left text-xs">
                   <th class="py-2 font-semibold">Date</th>
                   {(
                     [

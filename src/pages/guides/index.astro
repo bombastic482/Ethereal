@@ -28,7 +28,7 @@ const categories = [...new Set(guides.map((g) => g.data.category))];
     </header>
     {categories.map((cat) => (
       <section class="mt-12" aria-labelledby={`cat-${cat}`}>
-        <h2 id={`cat-${cat}`} class="text-subtle text-xs font-semibold tracking-wide uppercase">
+        <h2 id={`cat-${cat}`} class="text-subtle text-xs font-semibold">
           {cat}
         </h2>
         <div class="mt-4 grid gap-4 md:grid-cols-2">

@@ -1064,7 +1064,7 @@ function Summary({
                 [reps ? 'Reps' : 'kcal', String(reps || kcal + walkKcal)],
               ].map(([k, v]) => (
                 <div key={k} class="surface-muted rounded-2xl p-3">
-                  <dt class="text-subtle text-xs font-semibold uppercase">{k}</dt>
+                  <dt class="text-subtle text-xs font-semibold">{k}</dt>
                   <dd class="font-display tabular mt-1 text-3xl">{v}</dd>
                 </div>
               ))}

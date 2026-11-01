@@ -481,7 +481,7 @@ function TodayScreenInner() {
             >
               <CountUp value={Math.abs(day.remaining.kcal)} />
             </p>
-            <p class="text-subtle text-xs font-semibold tracking-wide uppercase">
+            <p class="text-subtle text-xs font-semibold">
               {day.remaining.kcal < 0 ? 'kcal over' : 'kcal left'}
             </p>
           </div>
@@ -1185,7 +1185,7 @@ function AddFoodSheet({
                     )}
                     {q.trim().length >= 3 && (
                       <div>
-                        <p class="text-subtle mb-2 text-xs font-semibold tracking-wide uppercase">
+                        <p class="text-subtle mb-2 text-xs font-semibold">
                           Open Food Facts · packaged products
                         </p>
                         {remoteState === 'loading' && <p class="text-subtle text-sm">Searching…</p>}
@@ -1318,9 +1318,7 @@ function CandidateList({
   const hour = new Date().getHours();
   return (
     <div>
-      {title && (
-        <p class="text-subtle mb-2 text-xs font-semibold tracking-wide uppercase">{title}</p>
-      )}
+      {title && <p class="text-subtle mb-2 text-xs font-semibold">{title}</p>}
       {items.length === 0 ? (
         <p class="text-subtle text-sm">{empty}</p>
       ) : (
@@ -1458,7 +1456,7 @@ function PortionPicker({
         ].map(([l, v]) => (
           <div key={l}>
             <p class="tabular text-lg font-bold">{v}</p>
-            <p class="text-subtle text-[11px] font-semibold tracking-wide uppercase">{l}</p>
+            <p class="text-subtle text-[11px] font-semibold">{l}</p>
           </div>
         ))}
       </div>

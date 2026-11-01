@@ -67,7 +67,7 @@ export function RecipeIdea({ date, diet, remainingKcal, remainingProtein, logged
     <section class="surface-muted p-4 sm:p-5" aria-label="Recipe idea">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
-          <p class="text-subtle text-xs font-semibold tracking-wide uppercase">
+          <p class="text-subtle text-xs font-semibold">
             {SLOT_LABEL[idea.meal]} idea that fits what is left
           </p>
           <h2 class="mt-1 text-lg font-bold tracking-tight">{idea.name}</h2>

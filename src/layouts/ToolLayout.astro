@@ -120,9 +120,7 @@ const jsonLd = [
               href={withBase(`/guides/${g.id}/`)}
               class="surface hover:shadow-glow flex flex-col gap-2 p-5 transition hover:-translate-y-0.5"
             >
-              <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-                {g.data.category}
-              </span>
+              <span class="text-subtle text-xs font-semibold">{g.data.category}</span>
               <span class="font-bold tracking-tight">{g.data.title}</span>
               <span class="text-muted line-clamp-3 text-sm">{g.data.description}</span>
             </a>

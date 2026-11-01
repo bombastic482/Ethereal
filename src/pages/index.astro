@@ -1,6 +1,7 @@
 ---
 import { withBase } from '@/lib/url';
 import HeroPreview from '@/components/HeroPreview';
+import HomeSky from '@/components/home/HomeSky';
 import Showcase from '@/components/home/Showcase.astro';
 import Faq from '@/components/Faq.astro';
 import { Icon } from '@/components/ui/Icon';
@@ -85,36 +86,30 @@ const faq = [
 ---
 
 <Base title={SITE.name} description={SITE.description} path="/">
-  <section class="relative overflow-hidden">
-    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-      <div class="bg-brand-200/35 dark:bg-brand-500/10 absolute -top-48 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full blur-3xl"></div>
-      <div class="bg-brand-100/70 dark:bg-brand-400/5 absolute top-20 right-[-10rem] h-[24rem] w-[24rem] rounded-full blur-3xl"></div>
+  <section class="home-hero">
+    <div class="home-hero-sky" aria-hidden="true">
+      <HomeSky client:load />
     </div>
-    <div class="container-page pt-16 pb-12 sm:pt-24 sm:pb-16">
+    <div class="container-page pt-14 pb-28 sm:pt-20 sm:pb-40">
       <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
         <div class="max-w-2xl text-center lg:text-left">
-          <span class="chip">
-            <Icon name="shield" size={14} /> Science-backed · Free forever · Private by design
-          </span>
-          <h1 class="mt-6 font-display text-5xl leading-[1] tracking-tight text-balance sm:text-6xl lg:text-7xl">
-            Become who you’re <em class="text-gradient not-italic">working toward.</em>
+          <h1 class="home-title">
+            Become who you’re <span class="home-title-soft">working toward.</span>
           </h1>
-          <p class="text-muted mt-6 max-w-2xl lg:mx-0 text-lg leading-relaxed text-pretty sm:text-xl">
+          <p class="home-lede">
             A calm coach for your whole self: home workouts that grow with you, food that fits your
             day, and a clear next step every morning. No gym, no sign-up, and nothing leaves your
             device.
           </p>
           <div class="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-            <a href={withBase('/start/')} class="btn btn-primary h-12 px-6 text-base">
+            <a href={withBase('/start/')} class="btn home-cta h-12 px-6 text-base">
               Build my plan <Icon name="arrow" size={18} />
             </a>
-            <a href={withBase('/train/')} class="btn btn-secondary h-12 px-6 text-base">
+            <a href={withBase('/train/')} class="btn home-cta-quiet h-12 px-6 text-base">
               <Icon name="dumbbell" size={18} /> Start training
             </a>
           </div>
-          <p class="text-subtle mt-5 text-xs">
-            Two minutes · No account · Your data never leaves your device
-          </p>
+          <p class="home-note">Two minutes. No account. Free, and it stays that way.</p>
         </div>
         <div class="animate-rise relative [animation-delay:150ms]">
           <HeroPreview client:load />
@@ -143,7 +138,9 @@ const faq = [
         ['0', 'trackers, ads, accounts', 'and nothing you type leaves your device'],
       ].map(([n, label, sub, href]) => (
         <div>
-          <p class="font-display text-gradient text-4xl leading-none tracking-tight">{n}</p>
+          <p class="font-display text-brand-600 dark:text-brand-300 text-4xl leading-none tracking-tight">
+            {n}
+          </p>
           <p class="mt-2 font-semibold">
             {href ? (
               <a class="hover:text-brand-600 dark:hover:text-brand-300" href={withBase(href)}>
@@ -181,8 +178,8 @@ const faq = [
     <ul class="mt-8 grid gap-4 md:grid-cols-3">
       {featuredRecipes.map((r) => (
         <li class="surface flex flex-col gap-2 p-6">
-          <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-            {r.meal} · {r.minutes} min
+          <span class="text-subtle text-xs font-semibold">
+            {r.meal.charAt(0).toUpperCase() + r.meal.slice(1)} · {r.minutes} min
           </span>
           <a
             class="text-lg font-bold tracking-tight hover:underline"
@@ -290,9 +287,7 @@ const faq = [
           href={withBase(`/guides/${g.id}/`)}
           class="surface hover:shadow-glow flex flex-col gap-2 p-6 transition hover:-translate-y-0.5"
         >
-          <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-            {g.data.category}
-          </span>
+          <span class="text-subtle text-xs font-semibold">{g.data.category}</span>
           <span class="text-lg font-bold tracking-tight">{g.data.title}</span>
           <span class="text-muted line-clamp-3 text-sm leading-relaxed">{g.data.description}</span>
         </a>

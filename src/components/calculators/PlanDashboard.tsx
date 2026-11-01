@@ -280,9 +280,7 @@ function PlanDashboardInner() {
           aria-label="Goal reached"
         >
           <div>
-            <p class="text-brand-700 dark:text-brand-300 text-xs font-semibold tracking-wide uppercase">
-              Goal reached
-            </p>
+            <p class="text-brand-700 dark:text-brand-300 text-xs font-semibold">Goal reached</p>
             <h2 class="font-display mt-1 text-3xl tracking-tight">
               Your trend is at {w(plan.goalWeightKg)}. Time to keep it.
             </h2>
@@ -309,7 +307,7 @@ function PlanDashboardInner() {
 
       {plan.goal !== 'maintain' && (
         <div class="surface p-5">
-          <div class="text-subtle mb-2 flex justify-between text-xs font-semibold tracking-wide uppercase">
+          <div class="text-subtle mb-2 flex justify-between text-xs font-semibold">
             <span>{w(plan.startWeightKg)}</span>
             <span>{pct}% there</span>
             <span>{w(plan.goalWeightKg)}</span>

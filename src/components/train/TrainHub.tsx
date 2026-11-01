@@ -211,7 +211,7 @@ function TrainHubInner() {
                 ['Minutes', log.reduce((n, l) => n + l.minutes, 0)],
               ].map(([k, v]) => (
                 <div key={k} class="surface-muted rounded-2xl p-3">
-                  <dt class="text-subtle text-[11px] font-semibold uppercase">{k}</dt>
+                  <dt class="text-subtle text-[11px] font-semibold">{k}</dt>
                   <dd class="font-display tabular mt-1 text-2xl">{v}</dd>
                 </div>
               ))}

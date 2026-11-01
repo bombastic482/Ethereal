@@ -23,7 +23,10 @@ test.describe('site', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Ethereal/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('working toward');
-    await page.getByRole('link', { name: /build my plan/i }).click();
+    await page
+      .getByRole('main')
+      .getByRole('link', { name: /build my plan/i })
+      .click();
     await expect(page).toHaveURL(/\/start\/$/);
   });
 

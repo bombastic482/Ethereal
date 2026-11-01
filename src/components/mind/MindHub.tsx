@@ -41,7 +41,7 @@ function MindHubInner() {
           ['Recharges', String(recharges), 'Breathing sessions in four weeks'],
         ].map(([k, v, sub]) => (
           <div key={k} class="surface p-5">
-            <p class="text-subtle text-xs font-semibold tracking-wide uppercase">{k}</p>
+            <p class="text-subtle text-xs font-semibold">{k}</p>
             <p class="font-display mt-1 text-3xl tracking-tight">{v}</p>
             <p class="text-muted mt-1 text-sm">{sub}</p>
           </div>

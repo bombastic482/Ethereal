@@ -388,12 +388,6 @@
     padding-inline: 2rem;
   }
 }
-@utility text-gradient {
-  background: linear-gradient(120deg, var(--color-brand-600), var(--color-brand-400) 70%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
 @utility btn {
   display: inline-flex;
   align-items: center;
@@ -525,12 +519,12 @@
   }
 }
 @utility eyebrow {
+  /* A quiet lead-in above a heading: sentence case and the section's colour, never shouted. */
   display: inline-block;
-  margin-bottom: 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+  letter-spacing: -0.005em;
   color: var(--color-brand-700);
   [data-theme='dark'] & {
     color: var(--color-brand-300);
@@ -1033,8 +1027,6 @@
   font-family: var(--font-sans, inherit);
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--fg-subtle);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2588,8 +2580,6 @@
 .sky-eyebrow {
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   opacity: 0.82;
 }
 .sky-title {
@@ -2674,6 +2664,97 @@
 @media (prefers-reduced-motion: reduce) {
   .sky-star,
   .sky-glow {
+    animation: none;
+  }
+}
+
+/* Home hero: the page opens in the same living sky as Today, at the visitor's time of day.
+   Under it, a quiet night shows until the real sky fades in, and the bottom melts into the page. */
+.home-hero {
+  --hero-bg: var(--bg);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: white;
+  background: linear-gradient(180deg, oklch(24% 0.06 272), oklch(33% 0.07 288) 62%, var(--bg));
+}
+.home-hero-sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.sky-home {
+  height: 100%;
+  /* Deeper than Today's sky: the words sit low in it, so the pale horizon is kept for the very
+     bottom, where the page takes over. */
+  background: linear-gradient(
+    180deg,
+    var(--sky-top),
+    color-mix(in oklab, var(--sky-top) 78%, var(--sky-horizon)) 62%,
+    var(--sky-horizon) 88%
+  );
+  animation: sky-in 0.9s ease both;
+}
+.sky-home::after {
+  height: 16%;
+}
+.hero-phone-screen {
+  color: var(--fg);
+}
+@keyframes sky-in {
+  from {
+    opacity: 0;
+  }
+}
+.home-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 9vw, 4.75rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  text-shadow: 0 2px 30px oklch(25% 0.06 270 / 0.25);
+}
+.home-title-soft {
+  color: oklch(94% 0.06 165);
+}
+.home-lede {
+  margin-top: 1.5rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: oklch(100% 0 0 / 0.86);
+  text-wrap: pretty;
+}
+@media (min-width: 640px) {
+  .home-lede {
+    font-size: 1.25rem;
+  }
+}
+.home-note {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  color: oklch(100% 0 0 / 0.82);
+  text-shadow: 0 1px 12px oklch(25% 0.06 270 / 0.35);
+}
+.home-cta {
+  color: oklch(20% 0.02 260);
+  background: white;
+  box-shadow: 0 12px 30px -12px oklch(20% 0.06 270 / 0.6);
+}
+.home-cta:hover {
+  background: oklch(97% 0.01 260);
+}
+.home-cta-quiet {
+  color: white;
+  background: oklch(100% 0 0 / 0.14);
+  box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.24);
+  backdrop-filter: blur(10px);
+}
+.home-cta-quiet:hover {
+  background: oklch(100% 0 0 / 0.22);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-home {
     animation: none;
   }
 }

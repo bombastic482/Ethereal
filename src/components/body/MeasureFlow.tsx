@@ -162,9 +162,7 @@ export function MeasureFlow({
           <div class={`measure-live ${live !== null ? 'measure-live-on' : ''}`} aria-live="polite">
             {live !== null ? (
               <>
-                <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-                  Body fat with these numbers
-                </span>
+                <span class="text-subtle text-xs font-semibold">Body fat with these numbers</span>
                 <span class="flex items-baseline gap-2">
                   <span class="font-display tabular text-3xl">{live.toFixed(1)}%</span>
                   <span class="text-muted text-sm">{band?.label}</span>

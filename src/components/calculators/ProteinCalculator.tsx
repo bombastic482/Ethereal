@@ -143,7 +143,7 @@ export default function ProteinCalculator() {
               {result.rationale}
             </Callout>
             <div>
-              <p class="text-subtle mb-2 text-xs font-semibold tracking-wide uppercase">
+              <p class="text-subtle mb-2 text-xs font-semibold">
                 What {result.perMeal} g looks like
               </p>
               <ul class="grid gap-1.5 text-sm sm:grid-cols-2">

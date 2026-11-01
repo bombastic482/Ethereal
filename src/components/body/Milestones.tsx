@@ -80,9 +80,7 @@ function Toast({ a, onClose }: { a: Achievement; onClose: () => void }) {
         <Icon name={a.icon} size={20} />
       </span>
       <span class="min-w-0 flex-1">
-        <span class="text-subtle block text-[11px] font-semibold tracking-wide uppercase">
-          Milestone
-        </span>
+        <span class="text-subtle block text-[11px] font-semibold">Milestone</span>
         <span class="block font-bold">{a.title}</span>
         <span class="text-muted block text-sm">{a.detail}</span>
       </span>

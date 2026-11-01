@@ -150,13 +150,13 @@ const jsonLd = [
           <section class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Easier and harder versions">
             {easier && (
               <a href={withBase(`/train/exercises/${easier.id}/`)} class="surface pressable p-4">
-                <span class="text-subtle block text-xs font-semibold uppercase">Too hard? Try</span>
+                <span class="text-subtle block text-xs font-semibold">Too hard? Try</span>
                 <span class="mt-1 block font-bold">{easier.name}</span>
               </a>
             )}
             {harder && (
               <a href={withBase(`/train/exercises/${harder.id}/`)} class="surface pressable p-4">
-                <span class="text-subtle block text-xs font-semibold uppercase">Too easy? Try</span>
+                <span class="text-subtle block text-xs font-semibold">Too easy? Try</span>
                 <span class="mt-1 block font-bold">{harder.name}</span>
               </a>
             )}

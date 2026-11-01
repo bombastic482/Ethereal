@@ -4,7 +4,7 @@ import { activity, exerciseKcal } from '@/lib/calc/exercise';
 import { buildDay, dayStore, missedItems, nowItem, toggleTick, type DayItem } from '@/lib/day';
 import { addExercise, diaryStore } from '@/lib/food-store';
 import { haptic } from '@/lib/fx';
-import { GOALS, lifeStore, toMinutes } from '@/lib/life';
+import { lifeStore, toMinutes } from '@/lib/life';
 import { logStore } from '@/lib/log';
 import { listPhotos, photosSupported } from '@/lib/photos';
 import { planProfile, todayIso } from '@/lib/plan';
@@ -43,6 +43,26 @@ function relative(item: DayItem, now: number): string {
   if (diff > 0) return `In ${span(diff)}`;
   if (item.end && toMinutes(item.end) > now) return 'Now';
   return `${span(-diff)} ago`;
+}
+
+/** One line under the greeting that says where the day stands, in words. */
+function dayLine(current: DayItem | null, done: number, total: number, now: number): string {
+  const tally =
+    done === 0
+      ? 'A fresh day.'
+      : done >= total
+        ? 'Everything is done.'
+        : `${done} done, ${total - done} to go.`;
+  if (!current) return done >= total ? 'Everything is done. Rest well.' : `${tally} Rest well.`;
+  const when = relative(current, now);
+  // Mid-sentence, but prayer names keep their capital.
+  const what =
+    current.kind === 'prayer'
+      ? current.title
+      : current.title.charAt(0).toLowerCase() + current.title.slice(1);
+  if (when === 'Now') return `${tally} Now: ${what}.`;
+  if (when.endsWith('ago')) return `${tally} Still open: ${what}.`;
+  return `${tally} Next, ${what} at ${clock(current.time)}.`;
 }
 
 function greeting(now: number, name: string): string {
@@ -179,7 +199,6 @@ function TodayPlanInner() {
   const shown = all ? day : upcoming.slice(0, 3);
   const why = life.why.trim();
   const picked = sel ? (day.find((i) => i.id === sel) ?? null) : null;
-  const firstGoal = GOALS.find((g) => g.id === life.goals[0]);
 
   const tick = (item: DayItem) => {
     if (item.auto) return;
@@ -203,7 +222,7 @@ function TodayPlanInner() {
               <h2 id="plan-h" class="sky-title">
                 {greeting(now, life.name)}
               </h2>
-              {firstGoal && <p class="sky-sub">Working on: {firstGoal.label.toLowerCase()}</p>}
+              <p class="sky-sub">{dayLine(current, doneCount, actionable.length, now)}</p>
             </div>
             <a class="sky-chip" href={withBase('/you/#day')} aria-label="Edit my day">
               <Icon name="edit" size={14} />
@@ -326,7 +345,7 @@ function TodayPlanInner() {
 
       {(shown.length > 0 || all) && (
         <div class="surface p-2 sm:p-3">
-          <p class="text-subtle px-2 pt-1 pb-2 text-xs font-semibold tracking-wide uppercase">
+          <p class="text-subtle px-2 pt-1 pb-2 text-xs font-semibold">
             {all ? 'Your whole day' : 'Coming up'}
           </p>
           <ol class="timeline">

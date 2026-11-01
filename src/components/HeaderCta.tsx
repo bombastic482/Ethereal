@@ -7,7 +7,7 @@ import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Icon } from './ui/Icon';
 
-/** Header button: "Start free" for new visitors; calories left today for people with a plan. */
+/** Header button: a way into the plan for new visitors; calories left today for people with one. */
 export default function HeaderCta({ compact = false }: { compact?: boolean }) {
   const [profile] = useProfile();
   const [plan] = planStore.use();
@@ -18,7 +18,7 @@ export default function HeaderCta({ compact = false }: { compact?: boolean }) {
   if (!plan.active) {
     return (
       <a href={withBase('/start/')} class={`btn btn-primary ${cls}`}>
-        Start free <Icon name="arrow" size={16} />
+        Build my plan <Icon name="arrow" size={16} />
       </a>
     );
   }

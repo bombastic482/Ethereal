@@ -83,7 +83,7 @@ export default function HeroPreview() {
                 <Icon name={next.icon} size={18} />
               </span>
               <span class="min-w-0 flex-1">
-                <span class="text-brand-700 dark:text-brand-300 block text-[10px] font-bold tracking-wide uppercase">
+                <span class="text-brand-700 dark:text-brand-300 block text-[10px] font-bold">
                   Next · in {next.at - now} min
                 </span>
                 <span class="block truncate text-[15px] font-bold tracking-tight">

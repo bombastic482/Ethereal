@@ -27,7 +27,7 @@ export function Stat({
         : 'text-fg';
   return (
     <div class={`flex flex-col ${cls ?? ''}`}>
-      <span class="text-subtle text-xs font-semibold tracking-wide uppercase">{label}</span>
+      <span class="text-subtle text-xs font-semibold">{label}</span>
       <span
         class={`font-display tabular mt-1 leading-none tracking-tight ${size === 'lg' ? 'text-5xl sm:text-6xl' : 'text-3xl'} ${color}`}
       >

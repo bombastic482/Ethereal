@@ -25,6 +25,8 @@ export function SkyScene({
   events,
   moon,
   class: cls,
+  low: lowAt = 0.8,
+  high: highAt = 0.5,
   children,
 }: {
   /** Minutes since midnight. */
@@ -34,6 +36,9 @@ export function SkyScene({
   moon: number;
   /** Extra classes, e.g. a smaller variant. */
   class?: string;
+  /** Where the sun and moon rise and set, and how high they climb, as fractions of the height. */
+  low?: number;
+  high?: number;
   children?: preact.ComponentChildren;
 }) {
   const box = useRef<HTMLDivElement>(null);
@@ -59,8 +64,8 @@ export function SkyScene({
   const night = arcProgress(now, events, 'moon');
 
   // Bodies cross the full width and arc to just below the greeting.
-  const low = h * 0.8;
-  const high = h * 0.5;
+  const low = h * lowAt;
+  const high = h * highAt;
   const along = (p: number) =>
     [w * (0.08 + 0.84 * p), low - (low - high) * Math.sin(Math.PI * p)] as const;
   const sunAt = sun === null ? null : along(sun);

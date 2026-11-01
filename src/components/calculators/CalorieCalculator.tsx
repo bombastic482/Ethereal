@@ -185,9 +185,7 @@ function WeekTable({
   return (
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
-        <caption class="text-subtle mb-2 text-left text-xs font-semibold tracking-wide uppercase">
-          Quick reference
-        </caption>
+        <caption class="text-subtle mb-2 text-left text-xs font-semibold">Quick reference</caption>
         <thead>
           <tr class="text-subtle text-left text-xs">
             <th class="pb-2 font-semibold">Weekly loss</th>

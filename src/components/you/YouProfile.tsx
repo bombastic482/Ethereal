@@ -608,9 +608,7 @@ function Faith({ life, patch }: { life: Life; patch: (p: Partial<Life>) => void 
             <ol class="grid grid-cols-3 gap-2 sm:grid-cols-6" aria-label="Today's prayer times">
               {(Object.keys(PRAYER_LABEL) as PrayerName[]).map((k) => (
                 <li key={k} class="surface-muted rounded-xl p-2 text-center">
-                  <span class="text-subtle block text-[11px] font-semibold uppercase">
-                    {PRAYER_LABEL[k]}
-                  </span>
+                  <span class="text-subtle block text-[11px] font-semibold">{PRAYER_LABEL[k]}</span>
                   <span class="tabular block font-semibold">{clock(times[k])}</span>
                 </li>
               ))}

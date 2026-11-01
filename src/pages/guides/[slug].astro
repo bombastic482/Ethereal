@@ -135,8 +135,8 @@ const jsonLd = [
             <ul class="mt-4 grid gap-3 sm:grid-cols-3">
               {recipePicks.map((r) => (
                 <li class="surface p-4">
-                  <span class="text-subtle text-xs font-semibold tracking-wide uppercase">
-                    {r.meal} · {r.minutes} min
+                  <span class="text-subtle text-xs font-semibold">
+                    {r.meal.charAt(0).toUpperCase() + r.meal.slice(1)} · {r.minutes} min
                   </span>
                   <a
                     class="mt-1 block font-bold tracking-tight hover:underline"
@@ -181,9 +181,7 @@ const jsonLd = [
         <div class="sticky top-24 grid gap-8">
           {toc.length > 0 && (
             <nav aria-label="On this page">
-              <p class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">
-                On this page
-              </p>
+              <p class="text-subtle mb-3 text-xs font-semibold">On this page</p>
               <ol class="border-line grid gap-2 border-l text-sm">
                 {toc.map((h) => (
                   <li>
@@ -200,9 +198,7 @@ const jsonLd = [
           )}
           {related.length > 0 && (
             <div>
-              <p class="text-subtle mb-3 text-xs font-semibold tracking-wide uppercase">
-                Try the tools
-              </p>
+              <p class="text-subtle mb-3 text-xs font-semibold">Try the tools</p>
               <div class="grid gap-3">
                 {related.map((t) => (
                   <ToolCard tool={t} />
