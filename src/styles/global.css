@@ -1979,3 +1979,228 @@
   color: var(--fg-muted);
   max-width: 40rem;
 }
+
+/* Today: hero with the day dial */
+.today-hero {
+  padding: 1.25rem;
+  background:
+    radial-gradient(90% 120% at 0% 0%, oklch(63% 0.15 var(--brand-h) / 0.12), transparent 55%),
+    var(--bg-elevated);
+  animation: var(--animate-rise);
+}
+[data-theme='dark'] .today-hero {
+  background:
+    radial-gradient(90% 120% at 0% 0%, oklch(55% 0.14 var(--brand-h) / 0.16), transparent 55%),
+    linear-gradient(180deg, oklch(19% 0.01 255), oklch(16.5% 0.009 255));
+}
+.today-hero-grid {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+}
+@media (min-width: 768px) {
+  .today-hero {
+    padding: 1.75rem 2rem 1.75rem 1.25rem;
+  }
+  .today-hero-grid {
+    grid-template-columns: 19rem minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+.dial {
+  position: relative;
+  width: min(19rem, 82vw);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+.dial-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.dial-track {
+  fill: none;
+  stroke: color-mix(in oklab, var(--fg) 8%, transparent);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+.dial-progress {
+  fill: none;
+  stroke: url(#dial-fill);
+  stroke-width: 14;
+  stroke-linecap: round;
+  filter: drop-shadow(0 4px 10px oklch(63% 0.15 var(--brand-h) / 0.35));
+}
+.dial-busy {
+  fill: none;
+  stroke: color-mix(in oklab, var(--fg) 14%, transparent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 1 5;
+}
+.dial-tick {
+  stroke: color-mix(in oklab, var(--fg) 18%, transparent);
+  stroke-width: 1.5;
+}
+.dial-tick-major {
+  stroke: color-mix(in oklab, var(--fg) 35%, transparent);
+  stroke-width: 2;
+}
+.dial-hour {
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--fg-subtle);
+}
+.dial-mark {
+  --k: var(--color-brand-500);
+  cursor: pointer;
+  outline: none;
+}
+.dial-meal {
+  --k: oklch(74% 0.15 65);
+}
+.dial-med {
+  --k: oklch(70% 0.15 350);
+}
+.dial-prayer,
+.dial-wind,
+.dial-sleep {
+  --k: oklch(64% 0.13 285);
+}
+.dial-wake {
+  --k: oklch(80% 0.14 85);
+}
+.dial-workout {
+  --k: oklch(66% 0.17 28);
+}
+.dial-walk {
+  --k: oklch(68% 0.14 150);
+}
+.dial-weigh,
+.dial-measure,
+.dial-photo {
+  --k: oklch(64% 0.13 250);
+}
+.dial-dot {
+  fill: var(--bg-elevated);
+  stroke: var(--k);
+  stroke-width: 3;
+  transition:
+    r 0.25s var(--ease-spring),
+    fill 0.2s ease;
+}
+.dial-core {
+  fill: var(--k);
+  transition: r 0.25s var(--ease-spring);
+}
+.dial-done .dial-dot {
+  fill: var(--k);
+}
+.dial-check {
+  fill: none;
+  stroke: white;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dial-sel .dial-dot {
+  stroke-width: 3.5;
+  filter: drop-shadow(0 4px 10px color-mix(in oklab, var(--k) 60%, transparent));
+}
+.dial-mark:focus-visible .dial-dot {
+  stroke-width: 4;
+  stroke: var(--fg);
+}
+.dial-now-halo {
+  fill: oklch(63% 0.15 var(--brand-h) / 0.22);
+  animation: dial-pulse 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dial-now-dot {
+  fill: white;
+  stroke: var(--color-brand-600);
+  stroke-width: 3.5;
+}
+@keyframes dial-pulse {
+  50% {
+    transform: scale(1.35);
+    opacity: 0.4;
+  }
+}
+.dial-center {
+  position: absolute;
+  inset: 22%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.2rem;
+  text-align: center;
+  pointer-events: none;
+}
+.dial-center > * {
+  pointer-events: auto;
+}
+.dial-center-clock {
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.dial-center-sub {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+.dial-center-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.8rem;
+  color: white;
+  background: var(--k);
+  animation: var(--animate-pop);
+}
+.dial-center-time {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--fg-subtle);
+}
+.dial-center-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  max-width: 9rem;
+}
+.dial-center-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1.5px solid var(--border-strong);
+  transition: transform 0.15s var(--ease-spring);
+}
+.dial-center-tick:active {
+  transform: scale(0.94);
+}
+.dial-center-tick.is-done {
+  color: white;
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-500);
+}
+.dial-center-tick:disabled {
+  opacity: 0.8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dial-now-halo,
+  .today-hero {
+    animation: none;
+  }
+}

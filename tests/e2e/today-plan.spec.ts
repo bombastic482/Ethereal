@@ -22,7 +22,7 @@ test.describe('today plan', () => {
     await page.goto('/today/');
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Good afternoon, Ali' })).toBeVisible();
-    const now = page.locator('.now-card');
+    const now = page.getByRole('region', { name: "What's next" });
     await expect(now.getByRole('heading', { name: 'Lunch' })).toBeVisible();
     await expect(now).toContainText(/in 10 min/i);
 
@@ -31,7 +31,13 @@ test.describe('today plan', () => {
     await page.getByRole('button', { name: 'Breakfast: mark done' }).click();
     await expect(page.getByRole('button', { name: 'Breakfast: done' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: /catch me up/i })).toHaveCount(0);
-    await expect(page.getByText(/1 of \d+ done today/)).toBeVisible();
+    await expect(page.getByRole('group', { name: /Your day: 1 of \d+ done/ })).toBeVisible();
+
+    // The day dial: tap dinner's marker, mark it done from the centre.
+    const dial = page.getByRole('group', { name: /Your day: \d+ of \d+ done/ });
+    await dial.getByRole('button', { name: /Dinner$/ }).click();
+    await page.getByRole('button', { name: 'Mark done', exact: true }).click();
+    await expect(dial.getByRole('button', { name: /Dinner, done$/ })).toBeVisible();
 
     // Log lunch from the Now card: the diary's sheet opens on Lunch.
     await now.getByRole('button', { name: 'Log lunch' }).click();

@@ -1,15 +1,7 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { bodyStore } from '@/lib/body';
 import { activity, exerciseKcal } from '@/lib/calc/exercise';
-import {
-  buildDay,
-  dayStore,
-  missedItems,
-  nowItem,
-  toggleTick,
-  type DayItem,
-  type DayKind,
-} from '@/lib/day';
+import { buildDay, dayStore, missedItems, nowItem, toggleTick, type DayItem } from '@/lib/day';
 import { addExercise, diaryStore } from '@/lib/food-store';
 import { haptic } from '@/lib/fx';
 import { GOALS, lifeStore, toMinutes } from '@/lib/life';
@@ -22,23 +14,9 @@ import { buildWorkout, weekOf } from '@/lib/train/program';
 import { trainStore } from '@/lib/train/store';
 import { withBase } from '@/lib/url';
 import TodayMind from '../mind/TodayMind';
+import { DayDial, KIND_ICON, KindIcon } from './DayDial';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
-import { Icon, type IconName } from '../ui/Icon';
-
-const ICON: Record<DayKind, IconName> = {
-  wake: 'sun',
-  meal: 'utensils',
-  med: 'pill',
-  prayer: 'moon',
-  workout: 'dumbbell',
-  walk: 'walk',
-  weigh: 'scale',
-  photo: 'camera',
-  measure: 'ruler',
-  wind: 'leaf',
-  sleep: 'bed',
-  busy: 'clock',
-};
+import { Icon } from '../ui/Icon';
 
 const minutesNow = () => {
   const d = new Date();
@@ -88,6 +66,7 @@ function TodayPlanInner() {
   const [now, setNow] = useState(0);
   const [lastPhoto, setLastPhoto] = useState<string | null | undefined>(undefined);
   const [all, setAll] = useState(false);
+  const [sel, setSel] = useState<string | null>(null);
   const [catchUp, setCatchUp] = useState(false);
 
   // A live clock: the Now card moves on by itself, and a new day starts at midnight.
@@ -174,6 +153,7 @@ function TodayPlanInner() {
   const upcoming = current ? day.slice(day.indexOf(current) + 1).filter((i) => !i.done) : [];
   const shown = all ? day : upcoming.slice(0, 3);
   const why = life.why.trim();
+  const picked = sel ? (day.find((i) => i.id === sel) ?? null) : null;
   const firstGoal = GOALS.find((g) => g.id === life.goals[0]);
 
   const tick = (item: DayItem) => {
@@ -184,34 +164,98 @@ function TodayPlanInner() {
 
   return (
     <section class="today-plan mb-8 grid gap-4" aria-labelledby="plan-h">
-      <div class="flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <p class="eyebrow mb-1">
-            {new Date(`${date}T12:00:00`).toLocaleDateString('en', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long',
-            })}
-          </p>
-          <h2 id="plan-h" class="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">
-            {greeting(now, life.name)}
-          </h2>
-          <p class="text-muted text-sm">
-            {doneCount} of {actionable.length} done today
-            {firstGoal ? ` · working on: ${firstGoal.label.toLowerCase()}` : ''}
-          </p>
+      <div class="today-hero surface">
+        <div class="today-hero-grid">
+          <DayDial
+            items={day}
+            now={now}
+            selected={sel}
+            onSelect={(id) => setSel(sel === id ? null : id)}
+            center={
+              picked ? (
+                <>
+                  <span class={`dial-center-icon dial-${picked.kind}`}>
+                    <KindIcon kind={picked.kind} size={18} />
+                  </span>
+                  <span class="dial-center-time">{clock(picked.time)}</span>
+                  <span class="dial-center-title">{picked.title}</span>
+                  {!picked.passive && (
+                    <button
+                      type="button"
+                      class={`dial-center-tick ${picked.done ? 'is-done' : ''}`}
+                      disabled={picked.auto}
+                      onClick={() => tick(picked)}
+                    >
+                      <Icon name="check" size={14} />
+                      {picked.done ? 'Done' : 'Mark done'}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span class="dial-center-clock tabular">
+                    {clock(
+                      `${String(Math.floor(now / 60)).padStart(2, '0')}:${String(now % 60).padStart(2, '0')}`,
+                    )}
+                  </span>
+                  <span class="dial-center-sub tabular">
+                    {doneCount} of {actionable.length} done
+                  </span>
+                </>
+              )
+            }
+          />
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p class="eyebrow mb-1">
+                  {new Date(`${date}T12:00:00`).toLocaleDateString('en', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                  })}
+                </p>
+                <h2
+                  id="plan-h"
+                  class="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl"
+                >
+                  {greeting(now, life.name)}
+                </h2>
+                {firstGoal && (
+                  <p class="text-muted mt-1 text-sm">Working on: {firstGoal.label.toLowerCase()}</p>
+                )}
+              </div>
+              <a
+                class="text-brand-700 dark:text-brand-300 text-sm font-semibold"
+                href={withBase('/you/#day')}
+              >
+                Edit my day
+              </a>
+            </div>
+            <div class="mt-5">
+              {current ? (
+                <NowCard
+                  bare
+                  item={current}
+                  now={now}
+                  date={date}
+                  weightKg={planProfile(profile, weights.entries).weightKg}
+                  onTick={() => tick(current)}
+                />
+              ) : (
+                <div class="py-2">
+                  <p class="eyebrow">That's the day</p>
+                  <h3 class="font-display text-3xl tracking-tight">
+                    {doneCount >= actionable.length - 1
+                      ? 'Everything done. Rest well.'
+                      : 'Rest now. Tomorrow is a fresh page.'}
+                  </h3>
+                  {why && <p class="text-muted mt-2 italic">“{why}”</p>}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <a
-          class="text-brand-700 dark:text-brand-300 text-sm font-semibold"
-          href={withBase('/you/#day')}
-        >
-          Edit my day
-        </a>
-      </div>
-      <div class="plan-progress" aria-hidden="true">
-        <span
-          style={{ transform: `scaleX(${actionable.length ? doneCount / actionable.length : 0})` }}
-        />
       </div>
 
       {!life.ready && life.goals.length === 0 && (
@@ -226,26 +270,6 @@ function TodayPlanInner() {
           </span>
           <Icon name="chevron" size={16} class="text-subtle flex-none" />
         </a>
-      )}
-
-      {current ? (
-        <NowCard
-          item={current}
-          now={now}
-          date={date}
-          weightKg={planProfile(profile, weights.entries).weightKg}
-          onTick={() => tick(current)}
-        />
-      ) : (
-        <div class="now-card surface p-5 sm:p-6">
-          <p class="eyebrow">That's the day</p>
-          <h3 class="font-display text-3xl tracking-tight">
-            {doneCount >= actionable.length - 1
-              ? 'Everything done. Rest well.'
-              : 'Rest now. Tomorrow is a fresh page.'}
-          </h3>
-          {why && <p class="text-muted mt-2 italic">“{why}”</p>}
-        </div>
       )}
 
       <TodayMind date={date} />
@@ -318,7 +342,7 @@ function Row({
     >
       <span class="tl-time tabular">{clock(item.time)}</span>
       <span class="tl-dot" aria-hidden="true">
-        <Icon name={item.done ? 'check' : ICON[item.kind]} size={14} />
+        <Icon name={item.done ? 'check' : KIND_ICON[item.kind]} size={14} />
       </span>
       <span class="min-w-0 flex-1">
         <span class="tl-title block truncate">
@@ -350,6 +374,7 @@ function Row({
 }
 
 function NowCard({
+  bare = false,
   item,
   now,
   date,
@@ -361,6 +386,8 @@ function NowCard({
   date: string;
   weightKg: number;
   onTick: () => void;
+  /** Inside the Today hero: no card of its own. */
+  bare?: boolean;
 }) {
   const when = relative(item, now);
   const logWalk = () => {
@@ -439,10 +466,15 @@ function NowCard({
   })();
   const hasOwnAction = ['meal', 'workout', 'weigh', 'photo', 'measure', 'wind'].includes(item.kind);
   return (
-    <div class={`now-card now-${item.kind} surface overflow-hidden`} aria-live="polite">
-      <div class="flex items-start gap-4 p-5 sm:p-6">
+    <div
+      class={`now now-${item.kind} ${bare ? '' : 'now-card surface overflow-hidden'}`}
+      role="region"
+      aria-label="What's next"
+      aria-live="polite"
+    >
+      <div class={`flex items-start gap-4 ${bare ? '' : 'p-5 sm:p-6'}`}>
         <span class="now-icon" aria-hidden="true">
-          <Icon name={ICON[item.kind]} size={26} />
+          <Icon name={KIND_ICON[item.kind]} size={26} />
         </span>
         <div class="min-w-0 flex-1">
           <p class="eyebrow mb-1">

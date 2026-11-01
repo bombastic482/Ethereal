@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { bodyFatBands } from '@/lib/calc/body-fat';
 import { daysBetween } from '@/lib/calc/trend';
-import { cmToIn, formatWeight, inToCm, round } from '@/lib/calc/units';
+import { cmToIn, formatWeight, round } from '@/lib/calc/units';
 import {
   bodyStore,
   composition,
