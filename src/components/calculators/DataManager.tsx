@@ -13,6 +13,7 @@ import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { Icon } from '../ui/Icon';
 import { NumberField } from '../ui/NumberField';
 import { ProfileFields } from '../ui/ProfileFields';
@@ -556,7 +557,9 @@ function DataManagerInner() {
 export default function DataManager() {
   return (
     <ErrorBoundary area="settings">
-      <DataManagerInner />
+      <Hydrated fallback={<Placeholder height="48rem" />}>
+        <DataManagerInner />
+      </Hydrated>
     </ErrorBoundary>
   );
 }

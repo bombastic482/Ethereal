@@ -71,7 +71,7 @@ test.describe('body composition', () => {
       );
     });
     await page.goto('/progress/');
-    const ms = page.getByRole('region', { name: 'Milestones' });
+    const ms = page.getByRole('region', { name: 'Milestones', exact: true });
     await ms.scrollIntoViewIfNeeded();
     await expect(ms).toContainText('First workout');
     await expect(ms).toContainText('Ten workouts');

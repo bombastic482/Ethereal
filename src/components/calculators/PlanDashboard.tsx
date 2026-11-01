@@ -14,6 +14,7 @@ import { confetti, haptic } from '@/lib/fx';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { DonutChart } from '../ui/DonutChart';
 import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
@@ -485,8 +486,8 @@ function PlanDashboardInner() {
             </p>
           )}
         </section>
-        <section class="surface p-5 sm:p-6" aria-label="Milestones">
-          <h3 class="text-lg font-bold tracking-tight">Milestones</h3>
+        <section class="surface p-5 sm:p-6" aria-label="Weight milestones">
+          <h3 class="text-lg font-bold tracking-tight">Weight milestones</h3>
           {milestones.length > 0 ? (
             <ul class="mt-4 grid gap-3">
               {milestones.map((m) => (
@@ -719,7 +720,9 @@ function PlanDashboardInner() {
 export default function PlanDashboard() {
   return (
     <ErrorBoundary area="your plan">
-      <PlanDashboardInner />
+      <Hydrated fallback={<Placeholder height="34rem" />}>
+        <PlanDashboardInner />
+      </Hydrated>
     </ErrorBoundary>
   );
 }

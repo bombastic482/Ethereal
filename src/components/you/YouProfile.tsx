@@ -24,6 +24,7 @@ import {
 import { trainStore } from '@/lib/train/store';
 import { withBase } from '@/lib/url';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { Icon, type IconName } from '../ui/Icon';
 import { Segmented } from '../ui/Segmented';
 import { GoalGrid } from './GoalGrid';
@@ -770,7 +771,9 @@ function YouProfileInner() {
 export default function YouProfile() {
   return (
     <ErrorBoundary area="your profile">
-      <YouProfileInner />
+      <Hydrated fallback={<Placeholder height="48rem" />}>
+        <YouProfileInner />
+      </Hydrated>
     </ErrorBoundary>
   );
 }

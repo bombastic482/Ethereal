@@ -8,6 +8,7 @@ import { todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { trainStore } from '@/lib/train/store';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { Icon } from '../ui/Icon';
 
 const RECENT_DAYS = 3;
@@ -160,7 +161,9 @@ function MilestonesInner({ celebrateOnly = false }: { celebrateOnly?: boolean })
 export default function Milestones({ celebrateOnly = false }: { celebrateOnly?: boolean }) {
   return (
     <ErrorBoundary area="milestones">
-      <MilestonesInner celebrateOnly={celebrateOnly} />
+      <Hydrated fallback={celebrateOnly ? null : <Placeholder height="22rem" />}>
+        <MilestonesInner celebrateOnly={celebrateOnly} />
+      </Hydrated>
     </ErrorBoundary>
   );
 }

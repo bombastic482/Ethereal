@@ -679,6 +679,32 @@
   }
 }
 
+/* A calm stand-in while personal data loads (see ui/Hydrated.tsx). */
+.placeholder {
+  background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklab, var(--fg) 4%, transparent) 50%,
+      transparent 70%
+    )
+    var(--bg-elevated);
+  background-size: 220% 100%;
+  animation: placeholder-sheen 1.8s ease-in-out infinite;
+}
+@keyframes placeholder-sheen {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .placeholder {
+    animation: none;
+  }
+}
+
 /* Print: the content, not the chrome. */
 @media print {
   header,

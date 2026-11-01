@@ -8,6 +8,7 @@ import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
 import { NumberField } from '../ui/NumberField';
@@ -531,7 +532,9 @@ function WeightTrackerInner() {
 export default function WeightTracker() {
   return (
     <ErrorBoundary area="the tracker">
-      <WeightTrackerInner />
+      <Hydrated fallback={<Placeholder height="36rem" />}>
+        <WeightTrackerInner />
+      </Hydrated>
     </ErrorBoundary>
   );
 }

@@ -14,6 +14,7 @@ import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { Icon } from '../ui/Icon';
 import { Stat } from '../ui/Stat';
 import { Heatmap } from '../ui/Heatmap';
@@ -555,7 +556,9 @@ function WeeklyReviewInner() {
 export default function WeeklyReview() {
   return (
     <ErrorBoundary area="the review">
-      <WeeklyReviewInner />
+      <Hydrated fallback={<Placeholder height="40rem" />}>
+        <WeeklyReviewInner />
+      </Hydrated>
     </ErrorBoundary>
   );
 }

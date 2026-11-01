@@ -5,10 +5,26 @@ import { logStore } from '@/lib/log';
 import { buildPlanSummary, planProfile, planStore, todayIso } from '@/lib/plan';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
+import { Hydrated } from './ui/Hydrated';
 import { Icon } from './ui/Icon';
 
-/** Header button: a way into the plan for new visitors; calories left today for people with one. */
+/**
+ * Header button: a way into the plan for new visitors; calories left today for people with one.
+ * Nothing is shown until the browser knows which, so a plan holder never sees "Build my plan".
+ */
 export default function HeaderCta({ compact = false }: { compact?: boolean }) {
+  return (
+    <Hydrated
+      fallback={
+        compact ? null : <span class="hidden h-10 w-32 sm:inline-block" aria-hidden="true" />
+      }
+    >
+      <HeaderCtaInner compact={compact} />
+    </Hydrated>
+  );
+}
+
+function HeaderCtaInner({ compact }: { compact: boolean }) {
   const [profile] = useProfile();
   const [plan] = planStore.use();
   const [diary] = diaryStore.use();

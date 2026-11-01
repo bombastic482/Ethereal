@@ -60,6 +60,7 @@ import { Bar } from '../ui/Bar';
 import { BarcodeScanner } from '../ui/BarcodeScanner';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { Hydrated, Placeholder } from '../ui/Hydrated';
 import { CountUp } from '../ui/CountUp';
 import { Icon } from '../ui/Icon';
 import { NumberField } from '../ui/NumberField';
@@ -2022,7 +2023,9 @@ function QuickEntry({ date }: { date: string }) {
 export default function TodayScreen() {
   return (
     <ErrorBoundary area="Today">
-      <TodayScreenInner />
+      <Hydrated fallback={<Placeholder height="40rem" />}>
+        <TodayScreenInner />
+      </Hydrated>
     </ErrorBoundary>
   );
 }
