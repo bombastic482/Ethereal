@@ -111,9 +111,20 @@ export function updateFood(id: string, patch: Partial<FoodEntry>): void {
   diaryStore.set({ ...d, food: d.food.map((e) => (e.id === id ? { ...e, ...patch } : e)) });
 }
 
-export function removeFood(id: string): void {
+/** Removes a food entry. Returns a function that puts it back where it was (for Undo). */
+export function removeFood(id: string): () => void {
   const d = diaryStore.get();
+  const at = d.food.findIndex((e) => e.id === id);
+  if (at < 0) return () => undefined;
+  const entry = d.food[at]!;
   diaryStore.set({ ...d, food: d.food.filter((e) => e.id !== id) });
+  return () => {
+    const now = diaryStore.get();
+    if (now.food.some((e) => e.id === id)) return;
+    const food = [...now.food];
+    food.splice(Math.min(at, food.length), 0, entry);
+    diaryStore.set({ ...now, food });
+  };
 }
 
 export function addExercise(entry: Omit<ExerciseEntry, 'id'>): ExerciseEntry {
@@ -123,9 +134,20 @@ export function addExercise(entry: Omit<ExerciseEntry, 'id'>): ExerciseEntry {
   return e;
 }
 
-export function removeExercise(id: string): void {
+/** Removes an activity. Returns a function that puts it back (for Undo). */
+export function removeExercise(id: string): () => void {
   const d = diaryStore.get();
+  const at = d.exercise.findIndex((e) => e.id === id);
+  if (at < 0) return () => undefined;
+  const entry = d.exercise[at]!;
   diaryStore.set({ ...d, exercise: d.exercise.filter((e) => e.id !== id) });
+  return () => {
+    const now = diaryStore.get();
+    if (now.exercise.some((e) => e.id === id)) return;
+    const exercise = [...now.exercise];
+    exercise.splice(Math.min(at, exercise.length), 0, entry);
+    diaryStore.set({ ...now, exercise });
+  };
 }
 
 export function setWater(date: string, glasses: number): void {
@@ -151,12 +173,28 @@ export function saveCustomFood(food: Omit<CustomFood, 'id'> & { id?: string }): 
 
 /** Copies yesterday's entries for a meal to today. The single most used shortcut in diet apps. */
 export function copyMeal(fromDate: string, toDate: string, meal: FoodEntry['meal']): number {
+  return copyMealUndoable(fromDate, toDate, meal).count;
+}
+
+/** Copies a meal from one day to another and returns how to take the copies back out again. */
+export function copyMealUndoable(
+  fromDate: string,
+  toDate: string,
+  meal: FoodEntry['meal'],
+): { count: number; undo: () => void } {
   const d = diaryStore.get();
   const items = d.food.filter((e) => e.date === fromDate && e.meal === meal);
-  if (items.length === 0) return 0;
+  if (items.length === 0) return { count: 0, undo: () => undefined };
   const copies = items.map((e) => ({ ...e, id: uid(), date: toDate }));
   diaryStore.set({ ...d, food: [...d.food, ...copies] });
-  return copies.length;
+  const ids = new Set(copies.map((c) => c.id));
+  return {
+    count: copies.length,
+    undo: () => {
+      const now = diaryStore.get();
+      diaryStore.set({ ...now, food: now.food.filter((e) => !ids.has(e.id)) });
+    },
+  };
 }
 
 export function foodCsv(food: FoodEntry[]): string {

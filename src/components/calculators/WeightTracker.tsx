@@ -2,6 +2,7 @@ import { useMemo, useState } from 'preact/hooks';
 import { daysBetween, trendSeries, weeklyAverages } from '@/lib/calc/trend';
 import { cmToIn, formatWeight, inToCm, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { logStore, removeEntry, upsertEntry } from '@/lib/log';
+import { toast } from '@/lib/toast';
 import { planStore, todayIso } from '@/lib/plan';
 import { confetti, haptic } from '@/lib/fx';
 import { useProfile } from '@/lib/profile';
@@ -515,7 +516,12 @@ function WeightTrackerInner() {
                     <button
                       type="button"
                       class="btn btn-ghost ml-auto h-8 px-2 text-xs"
-                      onClick={() => removeEntry(e.date)}
+                      onClick={() => {
+                        removeEntry(e.date);
+                        toast(`Removed the weigh-in for ${fmtDate(e.date)}.`, {
+                          undo: () => upsertEntry(e),
+                        });
+                      }}
                       aria-label={`Delete entry for ${e.date}`}
                     >
                       <Icon name="close" size={14} />

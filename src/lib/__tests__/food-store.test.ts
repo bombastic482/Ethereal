@@ -84,3 +84,41 @@ describe('scanned products', () => {
     });
   });
 });
+
+describe('undo', () => {
+  const per100g = { kcal: 100, protein: 10, carbs: 10, fat: 2, fibre: 1 };
+  it('puts a removed food back where it was, once', async () => {
+    installWindow();
+    vi.resetModules();
+    const fs = await import('../food-store');
+    const add = (name: string) =>
+      fs.addFood({ date: '2026-10-01', meal: 'lunch', name, grams: 100, per100g, source: 'local' });
+    add('Rice');
+    const mid = add('Chicken');
+    add('Salad');
+    const undo = fs.removeFood(mid.id);
+    expect(fs.diaryStore.get().food.map((e) => e.name)).toEqual(['Rice', 'Salad']);
+    undo();
+    undo(); // a second press does not duplicate it
+    expect(fs.diaryStore.get().food.map((e) => e.name)).toEqual(['Rice', 'Chicken', 'Salad']);
+    expect(fs.removeFood('missing')).toBeTypeOf('function');
+  });
+  it('takes a copied meal back out again', async () => {
+    installWindow();
+    vi.resetModules();
+    const fs = await import('../food-store');
+    fs.addFood({
+      date: '2026-10-01',
+      meal: 'dinner',
+      name: 'Soup',
+      grams: 300,
+      per100g,
+      source: 'local',
+    });
+    const { count, undo } = fs.copyMealUndoable('2026-10-01', '2026-10-02', 'dinner');
+    expect(count).toBe(1);
+    expect(fs.diaryStore.get().food).toHaveLength(2);
+    undo();
+    expect(fs.diaryStore.get().food.map((e) => e.date)).toEqual(['2026-10-01']);
+  });
+});

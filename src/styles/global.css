@@ -4260,3 +4260,95 @@
     animation: none;
   }
 }
+
+/* Toasts: one quiet line at the bottom, above the tab bar on a phone, with Undo when it helps. */
+.toaster {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  width: min(28rem, calc(100% - 2rem));
+  translate: -50% 0;
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .toaster {
+    bottom: 1.5rem;
+    left: calc(50% + var(--rail-w, 0px) / 2);
+  }
+}
+.toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.5rem 0.55rem 1rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bg);
+  background: var(--fg);
+  box-shadow: 0 14px 34px -12px oklch(0% 0 0 / 0.45);
+  pointer-events: auto;
+  animation: toast-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+}
+.toast-undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: none;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: var(--color-brand-300);
+}
+.toast-undo:hover,
+.toast-close:hover {
+  background: oklch(100% 0 0 / 0.1);
+}
+[data-theme='dark'] .toast-undo {
+  color: var(--color-brand-700);
+}
+[data-theme='dark'] .toast-undo:hover,
+[data-theme='dark'] .toast-close:hover {
+  background: oklch(0% 0 0 / 0.08);
+}
+.toast-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  opacity: 0.7;
+}
+.toast-time {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.25;
+  transform-origin: left;
+  animation: toast-time linear both;
+}
+@keyframes toast-time {
+  to {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast-time {
+    animation: none;
+  }
+}

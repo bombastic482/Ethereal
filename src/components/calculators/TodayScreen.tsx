@@ -27,7 +27,7 @@ const oz = (g: number) => round(g / OZ, 1);
 import {
   addExercise,
   addFood,
-  copyMeal,
+  copyMealUndoable,
   deleteSavedMeal,
   diaryStore,
   logSavedMeal,
@@ -55,6 +55,7 @@ import { useDictation } from '@/lib/voice';
 import { HandPortions } from './HandPortions';
 import { StarterRecipes } from './StarterRecipes';
 import { RecipeIdea } from './RecipeIdea';
+import { toast } from '@/lib/toast';
 import { withBase } from '@/lib/url';
 import { Bar } from '../ui/Bar';
 import { BarcodeScanner } from '../ui/BarcodeScanner';
@@ -633,7 +634,14 @@ function TodayScreenInner() {
                       <button
                         type="button"
                         class="text-brand-700 dark:text-brand-300 font-semibold underline"
-                        onClick={() => copyMeal(yesterday, date, m.key)}
+                        onClick={() => {
+                          const { count, undo } = copyMealUndoable(yesterday, date, m.key);
+                          if (count)
+                            toast(
+                              `Copied ${count} item${count === 1 ? '' : 's'} from yesterday's ${m.label.toLowerCase()}.`,
+                              { undo },
+                            );
+                        }}
                       >
                         Copy yesterday's {m.label.toLowerCase()}
                       </button>
@@ -786,7 +794,9 @@ function TodayScreenInner() {
                     <button
                       type="button"
                       class="btn btn-ghost h-8 px-2 text-xs"
-                      onClick={() => removeExercise(e.id)}
+                      onClick={() =>
+                        toast(`Removed ${e.activity}.`, { undo: removeExercise(e.id) })
+                      }
                       aria-label="Delete exercise"
                     >
                       <Icon name="close" size={14} />
@@ -937,7 +947,7 @@ function FoodRow({ entry, index = 0 }: { entry: FoodEntry; index?: number }) {
         <button
           type="button"
           class="btn btn-ghost h-8 px-2 text-xs"
-          onClick={() => removeFood(entry.id)}
+          onClick={() => toast(`Removed ${entry.name}.`, { undo: removeFood(entry.id) })}
           aria-label={`Delete ${entry.name}`}
         >
           <Icon name="close" size={14} />

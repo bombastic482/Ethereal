@@ -6,6 +6,7 @@ import AppRail from '@/components/AppRail.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import TabBar from '@/components/TabBar.astro';
+import Toaster from '@/components/ui/Toaster';
 import { ClientRouter } from 'astro:transitions';
 import { SITE, sectionOf } from '@/lib/site';
 // Preload the one font file the first paint needs; otherwise it is discovered only after the
@@ -88,6 +89,7 @@ const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
     </main>
     <Footer compact={appFooter ?? section !== undefined} />
     <TabBar />
+    <Toaster client:load transition:persist />
     <script>
       import { startCounting } from '@/lib/analytics';
 

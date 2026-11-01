@@ -40,7 +40,8 @@ test.describe('body composition', () => {
     await expect(result).toContainText(/(2[4-9]|3[0-2])\.\d%/);
     await expect(page.getByRole('heading', { name: 'What your weight is made of' })).toBeVisible();
 
-    await page.getByRole('radio', { name: /Fit · 17%/ }).check({ force: true });
+    // Not forced: the card is still easing in, and a forced click does not wait for it to settle.
+    await page.getByRole('radio', { name: /Fit · 17%/ }).check();
     await expect(page.getByText(/to go$/)).toBeVisible();
     await page.reload();
     await expect(page.getByRole('region', { name: 'Your measurements' })).toContainText(

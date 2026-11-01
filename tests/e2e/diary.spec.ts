@@ -52,6 +52,15 @@ test.describe('food diary', () => {
     await expect(
       page.getByRole('region', { name: 'Breakfast' }).getByText(/^Banana/),
     ).toBeVisible();
+
+    // Deleting says so and offers it back.
+    const breakfast = page.getByRole('region', { name: 'Breakfast' });
+    await breakfast.getByRole('button', { name: /^Delete Banana/ }).click();
+    await expect(breakfast.getByText(/^Banana/)).toHaveCount(0);
+    await expect(page.getByText(/^Removed Banana/)).toBeVisible();
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(breakfast.getByText('236 g')).toBeVisible();
+    await expect(page.getByText(/^Removed Banana/)).toHaveCount(0);
   });
 
   test('quick add, exercise and water work', async ({ page }) => {
