@@ -109,7 +109,6 @@ test.describe('food diary', () => {
 test.describe('saved meals and sharing', () => {
   test('a logged meal can be saved and re-logged from the Meals tab', async ({ page }) => {
     await ready(page, '/today/');
-    page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept('My usual breakfast') : d.accept()));
     await page
       .getByRole('region', { name: 'Breakfast' })
       .getByRole('button', { name: 'Add' })
@@ -119,6 +118,9 @@ test.describe('saved meals and sharing', () => {
     await dialog.getByRole('button', { name: /^Oats/ }).first().click();
     await dialog.getByRole('button', { name: /^Add \d+ g$/ }).click();
     await page.getByRole('button', { name: /save breakfast as a meal/i }).click();
+    await page.getByLabel('Name for this breakfast').fill('My usual breakfast');
+    await page.getByRole('button', { name: 'Save meal' }).click();
+    await expect(page.getByText(/^Saved "My usual breakfast"/)).toBeVisible();
 
     await page.getByRole('region', { name: 'Lunch' }).getByRole('button', { name: 'Add' }).click();
     await dialog.getByRole('radio', { name: 'Meals' }).check();

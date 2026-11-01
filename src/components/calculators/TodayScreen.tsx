@@ -183,6 +183,8 @@ function TodayScreenInner() {
     };
   }, [date, today]);
   const [adding, setAdding] = useState<Meal | null>(null);
+  // The meal being named to save, and the name so far.
+  const [naming, setNaming] = useState<{ meal: Meal; name: string } | null>(null);
   const [focusRecipe, setFocusRecipe] = useState<string | null>(null);
   const [focusFood, setFocusFood] = useState<string | null>(null);
   // Deep links: /today/#recipe=<id> opens the sheet on that recipe; /today/#food=<id> opens the
@@ -589,17 +591,18 @@ function TodayScreenInner() {
                       <button
                         type="button"
                         class="btn btn-ghost h-9 px-2 text-xs"
-                        onClick={() => {
-                          const name = prompt(
-                            `Name this ${m.label.toLowerCase()} so you can log it again in one tap:`,
-                            `${m.label} · ${new Date(date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
-                          );
-                          if (name && saveMealFromEntries(name, items)) {
-                            haptic();
-                            alert(`Saved "${name}". Find it under Add → Meals.`);
-                          }
-                        }}
+                        onClick={() =>
+                          setNaming(
+                            naming?.meal === m.key
+                              ? null
+                              : {
+                                  meal: m.key,
+                                  name: `${m.label} · ${new Date(date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
+                                },
+                          )
+                        }
                         aria-label={`Save ${m.label.toLowerCase()} as a meal`}
+                        aria-expanded={naming?.meal === m.key}
                         title="Save as meal"
                       >
                         <Icon name="copy" size={14} />
@@ -614,6 +617,34 @@ function TodayScreenInner() {
                     </button>
                   </div>
                 </header>
+                {naming?.meal === m.key && (
+                  <form
+                    class="meal-name"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const name = naming.name.trim();
+                      if (!name || !saveMealFromEntries(name, items)) return;
+                      haptic();
+                      setNaming(null);
+                      toast(`Saved "${name}". Log it again from Add, then Meals.`);
+                    }}
+                  >
+                    <input
+                      class="field h-10 py-0 text-sm"
+                      value={naming.name}
+                      onInput={(e) =>
+                        setNaming({ meal: m.key, name: (e.target as HTMLInputElement).value })
+                      }
+                      onKeyDown={(e) => e.key === 'Escape' && setNaming(null)}
+                      aria-label={`Name for this ${m.label.toLowerCase()}`}
+                      maxLength={60}
+                      autoFocus
+                    />
+                    <button type="submit" class="btn btn-tonal h-10 px-4 text-sm">
+                      Save meal
+                    </button>
+                  </form>
+                )}
                 {items.length > 0 && budget > 0 && (
                   <div class="meal-fill" aria-hidden="true">
                     {/* No warning colour when a meal runs over its share: the day's total is
