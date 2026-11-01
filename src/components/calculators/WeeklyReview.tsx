@@ -336,6 +336,7 @@ function WeeklyReviewInner() {
                     target: x.s.target.kcal,
                   }))}
                   ariaLabel="Calories per day this week"
+                  {...(days.includes(today) ? { current: days.indexOf(today) } : {})}
                 />
               </div>
             )}

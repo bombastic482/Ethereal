@@ -4358,3 +4358,108 @@
   margin-top: 0.75rem;
   animation: var(--animate-rise);
 }
+
+/* A week of calories as soft bars in faint tracks, against one dashed target line. */
+.week-bars {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  height: 9.5rem;
+}
+.week-bars-target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed var(--border-strong);
+  pointer-events: none;
+  z-index: 1;
+}
+.week-bar {
+  display: grid;
+  grid-template-rows: 1.25rem 1fr 1.25rem;
+  min-width: 0;
+}
+.week-bar-value {
+  align-self: end;
+  overflow: hidden;
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--fg-subtle);
+}
+.week-bar-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 0.6rem;
+  background: var(--bg-muted);
+  overflow: hidden;
+}
+.week-bar-target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px dashed var(--border-strong);
+}
+.week-bar-fill {
+  width: 100%;
+  border-radius: 0.6rem;
+  background: var(--color-brand-500);
+  transform-origin: bottom;
+  animation: week-bar-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.week-bar:nth-child(2) .week-bar-fill {
+  animation-delay: 0.03s;
+}
+.week-bar:nth-child(3) .week-bar-fill {
+  animation-delay: 0.06s;
+}
+.week-bar:nth-child(4) .week-bar-fill {
+  animation-delay: 0.09s;
+}
+.week-bar:nth-child(5) .week-bar-fill {
+  animation-delay: 0.12s;
+}
+.week-bar:nth-child(6) .week-bar-fill {
+  animation-delay: 0.15s;
+}
+.week-bar:nth-child(7) .week-bar-fill {
+  animation-delay: 0.18s;
+}
+.week-bar:nth-child(8) .week-bar-fill {
+  animation-delay: 0.21s;
+}
+@keyframes week-bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+.week-bar.is-under .week-bar-fill {
+  background: oklch(63% 0.15 var(--brand-h) / 0.55);
+}
+.week-bar.is-over .week-bar-fill {
+  background: oklch(78% 0.12 75);
+}
+.week-bar.is-current .week-bar-fill {
+  background: repeating-linear-gradient(
+    -45deg,
+    oklch(63% 0.15 var(--brand-h) / 0.55) 0 5px,
+    oklch(63% 0.15 var(--brand-h) / 0.35) 5px 10px
+  );
+}
+.week-bar-label {
+  align-self: end;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--fg-subtle);
+}
+@media (prefers-reduced-motion: reduce) {
+  .week-bar-fill {
+    animation: none;
+  }
+}

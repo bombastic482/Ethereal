@@ -612,6 +612,7 @@ function PlanDashboardInner() {
                 <WeekBars
                   days={week.bars}
                   ariaLabel="Calories eaten per day this week against target"
+                  current={6}
                 />
               </div>
             </>
