@@ -254,7 +254,7 @@ function DataManagerInner() {
         )}
       </section>
 
-      <section class="surface grid gap-4 p-5 sm:p-6" aria-label="Your data">
+      <section id="data" class="surface grid scroll-mt-24 gap-4 p-5 sm:p-6" aria-label="Your data">
         <h2 class="text-lg font-bold tracking-tight">Your data</h2>
         <p class="text-muted text-sm">
           {log.entries.length} weigh-in{log.entries.length === 1 ? '' : 's'} and {diary.food.length}{' '}

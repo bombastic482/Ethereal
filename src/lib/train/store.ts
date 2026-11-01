@@ -11,6 +11,22 @@ export interface WorkoutLog {
   minutes: number;
   sets: LoggedSet[];
   kcal: number;
+  /** How it felt, asked at the end: 1 easy, 2 about right, 3 hard. */
+  feel?: 1 | 2 | 3;
+}
+
+/** A workout that was started and not yet finished, so it can be resumed. */
+export interface InProgress {
+  date: string;
+  session: Session;
+  week: number;
+  /** Exercise ids by main-slot index, after any swaps made during the session. */
+  main: string[];
+  step: number;
+  /** Logged value per step index (reps, or seconds held). */
+  values: Record<number, number>;
+  /** Active time so far, in ms, excluding pauses. */
+  activeMs: number;
 }
 
 export interface TrainState {
@@ -20,11 +36,12 @@ export interface TrainState {
   /** Spoken cues and rest-timer beeps during workouts. */
   voice: boolean;
   sound: boolean;
+  current: InProgress | null;
 }
 
 export const trainStore = createStore<TrainState>(
   'ethereal:train:v1',
-  { setup: null, log: [], voice: false, sound: true },
+  { setup: null, log: [], voice: false, sound: true, current: null },
   (raw) => {
     if (!raw || typeof raw !== 'object') return null;
     const r = raw as Partial<TrainState>;
@@ -33,6 +50,7 @@ export const trainStore = createStore<TrainState>(
       log: Array.isArray(r.log) ? r.log : [],
       voice: r.voice === true,
       sound: r.sound !== false,
+      current: r.current && typeof r.current === 'object' ? r.current : null,
     };
   },
 );

@@ -14,8 +14,8 @@ test.describe('phone tab bar', () => {
     await expect(bar).toBeVisible();
     await bar.evaluate((el) => ((el as HTMLElement & { marker?: number }).marker = 7));
     for (const [i, path] of [
-      [1, '/plan/'],
-      [2, '/track/'],
+      [1, '/train/'],
+      [3, '/progress/'],
       [0, '/today/'],
     ] as const) {
       await page.locator(`[data-tab="${i}"]`).click();

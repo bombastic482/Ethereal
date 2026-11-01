@@ -92,7 +92,7 @@ Tracking is not the only route to a deficit. These all work when people stick wi
 - **Habit targets.** Protein at every meal, vegetables twice a day, no eating after a set time, 8,000 steps. Behavior counts, not calories.
 - **Photo logging.** A picture of each meal, reviewed weekly. Surprisingly effective for awareness without arithmetic.
 
-Whatever method you use, the feedback loop is the same: a consistent approach to eating, a weekly weight average, and small adjustments when the trend is wrong. Write the approach you have chosen into [your plan](/plan/) and give it three weeks before judging it.
+Whatever method you use, the feedback loop is the same: a consistent approach to eating, a weekly weight average, and small adjustments when the trend is wrong. Write the approach you have chosen into [your plan](/progress/) and give it three weeks before judging it.
 
 ## Key takeaways
 

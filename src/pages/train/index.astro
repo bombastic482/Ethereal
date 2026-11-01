@@ -1,0 +1,15 @@
+---
+import TrainHub from '@/components/train/TrainHub';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="Train at Home"
+  description="A home workout plan that fits your room and grows with you: animated demos, a guided player with rest timer and spoken cues, and progressions from wall push-ups to full push-ups. No gym, no gear, free."
+  path="/train/"
+  heading="Train"
+  lede="Short sessions on your bedroom floor that get a little harder as you get stronger."
+  section="train"
+>
+  <TrainHub client:load />
+</AppLayout>

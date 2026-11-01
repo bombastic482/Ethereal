@@ -10,6 +10,8 @@ export interface Store<T> {
   set: (next: T) => void;
   patch: (partial: Partial<T>) => T;
   reset: () => void;
+  /** Replaces the value with untrusted data (a backup), validated like a stored value. */
+  restore: (raw: unknown) => boolean;
   subscribe: (fn: (v: T) => void) => () => void;
   use: () => [T, (partial: Partial<T>) => void];
 }
@@ -61,6 +63,13 @@ export function createStore<T extends object>(
     }
     listeners.forEach((l) => l(defaults));
   };
+  const restore = (raw: unknown): boolean => {
+    if (!raw || typeof raw !== 'object') return false;
+    const migrated = migrate ? migrate(raw) : (raw as T);
+    if (!migrated) return false;
+    set({ ...defaults, ...migrated });
+    return true;
+  };
   const subscribe = (fn: (v: T) => void) => {
     listeners.add(fn);
     return () => listeners.delete(fn);
@@ -84,5 +93,5 @@ export function createStore<T extends object>(
     }, []);
     return [state, patch];
   };
-  return { key, get, set, patch, reset, subscribe, use };
+  return { key, get, set, patch, reset, restore, subscribe, use };
 }

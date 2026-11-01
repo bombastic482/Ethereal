@@ -17,7 +17,7 @@ Your body does not reset at midnight. Fat loss happens over weeks and months in 
 
 If Saturday involves dinner out and drinks, you can hold 1,800 calories Monday to Friday and bank 1,000 for the weekend without changing your weekly total. Or keep weekdays as planned and accept that one 3,000-calorie day turns a 500-calorie daily deficit into a weekly average of about 360. You still lose, just slower. What does not work is pretending the weekend does not count.
 
-Use the [calorie calculator](/tools/calories/) to get your weekly number, then decide in advance how you want to spend it. Writing it into [your plan](/plan/) before the week starts removes the Friday-night negotiation with yourself.
+Use the [calorie calculator](/tools/calories/) to get your weekly number, then decide in advance how you want to spend it. Writing it into [your plan](/progress/) before the week starts removes the Friday-night negotiation with yourself.
 
 ### Do not over-bank
 

@@ -94,7 +94,7 @@ function OnboardingInner() {
     const changed =
       openedWeight.current !== null && Math.abs(profile.weightKg - openedWeight.current) >= 0.05;
     if (!editing || changed) upsertEntry({ date: today, weightKg: profile.weightKg });
-    location.assign(withBase('/plan/'));
+    location.assign(withBase('/progress/'));
   };
 
   return (

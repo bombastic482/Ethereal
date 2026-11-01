@@ -1,0 +1,205 @@
+---
+import SectionNav from '@/components/SectionNav.astro';
+import { Figure } from '@/components/train/Figure';
+import { Icon } from '@/components/ui/Icon';
+import Base from '@/layouts/Base.astro';
+import { EXERCISES, exerciseById, type Exercise } from '@/lib/train/exercises';
+import { LADDERS } from '@/lib/train/program';
+import { absoluteUrl, withBase } from '@/lib/url';
+
+export function getStaticPaths() {
+  return EXERCISES.map((e) => ({ params: { id: e.id }, props: { e } }));
+}
+
+const { e } = Astro.props as { e: Exercise };
+const site = Astro.site;
+const path = `/train/exercises/${e.id}/`;
+const LEVEL = ['', 'Beginner', 'Easy', 'Moderate', 'Hard', 'Advanced'];
+const MUSCLE: Record<string, string> = {
+  chest: 'Chest',
+  back: 'Back',
+  shoulders: 'Shoulders',
+  triceps: 'Triceps',
+  biceps: 'Biceps',
+  core: 'Core',
+  glutes: 'Glutes',
+  quads: 'Quads',
+  hamstrings: 'Hamstrings',
+  calves: 'Calves',
+  heart: 'Heart and lungs',
+};
+const GEAR: Record<string, string> = {
+  none: 'Just floor space',
+  towel: 'A towel',
+  bed: 'A bed or sofa',
+  chair: 'A sturdy chair',
+  door: 'A doorframe',
+  wall: 'A wall',
+  table: 'A sturdy table',
+  treadmill: 'A treadmill',
+};
+const easier = e.easier ? exerciseById(e.easier) : undefined;
+const harder = e.harder ? exerciseById(e.harder) : undefined;
+const ladders = Object.entries(LADDERS).filter(([, ids]) => ids.includes(e.id));
+const ladder = ladders[0]?.[1].map((id) => exerciseById(id)!).filter(Boolean) ?? [];
+const amount = e.unit === 'seconds' ? 'Hold for time' : `Reps${e.perSide ? ', each side' : ''}`;
+const gear = e.equipment.map((q) => GEAR[q]).join(', ');
+const description = `How to do ${e.name.toLowerCase()} at home: ${e.summary} Animated demo, form cues, common mistakes, and easier and harder versions.`;
+const jsonLd = [
+  {
+    '@type': 'HowTo',
+    name: `How to do ${e.name}`,
+    description: e.summary,
+    tool: e.equipment
+      .filter((q) => q !== 'none')
+      .map((q) => ({ '@type': 'HowToTool', name: GEAR[q] })),
+    step: e.cues.map((c, i) => ({ '@type': 'HowToStep', position: i + 1, text: c })),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Train', item: absoluteUrl('/train/', site) },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Exercises',
+        item: absoluteUrl('/train/exercises/', site),
+      },
+      { '@type': 'ListItem', position: 3, name: e.name, item: absoluteUrl(path, site) },
+    ],
+  },
+];
+---
+
+<Base
+  title={`${e.name}: How to Do It at Home`}
+  description={description}
+  path={path}
+  jsonLd={jsonLd}
+>
+  <article class="container-page pt-6 pb-16 sm:pt-10">
+    <SectionNav section="train" path={path} class="mb-6 sm:mb-8" />
+    <nav aria-label="Breadcrumb" class="text-subtle text-xs">
+      <a class="hover:text-fg" href={withBase('/train/exercises/')}>
+        Exercises
+      </a>{' '}
+      › <span class="capitalize">{e.pattern}</span>
+    </nav>
+    <div class="mt-4 grid items-start gap-8 lg:grid-cols-[1.15fr_1fr]">
+      <div class="surface overflow-hidden lg:sticky lg:top-24">
+        <div class="bg-muted aspect-[11/7]">
+          <Figure
+            client:visible
+            keys={e.keys}
+            props={e.props}
+            muscles={e.muscles}
+            peak={e.peak}
+            towel={e.towel}
+            label={`${e.name}, animated demonstration`}
+            class="h-full w-full"
+          />
+        </div>
+        <div class="flex flex-wrap gap-2 p-4">
+          {e.muscles.map((m) => (
+            <span class="chip">{MUSCLE[m]}</span>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p class="eyebrow">
+          {LEVEL[e.level]} · {amount}
+        </p>
+        <h1 class="font-display text-4xl leading-[1.05] tracking-tight sm:text-5xl">{e.name}</h1>
+        <p class="text-muted mt-3 text-lg">{e.summary}</p>
+        <p class="text-muted mt-3 flex items-center gap-2 text-sm">
+          <Icon name="home" size={16} /> {gear}
+        </p>
+
+        <section class="mt-8" aria-labelledby="cues-h">
+          <h2 id="cues-h" class="text-xl font-bold tracking-tight">
+            How to do it
+          </h2>
+          <ol class="mt-3 grid gap-3">
+            {e.cues.map((c, i) => (
+              <li class="flex gap-3">
+                <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-7 w-7 flex-none place-items-center rounded-full text-sm font-bold">
+                  {i + 1}
+                </span>
+                <span class="pt-0.5">{c}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section class="mt-8" aria-labelledby="mistakes-h">
+          <h2 id="mistakes-h" class="text-xl font-bold tracking-tight">
+            Watch out for
+          </h2>
+          <ul class="mt-3 grid gap-2.5">
+            {e.mistakes.map((c) => (
+              <li class="text-muted flex gap-3">
+                <Icon name="warn" size={18} class="mt-0.5 flex-none text-amber-600" />
+                <span>{c}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {(easier || harder) && (
+          <section class="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Easier and harder versions">
+            {easier && (
+              <a href={withBase(`/train/exercises/${easier.id}/`)} class="surface pressable p-4">
+                <span class="text-subtle block text-xs font-semibold uppercase">Too hard? Try</span>
+                <span class="mt-1 block font-bold">{easier.name}</span>
+              </a>
+            )}
+            {harder && (
+              <a href={withBase(`/train/exercises/${harder.id}/`)} class="surface pressable p-4">
+                <span class="text-subtle block text-xs font-semibold uppercase">Too easy? Try</span>
+                <span class="mt-1 block font-bold">{harder.name}</span>
+              </a>
+            )}
+          </section>
+        )}
+
+        {ladder.length > 1 && (
+          <section class="mt-8" aria-labelledby="ladder-h">
+            <h2 id="ladder-h" class="text-xl font-bold tracking-tight">
+              The progression
+            </h2>
+            <p class="text-muted mt-1 text-sm">
+              Your plan moves you up one rung when you hit the top of the range on every set.
+            </p>
+            <ol class="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
+              {ladder.map((x, i) => (
+                <li class="flex items-center gap-1.5">
+                  {x.id === e.id ? (
+                    <span
+                      class="bg-brand-600 rounded-full px-3 py-1 font-semibold text-white"
+                      aria-current="step"
+                    >
+                      {x.name}
+                    </span>
+                  ) : (
+                    <a
+                      class="bg-muted hover:text-fg text-muted rounded-full px-3 py-1"
+                      href={withBase(`/train/exercises/${x.id}/`)}
+                    >
+                      {x.name}
+                    </a>
+                  )}
+                  {i < ladder.length - 1 && <Icon name="chevron" size={14} class="text-subtle" />}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+
+        <a href={withBase('/train/')} class="btn btn-primary mt-10">
+          Get a plan built around it <Icon name="arrow" size={16} />
+        </a>
+      </div>
+    </div>
+  </article>
+</Base>

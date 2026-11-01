@@ -14,7 +14,12 @@ const PAGES = [
   '/recipes/',
   '/recipes/shakshuka-with-feta/',
   '/start/',
-  '/plan/',
+  '/progress/',
+  '/eat/',
+  '/train/',
+  '/train/exercises/',
+  '/train/exercises/push-up/',
+  '/you/',
   '/track/',
   '/settings/',
   '/about/',
@@ -49,7 +54,15 @@ for (const path of PAGES) {
 }
 
 // Dark mode uses a different palette, so contrast has to be checked there too.
-for (const path of ['/', '/today/', '/plan/', '/review/', '/recipes/', '/settings/']) {
+for (const path of [
+  '/',
+  '/today/',
+  '/progress/',
+  '/train/',
+  '/review/',
+  '/recipes/',
+  '/settings/',
+]) {
   test(`no serious accessibility violations on ${path} in dark mode`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
     await page.addInitScript(() => {

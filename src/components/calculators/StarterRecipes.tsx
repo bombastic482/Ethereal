@@ -103,7 +103,7 @@ export function StarterRecipes({ date, slot, diet, remainingKcal, focusId, onLog
         Want the whole day done for you?{' '}
         <a
           class="text-brand-700 dark:text-brand-300 font-semibold"
-          href={withBase('/plan/#dayplan-h')}
+          href={withBase('/eat/#dayplan-h')}
         >
           Plan a day that hits your numbers →
         </a>

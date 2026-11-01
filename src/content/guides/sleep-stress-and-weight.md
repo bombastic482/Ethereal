@@ -71,7 +71,7 @@ Consider a maintenance break when:
 - Hunger and food thoughts are intrusive and constant.
 - Training performance has dropped noticeably for two or more weeks.
 
-Use the [calorie calculator](/tools/calories/) to estimate maintenance, raise your target to that level, keep protein high, and keep moving. Update [your plan](/plan/) so the break is a written phase rather than a lapse. Expect the scale to rise a kilogram or two from glycogen and water, then settle. When life calms down, resume the deficit from where you are.
+Use the [calorie calculator](/tools/calories/) to estimate maintenance, raise your target to that level, keep protein high, and keep moving. Update [your plan](/progress/) so the break is a written phase rather than a lapse. Expect the scale to rise a kilogram or two from glycogen and water, then settle. When life calms down, resume the deficit from where you are.
 
 If your stress is severe, if you have symptoms of depression or anxiety, or if you have a history of disordered eating, dieting at all right now may not be the right call; please talk to a clinician first.
 

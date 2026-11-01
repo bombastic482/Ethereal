@@ -8,7 +8,7 @@ async function ready(page: Page, path: string) {
 
 test.describe('plan and tracker', () => {
   test('onboarding builds a plan, dashboard and tracker reflect it', async ({ page }) => {
-    await ready(page, '/plan/');
+    await ready(page, '/progress/');
     await expect(page.getByText(/don't have a plan yet/i)).toBeVisible();
     await page.getByRole('link', { name: /build my plan/i }).click();
     await expect(page).toHaveURL(/\/start\/$/);
@@ -32,7 +32,7 @@ test.describe('plan and tracker', () => {
     await page.getByRole('button', { name: /start my plan/i }).click();
 
     // Dashboard
-    await expect(page).toHaveURL(/\/plan\/$/);
+    await expect(page).toHaveURL(/\/progress\/$/);
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     await expect(page.getByText(/to go/)).toBeVisible();
     await expect(page.getByRole('progressbar')).toBeVisible();
@@ -85,7 +85,7 @@ test.describe('day planner', () => {
     context,
   }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => undefined);
-    await ready(page, '/plan/');
+    await ready(page, '/eat/');
     const planner = page.getByRole('region', { name: /plan a day that hits your numbers/i });
     await planner.scrollIntoViewIfNeeded();
     await expect(planner.getByRole('heading', { level: 2 })).toBeVisible({ timeout: 15_000 });
@@ -221,7 +221,7 @@ test.describe('goal reached', () => {
       );
     });
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/plan/');
+    await page.goto('/progress/');
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
     const card = page.getByRole('region', { name: 'Goal reached' });
     await expect(card).toBeVisible();
@@ -279,7 +279,7 @@ test.describe('one daily target', () => {
       await expect(page.locator('main')).toContainText(pattern);
       return (await page.locator('main').innerText()).match(pattern)![1];
     };
-    const onPlan = await target('/plan/', /eat per day\s*([\d,]+)/i);
+    const onPlan = await target('/progress/', /eat per day\s*([\d,]+)/i);
     const onToday = await target('/today/', /([\d,]+)\s+target/);
     expect(onToday).toBe(onPlan);
   });

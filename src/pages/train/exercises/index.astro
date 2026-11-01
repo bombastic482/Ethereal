@@ -1,0 +1,16 @@
+---
+import ExerciseLibrary from '@/components/train/ExerciseLibrary';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { EXERCISES } from '@/lib/train/exercises';
+---
+
+<AppLayout
+  title="Home Exercise Library"
+  description={`${EXERCISES.length} bodyweight exercises you can do in a bedroom, each with an animated demo, the muscles it works, form cues and common mistakes. From wall push-ups to Bulgarian split squats.`}
+  path="/train/exercises/"
+  heading="Exercises"
+  lede={`${EXERCISES.length} moves for a small room, easiest first. Tap any one for form cues and the mistakes to avoid.`}
+  section="train"
+>
+  <ExerciseLibrary client:load />
+</AppLayout>

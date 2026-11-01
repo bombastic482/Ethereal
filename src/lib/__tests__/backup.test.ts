@@ -24,7 +24,12 @@ describe('backup', () => {
     const fs = await import('../food-store');
     const log = await import('../log');
     const refl = await import('../reflections');
+    const train = await import('../train/store');
+    const program = await import('../train/program');
+    const life = await import('../life');
 
+    train.trainStore.patch({ setup: program.defaultSetup('2026-10-01', 2), voice: true });
+    life.lifeStore.patch({ name: 'Ali', goals: ['get-stronger'], wake: '06:30' });
     log.upsertEntry({ date: '2026-10-01', weightKg: 82.4 });
     fs.addFood({
       date: '2026-10-01',
@@ -62,6 +67,15 @@ describe('backup', () => {
     expect(fs2.diaryStore.get().steps?.['2026-10-01']).toBe(9000);
     expect(fs2.prefsStore.get().waterGoalGlasses).toBe(10);
     expect(refl2.reflectionStore.get().notes['2026-10-05']?.wentWell).toBe('walks');
+    const train2 = await import('../train/store');
+    const life2 = await import('../life');
+    expect(train2.trainStore.get().setup?.level).toBe(2);
+    expect(train2.trainStore.get().voice).toBe(true);
+    expect(life2.lifeStore.get()).toMatchObject({
+      name: 'Ali',
+      goals: ['get-stronger'],
+      wake: '06:30',
+    });
   });
 
   it('rejects foreign payloads and tolerates old backups without a diary', async () => {

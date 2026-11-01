@@ -22,7 +22,30 @@ export type IconName =
   | 'spark'
   | 'shield'
   | 'bolt'
-  | 'lock';
+  | 'lock'
+  | 'dumbbell'
+  | 'utensils'
+  | 'chart'
+  | 'user'
+  | 'clock'
+  | 'pill'
+  | 'heart'
+  | 'book'
+  | 'play'
+  | 'pause'
+  | 'plus'
+  | 'minus'
+  | 'chevron'
+  | 'leaf'
+  | 'bell'
+  | 'timer'
+  | 'volume'
+  | 'mute'
+  | 'skip'
+  | 'list'
+  | 'home'
+  | 'mind'
+  | 'speak';
 
 const PATHS: Record<IconName, string> = {
   scale: 'M12 3v18M5 7l7-4 7 4M3 15l2-8 2 8a2.5 2.5 0 0 1-4 0Zm14 0 2-8 2 8a2.5 2.5 0 0 1-4 0Z',
@@ -51,6 +74,31 @@ const PATHS: Record<IconName, string> = {
   shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Zm-3 9 2 2 4-4',
   bolt: 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z',
   lock: 'M6 11h12v10H6V11Zm3 0V7a3 3 0 0 1 6 0v4',
+  dumbbell: 'M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11',
+  utensils: 'M7 3v18M4.5 3v5a2.5 2.5 0 0 0 5 0V3M17 21V3c-2.2 1.3-3.5 3.8-3.5 7v3H17',
+  chart: 'M4 20h16M6 16l4-5 3 3 5-7m0 0h-3.5M18 7v3.5',
+  user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7.5 9a7.5 7.5 0 0 1 15 0',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-13v4.5l3 2',
+  pill: 'M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7l-6 6ZM7 10.5l6.5 6.5',
+  heart:
+    'M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z',
+  book: 'M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5v-13ZM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5v-13Z',
+  play: 'M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5Z',
+  pause: 'M8 5v14M16 5v14',
+  plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
+  chevron: 'M9 6l6 6-6 6',
+  leaf: 'M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19c3-4 6-6.5 9.5-8.5',
+  bell: 'M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Zm4 4.5a2 2 0 0 0 4 0',
+  timer: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm0-8V9.5M10 2.5h4M19 6l1.5-1.5',
+  volume: 'M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5ZM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11',
+  mute: 'M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5ZM16 9.5l5 5m0-5-5 5',
+  skip: 'M6 5.5v13l9-6.5-9-6.5ZM18 5v14',
+  list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+  home: 'M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5Z',
+  speak:
+    'M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5v-9ZM8 9h8M8 12h5',
+  mind: 'M12 21v-5M8.5 16a4.5 4.5 0 0 1-2-8.5 4 4 0 0 1 5.5-3.8 4 4 0 0 1 5.5 3.8 4.5 4.5 0 0 1-2 8.5h-7Z',
 };
 
 interface Props extends Omit<SVGAttributes<SVGSVGElement>, 'name' | 'size'> {

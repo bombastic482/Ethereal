@@ -79,7 +79,7 @@ Arrive with your weight trend, a few weeks of food logs, and the signs you have 
 
 ## What to do instead
 
-Stopping a diet is a change of goal, not the end of the project. At maintenance, keep protein around 1.6 grams per kilogram, train to get stronger, sleep seven or more hours, and loosen tracking until you eat by habit rather than by spreadsheet. Set [your plan](/plan/) to a maintenance target and let it be boring for a while. Boring is what maintenance is supposed to feel like.
+Stopping a diet is a change of goal, not the end of the project. At maintenance, keep protein around 1.6 grams per kilogram, train to get stronger, sleep seven or more hours, and loosen tracking until you eat by habit rather than by spreadsheet. Set [your plan](/progress/) to a maintenance target and let it be boring for a while. Boring is what maintenance is supposed to feel like.
 
 ## Key takeaways
 

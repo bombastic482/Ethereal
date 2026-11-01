@@ -9,6 +9,8 @@ import { DEFAULT_PLAN, planStore, type Plan } from './plan';
 import { DEFAULT_PROFILE, resetProfile, updateProfile, type Profile } from './profile';
 import { clearPhotos, photosSupported } from './photos';
 import { reflectionStore, type Reflections } from './reflections';
+import { lifeStore, type Life } from './life';
+import { trainStore, type TrainState } from './train/store';
 
 export interface Backup {
   app: 'ethereal';
@@ -20,6 +22,8 @@ export interface Backup {
   diary?: Diary;
   prefs?: DiaryPrefs;
   reflections?: Reflections;
+  train?: TrainState;
+  life?: Life;
 }
 
 const PROFILE_KEY = 'ethereal:profile:v1';
@@ -44,6 +48,8 @@ export function createBackup(): Backup {
     diary: diaryStore.get(),
     prefs: prefsStore.get(),
     reflections: reflectionStore.get(),
+    train: trainStore.get(),
+    life: lifeStore.get(),
   };
 }
 
@@ -67,6 +73,8 @@ export function validateBackup(raw: unknown): Backup | null {
     ...(b.diary && typeof b.diary === 'object' ? { diary: b.diary } : {}),
     ...(b.prefs && typeof b.prefs === 'object' ? { prefs: b.prefs } : {}),
     ...(b.reflections && typeof b.reflections === 'object' ? { reflections: b.reflections } : {}),
+    ...(b.train && typeof b.train === 'object' ? { train: b.train } : {}),
+    ...(b.life && typeof b.life === 'object' ? { life: b.life } : {}),
   };
 }
 
@@ -80,6 +88,8 @@ export function restoreBackup(raw: unknown): boolean {
   if (b.diary) diaryStore.set({ ...diaryStore.get(), ...b.diary });
   if (b.prefs) prefsStore.set({ ...prefsStore.get(), ...b.prefs });
   if (b.reflections) reflectionStore.set({ ...reflectionStore.get(), ...b.reflections });
+  if (b.train) trainStore.restore(b.train);
+  if (b.life) lifeStore.restore(b.life);
   return true;
 }
 
@@ -139,6 +149,8 @@ export async function clearAllData(): Promise<void> {
   diaryStore.reset();
   prefsStore.reset();
   reflectionStore.reset();
+  trainStore.reset();
+  lifeStore.reset();
   resetProfile();
   try {
     for (const key of Object.keys(localStorage)) {

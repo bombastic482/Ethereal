@@ -126,6 +126,30 @@ const at = (a: Point, b: Point, t: number): Point => [
   a[1] + (b[1] - a[1]) * t,
 ];
 
+const f2 = (n: number) => n.toFixed(2);
+const lineAttrs = (a: Point, b: Point) => ({
+  x1: f2(a[0]),
+  y1: f2(a[1]),
+  x2: f2(b[0]),
+  y2: f2(b[1]),
+});
+
+/** The time into the loop at which the figure sits exactly on key `peak`. */
+function peakTime(keys: readonly Key[], peak: number): number {
+  const cycle = loopLength(keys);
+  const t =
+    keys.slice(0, peak + 1).reduce((s, k) => s + k.ms, 0) +
+    keys.slice(0, peak).reduce((s, k) => s + (k.hold ?? 0), 0);
+  return Math.min(t, Math.max(0, cycle - 1));
+}
+
+function shadowOf(j: Joints) {
+  const xs = [j.hip[0], j.leg.n[1][0], j.leg.f[1][0], j.arm.n[1][0]];
+  const lo = Math.min(...xs);
+  const hi = Math.max(...xs);
+  return { cx: f2((lo + hi) / 2), rx: f2(Math.max(14, (hi - lo) / 2 + 8)) };
+}
+
 function Prop({ p }: { p: SceneProp }) {
   switch (p.kind) {
     case 'mat':
@@ -271,51 +295,25 @@ export function Figure({
   useEffect(() => {
     const el = svg.current;
     if (!el) return;
+    const set = (el: Element | null | undefined, attrs: Record<string, string>) => {
+      if (el) for (const k in attrs) el.setAttribute(k, attrs[k]!);
+    };
     const draw = (ms: number) => {
       const j = solve(poseAt(keys, ms));
-      for (const s of [...FAR, ...BODY, ...NEAR]) {
-        const line = segs.current[s];
-        if (!line) continue;
-        const [a, b] = ends(j, s);
-        line.setAttribute('x1', a[0].toFixed(2));
-        line.setAttribute('y1', a[1].toFixed(2));
-        line.setAttribute('x2', b[0].toFixed(2));
-        line.setAttribute('y2', b[1].toFixed(2));
-      }
+      for (const s of [...FAR, ...BODY, ...NEAR]) set(segs.current[s], lineAttrs(...ends(j, s)));
       [...bodyGlow, ...nearGlow].forEach(([s, t0, t1], i) => {
-        const line = glows.current[i];
-        if (!line) return;
         const [a, b] = ends(j, s);
-        const p = at(a, b, t0);
-        const q = at(a, b, t1);
-        line.setAttribute('x1', p[0].toFixed(2));
-        line.setAttribute('y1', p[1].toFixed(2));
-        line.setAttribute('x2', q[0].toFixed(2));
-        line.setAttribute('y2', q[1].toFixed(2));
+        set(glows.current[i], lineAttrs(at(a, b, t0), at(a, b, t1)));
       });
-      if (strap.current) {
-        strap.current.setAttribute('x1', j.arm.n[1][0].toFixed(2));
-        strap.current.setAttribute('y1', j.arm.n[1][1].toFixed(2));
-        strap.current.setAttribute('x2', j.toe.n[0].toFixed(2));
-        strap.current.setAttribute('y2', j.toe.n[1].toFixed(2));
-      }
-      head.current?.setAttribute('cx', j.head[0].toFixed(2));
-      head.current?.setAttribute('cy', j.head[1].toFixed(2));
-      const xs = [j.hip[0], j.leg.n[1][0], j.leg.f[1][0], j.arm.n[1][0]];
-      const lo = Math.min(...xs);
-      const hi = Math.max(...xs);
-      shadow.current?.setAttribute('cx', ((lo + hi) / 2).toFixed(2));
-      shadow.current?.setAttribute('rx', Math.max(14, (hi - lo) / 2 + 8).toFixed(2));
+      set(strap.current, lineAttrs(j.arm.n[1], j.toe.n));
+      set(head.current, { cx: f2(j.head[0]), cy: f2(j.head[1]) });
+      set(shadow.current, shadowOf(j));
     };
 
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const cycle = loopLength(keys);
-    // The time at which the loop sits exactly on the peak key.
-    const peakAt =
-      keys.slice(0, peak + 1).reduce((s, k) => s + k.ms, 0) +
-      keys.slice(0, peak).reduce((s, k) => s + (k.hold ?? 0), 0);
     if (still || paused || keys.length < 2) {
-      draw(Math.min(peakAt, cycle - 1));
+      draw(peakTime(keys, peak));
       return;
     }
 
@@ -349,6 +347,14 @@ export function Figure({
 
   // A faint copy of the starting position, shown only when motion is reduced.
   const ghost = solve(keys[0]!.pose);
+  // The first paint (and the server render) shows the working position, so a demo is never
+  // an empty frame before its script runs.
+  const first = solve(poseAt(keys, peakTime(keys, peak)));
+  const firstGlow = (specs: Array<[Seg, number, number]>, i: number) => {
+    const [s, t0, t1] = specs[i]!;
+    const [a, b] = ends(first, s);
+    return lineAttrs(at(a, b, t0), at(a, b, t1));
+  };
 
   return (
     <svg
@@ -358,7 +364,7 @@ export function Figure({
       role="img"
       aria-label={label}
     >
-      <ellipse ref={shadow} cx={W / 2} cy={FLOOR + 1.5} rx={30} ry={3.2} class="fig-shadow" />
+      <ellipse ref={shadow} {...shadowOf(first)} cy={FLOOR + 1.5} ry={3.2} class="fig-shadow" />
       <line x1={4} y1={FLOOR} x2={W - 4} y2={FLOOR} class="fig-floor" />
       {props.map((p, i) => (
         <Prop key={i} p={p} />
@@ -374,6 +380,7 @@ export function Figure({
         {FAR.map((s) => (
           <line
             key={s}
+            {...lineAttrs(...ends(first, s))}
             ref={(e) => {
               if (e) segs.current[s] = e;
             }}
@@ -385,18 +392,20 @@ export function Figure({
         {BODY.map((s) => (
           <line
             key={s}
+            {...lineAttrs(...ends(first, s))}
             ref={(e) => {
               if (e) segs.current[s] = e;
             }}
             stroke-width={WIDTH[s]}
           />
         ))}
-        <circle ref={head} r={7} />
+        <circle ref={head} cx={f2(first.head[0])} cy={f2(first.head[1])} r={7} />
       </g>
       <g class="fig-glow" aria-hidden="true">
         {bodyGlow.map(([s], i) => (
           <line
             key={i}
+            {...firstGlow(bodyGlow, i)}
             ref={(e) => {
               if (e) glows.current[i] = e;
             }}
@@ -404,11 +413,12 @@ export function Figure({
           />
         ))}
       </g>
-      {towel && <line ref={strap} class="fig-towel" />}
+      {towel && <line ref={strap} {...lineAttrs(first.arm.n[1], first.toe.n)} class="fig-towel" />}
       <g class="fig-near">
         {NEAR.map((s) => (
           <line
             key={s}
+            {...lineAttrs(...ends(first, s))}
             ref={(e) => {
               if (e) segs.current[s] = e;
             }}
@@ -420,6 +430,7 @@ export function Figure({
         {nearGlow.map(([s], i) => (
           <line
             key={i}
+            {...firstGlow(nearGlow, i)}
             ref={(e) => {
               if (e) glows.current[bodyGlow.length + i] = e;
             }}

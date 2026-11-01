@@ -19,7 +19,20 @@ interface Cmd {
 
 const PAGES: Array<{ label: string; href: string; icon: IconName; hint: string }> = [
   { label: 'Today', href: '/today/', icon: 'flame', hint: 'Log food, exercise, water' },
-  { label: 'My plan', href: '/plan/', icon: 'target', hint: 'Targets, progress, two-week check' },
+  { label: 'Train', href: '/train/', icon: 'dumbbell', hint: 'Your home workout plan and player' },
+  {
+    label: 'Exercise library',
+    href: '/train/exercises/',
+    icon: 'dumbbell',
+    hint: 'Animated demos, form cues, easier and harder versions',
+  },
+  {
+    label: 'Progress',
+    href: '/progress/',
+    icon: 'chart',
+    hint: 'Targets, progress, two-week check',
+  },
+  { label: 'You', href: '/you/', icon: 'user', hint: 'Goals, your day, health, prayer times' },
   { label: 'Weight tracker', href: '/track/', icon: 'scale', hint: 'Weigh-ins, trend, photos' },
   { label: 'Weekly review', href: '/review/', icon: 'calendar', hint: 'The week in five minutes' },
   { label: 'Settings & data', href: '/settings/', icon: 'shield', hint: 'Backup, share, install' },
@@ -38,7 +51,7 @@ const PAGES: Array<{ label: string; href: string; icon: IconName; hint: string }
   },
   {
     label: 'Plan a day',
-    href: '/plan/#dayplan-h',
+    href: '/eat/#dayplan-h',
     icon: 'calendar',
     hint: 'Four recipes that hit your targets, plus a shopping list',
   },

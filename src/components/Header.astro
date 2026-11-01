@@ -1,10 +1,10 @@
 ---
 import CommandPalette from '@/components/CommandPalette';
 import HeaderCta from '@/components/HeaderCta';
-import { withBase } from '@/lib/url';
+import { BASE, withBase } from '@/lib/url';
 import { Icon } from '@/components/ui/Icon';
 import Logo from '@/components/Logo.astro';
-import { NAV, SITE } from '@/lib/site';
+import { NAV, SECTIONS, SITE, sectionOf } from '@/lib/site';
 import ThemeToggle from './ThemeToggle.astro';
 import { getCollection } from 'astro:content';
 
@@ -14,8 +14,13 @@ const guideLinks = (await getCollection('guides', ({ data }) => !data.draft))
   .map((g) => ({ label: g.data.title, href: `/guides/${g.id}/`, hint: g.data.category }));
 
 const current = Astro.url.pathname;
+const section = sectionOf(current.slice(BASE.length) || '/');
+// A section's tab stays lit on every page inside it (Recipes under Eat, Weight under Progress).
 const isActive = (href: string) =>
-  current === withBase(href) || (href !== '/' && current.startsWith(withBase(href)));
+  current === withBase(href) ||
+  (href !== '/' && current.startsWith(withBase(href))) ||
+  (section !== undefined && SECTIONS[section].pages[0]!.href === href);
+const youActive = section === 'you';
 ---
 
 <header class="site-header sticky top-0 z-40">
@@ -47,6 +52,18 @@ const isActive = (href: string) =>
 
     <div class="flex items-center gap-2">
       <HeaderCta client:idle />
+      <a
+        href={withBase('/you/')}
+        class:list={[
+          'btn btn-ghost hidden h-10 w-10 rounded-full p-0 md:inline-flex',
+          youActive && 'bg-muted text-fg',
+        ]}
+        aria-label="You: profile and settings"
+        title="You: profile and settings"
+        aria-current={youActive ? 'page' : undefined}
+      >
+        <Icon name="user" size={18} />
+      </a>
       <button
         type="button"
         id="palette-btn"
@@ -83,6 +100,15 @@ const isActive = (href: string) =>
           {item.label}
         </a>
       ))}
+      <a
+        href={withBase('/you/')}
+        class:list={[
+          'rounded-xl px-4 py-3 text-sm font-medium',
+          youActive ? 'bg-muted' : 'hover:bg-muted',
+        ]}
+      >
+        You: profile and settings
+      </a>
       <HeaderCta client:idle compact />
     </div>
   </nav>

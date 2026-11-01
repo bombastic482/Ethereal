@@ -204,7 +204,7 @@ export function sessionOn(setup: TrainSetup, date: string): Session | null {
   return count % 2 === 0 ? 'A' : 'B';
 }
 
-function prescribe(
+export function prescribe(
   e: Exercise,
   ladder: string,
   sets: number,
@@ -261,6 +261,27 @@ export function buildWorkout(setup: TrainSetup, session: Session, week: number):
   return { session, week, warmUp, main, coolDown, walkMinutes, walkTip, estimatedMinutes };
 }
 
+/**
+ * The nearest usable exercise one step harder or easier on the same ladder, if there is one.
+ * Used for mid-workout swaps and for the end-of-session suggestions.
+ */
+export function neighbour(
+  ladder: string,
+  id: string,
+  direction: 'harder' | 'easier',
+  setup: Pick<TrainSetup, 'equipment' | 'easyOnLegs'>,
+): Exercise | undefined {
+  const rungs = LADDERS[ladder] ?? [];
+  const i = rungs.indexOf(id);
+  if (i < 0) return undefined;
+  const step = direction === 'harder' ? 1 : -1;
+  for (let j = i + step; j >= 0 && j < rungs.length; j += step) {
+    const e = exerciseById(rungs[j]!);
+    if (e && usable(e, setup)) return e;
+  }
+  return undefined;
+}
+
 export interface LoggedSet {
   exerciseId: string;
   /** Reps, or seconds for holds. */
@@ -287,29 +308,15 @@ export function suggestions(
   for (const p of workout.main) {
     const sets = logged.filter((s) => s.exerciseId === p.exercise.id);
     if (sets.length === 0) continue;
-    const ladder = LADDERS[p.ladder] ?? [];
-    const i = ladder.indexOf(p.exercise.id);
-    const usableAt = (j: number) => {
-      const e = exerciseById(ladder[j] ?? '');
-      return e && usable(e, setup) ? e : undefined;
-    };
-    if (sets.length >= p.sets && sets.every((s) => s.value >= p.high)) {
-      for (let j = i + 1; j < ladder.length; j++) {
-        const next = usableAt(j);
-        if (next) {
-          out.push({ ladder: p.ladder, from: p.exercise.id, to: next.id, direction: 'harder' });
-          break;
-        }
-      }
-    } else if (sets[0]!.value < p.low) {
-      for (let j = i - 1; j >= 0; j--) {
-        const prev = usableAt(j);
-        if (prev) {
-          out.push({ ladder: p.ladder, from: p.exercise.id, to: prev.id, direction: 'easier' });
-          break;
-        }
-      }
-    }
+    const direction =
+      sets.length >= p.sets && sets.every((s) => s.value >= p.high)
+        ? 'harder'
+        : sets[0]!.value < p.low
+          ? 'easier'
+          : null;
+    if (!direction) continue;
+    const to = neighbour(p.ladder, p.exercise.id, direction, setup);
+    if (to) out.push({ ladder: p.ladder, from: p.exercise.id, to: to.id, direction });
   }
   return out;
 }

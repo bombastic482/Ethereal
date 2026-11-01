@@ -1,0 +1,49 @@
+---
+import DayPlanner from '@/components/calculators/DayPlanner';
+import { Icon } from '@/components/ui/Icon';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { builtRecipes } from '@/lib/recipes-build';
+import { chains } from '@/lib/chains-build';
+import { withBase } from '@/lib/url';
+---
+
+<AppLayout
+  title="Eat"
+  description="Plan a day of food that hits your calorie and protein targets, browse recipes that fit, and find the leanest order when you eat out."
+  path="/eat/"
+  heading="Eat"
+  lede="Decide the day's food in a minute, so the evening isn't a negotiation."
+  section="eat"
+>
+  <DayPlanner client:load />
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    <a
+      href={withBase('/recipes/')}
+      class="surface flex transition duration-200 hover:-translate-y-0.5 hover:shadow-glow items-start gap-4 p-5"
+    >
+      <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 flex-none place-items-center rounded-2xl">
+        <Icon name="utensils" size={22} />
+      </span>
+      <span>
+        <span class="block font-bold tracking-tight">{builtRecipes.length} recipes</span>
+        <span class="text-muted mt-1 block text-sm">
+          High-protein meals with exact numbers. Log any of them in a tap.
+        </span>
+      </span>
+    </a>
+    <a
+      href={withBase('/eating-out/')}
+      class="surface flex transition duration-200 hover:-translate-y-0.5 hover:shadow-glow items-start gap-4 p-5"
+    >
+      <span class="bg-brand-100 text-brand-700 dark:bg-brand-400/15 dark:text-brand-200 grid h-11 w-11 flex-none place-items-center rounded-2xl">
+        <Icon name="pie" size={22} />
+      </span>
+      <span>
+        <span class="block font-bold tracking-tight">Eating out</span>
+        <span class="text-muted mt-1 block text-sm">
+          The leanest order at {chains.length} chains, ranked by protein per calorie.
+        </span>
+      </span>
+    </a>
+  </div>
+</AppLayout>

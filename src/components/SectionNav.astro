@@ -1,0 +1,74 @@
+---
+/**
+ * The pages of the current section as a row of pills: Overview, Weight & photos, Weekly review
+ * under Progress, and so on. Shown on every screen size; on phones it scrolls sideways if it has
+ * to. Sections with a single page show nothing.
+ */
+import { SECTIONS, type Section } from '@/lib/site';
+import { withBase } from '@/lib/url';
+
+interface Props {
+  section: Section;
+  /** Path without the base, used to pick the active pill. */
+  path: string;
+  class?: string;
+}
+const { section, path, class: cls } = Astro.props;
+const pages = SECTIONS[section].pages;
+// The longest matching href wins, so /train/exercises/ beats /train/.
+const active = pages
+  .filter((p) => path.startsWith(p.href))
+  .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+---
+
+{pages.length > 1 && (
+  <nav class:list={['section-nav', cls]} aria-label={`${SECTIONS[section].label} pages`}>
+    {pages.map((p) => (
+      <a
+        href={withBase(p.href)}
+        class:list={['section-pill', p.href === active && 'section-pill-on']}
+        aria-current={p.href === active ? 'page' : undefined}
+        data-astro-prefetch="hover"
+      >
+        {p.label}
+      </a>
+    ))}
+  </nav>
+)}
+
+<style>
+  .section-nav {
+    display: flex;
+    gap: 0.25rem;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0.25rem;
+    border-radius: 1rem;
+    background: var(--bg-muted);
+  }
+  .section-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .section-pill {
+    flex: none;
+    border-radius: 0.75rem;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--fg-muted);
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .section-pill:hover {
+    color: var(--fg);
+  }
+  .section-pill-on {
+    background: var(--bg-elevated);
+    color: var(--fg);
+    box-shadow: var(--shadow-soft, 0 1px 2px rgb(0 0 0 / 0.06));
+  }
+</style>

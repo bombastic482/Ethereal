@@ -1,0 +1,15 @@
+---
+import YouProfile from '@/components/you/YouProfile';
+import AppLayout from '@/layouts/AppLayout.astro';
+---
+
+<AppLayout
+  title="You"
+  description="What you're working toward, the shape of your day, health notes, medicines and prayer times. Ethereal builds your day around it, privately on your device."
+  path="/you/"
+  heading="You"
+  lede="Tell Ethereal a little about your life once, and every day gets planned around it."
+  section="you"
+>
+  <YouProfile client:load />
+</AppLayout>

@@ -1,4 +1,5 @@
 ---
+import SectionNav from '@/components/SectionNav.astro';
 import { Icon } from '@/components/ui/Icon';
 import Base from '@/layouts/Base.astro';
 import { chains } from '@/lib/chains-build';
@@ -30,7 +31,8 @@ const jsonLd = [
   image="/og/pages/eating-out.png"
   jsonLd={jsonLd}
 >
-  <div class="container-page pt-12 pb-16 sm:pt-16">
+  <div class="container-page pt-6 pb-16 sm:pt-10">
+    <SectionNav section="eat" path="/eating-out/" class="mb-8 sm:mb-10" />
     <header class="max-w-2xl">
       <p class="text-brand-700 dark:text-brand-300 text-sm font-semibold tracking-wide uppercase">
         Eating out

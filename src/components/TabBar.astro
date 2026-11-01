@@ -6,17 +6,18 @@
  * tab. Hidden from md up, where the header nav takes over.
  */
 import { Icon } from '@/components/ui/Icon';
+import { SECTIONS } from '@/lib/site';
 import { withBase } from '@/lib/url';
 
 const current = Astro.url.pathname;
-const tabs = [
-  { href: '/today/', label: 'Today', icon: 'flame' },
-  { href: '/plan/', label: 'Plan', icon: 'target' },
-  { href: '/track/', label: 'Track', icon: 'scale' },
-  { href: '/tools/', label: 'Tools', icon: 'pie' },
-  { href: '/settings/', label: 'Settings', icon: 'shield' },
-] as const;
-const activeIndex = tabs.findIndex((tab) => current.startsWith(withBase(tab.href)));
+// One tab per section; a tab stays lit on every page of its section.
+const tabs = Object.values(SECTIONS).map((s) => ({
+  href: s.pages[0]!.href,
+  label: s.label,
+  icon: s.icon,
+  paths: s.pages.map((p) => withBase(p.href)),
+}));
+const activeIndex = tabs.findIndex((tab) => tab.paths.some((p) => current.startsWith(p)));
 ---
 
 <nav
@@ -35,7 +36,7 @@ const activeIndex = tabs.findIndex((tab) => current.startsWith(withBase(tab.href
         class:list={['tab', i === activeIndex && 'tab-active']}
         aria-current={i === activeIndex ? 'page' : undefined}
         data-tab={i}
-        data-path={withBase(tab.href)}
+        data-paths={tab.paths.join('|')}
         data-astro-prefetch="tap"
       >
         <Icon name={tab.icon} size={22} />
@@ -64,7 +65,7 @@ const activeIndex = tabs.findIndex((tab) => current.startsWith(withBase(tab.href
     if (!bar) return;
     const path = location.pathname;
     const match = [...bar.querySelectorAll<HTMLAnchorElement>('[data-tab]')].find((a) =>
-      path.startsWith(a.dataset.path ?? '\u0000'),
+      (a.dataset.paths ?? '').split('|').some((p) => p && path.startsWith(p)),
     );
     setActive(bar, match ? Number(match.dataset.tab) : -1);
     if (bar.dataset.bound) return;

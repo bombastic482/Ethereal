@@ -27,10 +27,10 @@ export const GET: APIRoute = () =>
           description: 'Log a weigh-in',
         },
         {
-          name: 'My plan',
-          short_name: 'Plan',
-          url: withBase('/plan/'),
-          description: 'Targets and progress',
+          name: 'Train',
+          short_name: 'Train',
+          url: withBase('/train/'),
+          description: "Start today's workout",
         },
         {
           name: 'Weekly review',

@@ -1,19 +1,33 @@
 ---
-import DayPlanner from '@/components/calculators/DayPlanner';
-import PlanDashboard from '@/components/calculators/PlanDashboard';
-import AppLayout from '@/layouts/AppLayout.astro';
+/**
+ * The old "My plan" page split in two: targets and progress went to /progress/, the day planner
+ * to /eat/. Old links and home-screen shortcuts land here and are sent on, keeping a #dayplan-h
+ * link pointed at the planner.
+ */
+import { withBase } from '@/lib/url';
+
+const progress = withBase('/progress/');
+const eat = withBase('/eat/');
 ---
 
-<AppLayout
-  title="My Plan"
-  description="Your daily calorie and protein targets, progress to goal, today's weigh-in and a two-week check that tells you exactly what to change."
-  path="/plan/"
-  heading="My plan"
-  lede="Your numbers for today, your progress so far, and what to change next."
-  current="plan"
->
-  <PlanDashboard client:load />
-  <div class="mt-6">
-    <DayPlanner client:visible />
-  </div>
-</AppLayout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Moved to Progress · Ethereal</title>
+    <link rel="canonical" href={progress} />
+    <meta http-equiv="refresh" content={`0; url=${progress}`} />
+    <script is:inline define:vars={{ progress, eat }}>
+      location.replace(
+        location.hash === '#dayplan-h' ? eat + '#dayplan-h' : progress + location.hash,
+      );
+    </script>
+  </head>
+  <body>
+    <p>
+      This page moved to <a href={progress}>Progress</a>.
+    </p>
+  </body>
+</html>

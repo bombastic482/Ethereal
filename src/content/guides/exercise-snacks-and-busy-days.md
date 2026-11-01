@@ -90,7 +90,7 @@ Assumes a desk job, a commute, and no gym. Total deliberate time is roughly 2 ho
 
 That week delivers three strength sessions, several vigorous cardio bouts, and a few thousand extra steps a day. It is enough to lose fat with muscle intact, and it fits into a life. If you have heart disease, uncontrolled blood pressure, or joint problems, check with a clinician before adding vigorous stair work; brisk walking is safe for almost anyone to begin with.
 
-The [weight-loss timeline](/tools/timeline/) shows how a modest daily movement habit shifts your expected pace, and [your plan](/plan/) can hold the step and session targets so they are not just intentions.
+The [weight-loss timeline](/tools/timeline/) shows how a modest daily movement habit shifts your expected pace, and [your plan](/progress/) can hold the step and session targets so they are not just intentions.
 
 ## Key takeaways
 

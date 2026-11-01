@@ -396,7 +396,7 @@ function WeeklyReviewInner() {
               <p class="mt-4 text-sm">
                 <a
                   class="text-brand-700 dark:text-brand-300 font-semibold"
-                  href={withBase('/plan/#dayplan-h')}
+                  href={withBase('/eat/#dayplan-h')}
                 >
                   Plan next week's meals around the new target →
                 </a>

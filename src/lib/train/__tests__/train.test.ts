@@ -151,3 +151,89 @@ describe('program', () => {
     expect(kcal).toBeLessThan(300);
   });
 });
+
+describe('session steps', async () => {
+  const { buildSteps, loggedSets, startValue, weekStreak, withSwaps, lastPerformance } =
+    await import('../session');
+  const { buildWorkout, defaultSetup } = await import('../program');
+  const setup = defaultSetup('2026-11-01', 2);
+  const w = buildWorkout(setup, 'A', 3);
+  const steps = buildSteps(w);
+
+  it('puts a rest between working sets and none after the last', () => {
+    const work = steps.filter((s) => s.kind === 'work');
+    expect(work).toHaveLength(w.main.reduce((n, p) => n + p.sets, 0));
+    const lastWork = steps.map((s) => s.kind).lastIndexOf('work');
+    expect(steps[lastWork + 1]?.kind).toBe('cool');
+    steps.forEach((s, i) => {
+      if (s.kind === 'rest') expect(steps[i + 1]).toBe(s.next);
+    });
+  });
+
+  it('gives longer rest when the exercise changes', () => {
+    const rests = steps.filter((s) => s.kind === 'rest');
+    const same = rests.find((r) => r.kind === 'rest' && r.next?.set !== 0);
+    const change = rests.find((r) => r.kind === 'rest' && r.next?.set === 0);
+    expect(change && same && change.kind === 'rest' && same.kind === 'rest').toBeTruthy();
+    if (change?.kind === 'rest' && same?.kind === 'rest')
+      expect(change.sec).toBeGreaterThan(same.sec);
+  });
+
+  it('logs only working sets with a value', () => {
+    const i = steps.findIndex((s) => s.kind === 'work');
+    const sets = loggedSets(steps, { 0: 45, [i]: 10, [i + 2]: 0 });
+    expect(sets).toEqual([{ exerciseId: w.main[0]!.exercise.id, value: 10 }]);
+  });
+
+  it('applies swaps and re-prescribes', () => {
+    const swapped = withSwaps(w, ['wall-push-up'], setup);
+    expect(swapped.main[0]!.exercise.id).toBe('wall-push-up');
+    expect(swapped.main[0]!.high).toBe(15);
+    expect(swapped.main[1]).toBe(w.main[1]);
+  });
+
+  it('starts from last time, or mid-range', () => {
+    const p = w.main[0]!;
+    expect(startValue(p, 0, null)).toBe(Math.round((p.low + p.high) / 2));
+    expect(startValue(p, 1, [12, 11])).toBe(11);
+    expect(startValue(p, 2, [12, 11])).toBe(11);
+    const log = [
+      {
+        id: 'a',
+        date: '2026-11-02',
+        session: 'A' as const,
+        week: 1,
+        minutes: 20,
+        kcal: 90,
+        sets: [{ exerciseId: 'push-up', value: 8 }],
+      },
+      {
+        id: 'b',
+        date: '2026-11-04',
+        session: 'B' as const,
+        week: 1,
+        minutes: 20,
+        kcal: 90,
+        sets: [{ exerciseId: 'squat', value: 12 }],
+      },
+    ];
+    expect(lastPerformance(log, 'push-up')).toEqual([8]);
+    expect(lastPerformance(log, 'plank')).toBeNull();
+  });
+
+  it('counts week streaks, allowing the current week to be empty so far', () => {
+    const mk = (date: string) => ({
+      id: date,
+      date,
+      session: 'A' as const,
+      week: 1,
+      minutes: 1,
+      kcal: 1,
+      sets: [],
+    });
+    const log = [mk('2026-11-02'), mk('2026-11-10'), mk('2026-11-16')];
+    expect(weekStreak(log, '2026-11-01', '2026-11-20')).toBe(3);
+    expect(weekStreak(log, '2026-11-01', '2026-11-24')).toBe(3);
+    expect(weekStreak(log, '2026-11-01', '2026-12-01')).toBe(0);
+  });
+});

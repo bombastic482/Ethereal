@@ -22,7 +22,7 @@ test.describe('site', () => {
   test('home page renders and links to tools', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Ethereal/);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Weight loss');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('working toward');
     await page.getByRole('link', { name: /build my plan/i }).click();
     await expect(page).toHaveURL(/\/start\/$/);
   });
@@ -145,7 +145,7 @@ test('first-run tour shows once on Today and can be completed', async ({ page })
 
 test('command palette jumps to pages and logs a food', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
-  await page.goto('/plan/');
+  await page.goto('/progress/');
   await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
   const dialog = page.getByRole('dialog', { name: /quick launcher/i });
   // The island's hydration marker clears a tick before its key listener mounts, so retry the shortcut.
