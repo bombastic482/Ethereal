@@ -451,7 +451,8 @@ function PlanDashboardInner() {
       <h3 class="text-lg font-bold tracking-tight">Today's weigh-in</h3>
       {todayEntry ? (
         <Callout tone="success">
-          Logged {w(todayEntry.weightKg)} today. Trend weight: <strong>{w(latestTrend)}</strong>.
+          Logged {w(todayEntry.weightKg)} today. Trend weight:{' '}
+          <strong class="whitespace-nowrap">{w(latestTrend)}</strong>.
         </Callout>
       ) : (
         <p class="text-muted text-sm">

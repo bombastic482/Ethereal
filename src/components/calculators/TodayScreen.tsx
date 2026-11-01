@@ -615,10 +615,9 @@ function TodayScreenInner() {
                 </header>
                 {items.length > 0 && budget > 0 && (
                   <div class="meal-fill" aria-hidden="true">
-                    <span
-                      class={n.kcal > budget * 1.15 ? 'is-over' : ''}
-                      style={{ width: `${Math.min(100, (100 * n.kcal) / budget)}%` }}
-                    />
+                    {/* No warning colour when a meal runs over its share: the day's total is
+                        what counts, and the ring already says what is left. */}
+                    <span style={{ width: `${Math.min(100, (100 * n.kcal) / budget)}%` }} />
                   </div>
                 )}
                 {items.length > 0 ? (

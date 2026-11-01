@@ -4251,9 +4251,6 @@
   animation: journey-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.meal-fill > span.is-over {
-  background: var(--color-accent-500);
-}
 .fav-off {
   color: var(--fg-subtle);
   opacity: 0.55;
