@@ -187,8 +187,7 @@ function PlanDashboardInner() {
         </span>
         <h2 class="font-display mt-5 text-3xl tracking-tight">You don't have a plan yet</h2>
         <p class="text-muted mt-2">
-          Three quick steps: your stats, your goal, your numbers. Takes about a minute and lives
-          only on this device.
+          Your stats, your goal, your numbers. Takes about a minute and lives only on this device.
         </p>
         <a href={withBase('/start/')} class="btn btn-primary mt-6">
           Build my plan <Icon name="arrow" size={16} />

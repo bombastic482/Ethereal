@@ -14,6 +14,12 @@ test.describe('plan and tracker', () => {
     await expect(page).toHaveURL(/\/start\/$/);
     await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
 
+    // First run starts with goals.
+    await page.getByLabel(/what should we call you/i).fill('Sam');
+    await page.getByRole('button', { name: /Lose fat/ }).click();
+    await page.getByRole('button', { name: /Get stronger/ }).click();
+    await page.getByRole('button', { name: /continue/i }).click();
+
     // Step 1: about you
     await page.getByRole('radio', { name: 'Male', exact: true }).check();
     await page.getByLabel('Age', { exact: true }).fill('32');
@@ -31,9 +37,17 @@ test.describe('plan and tracker', () => {
     await expect(page.getByText('Eat per day')).toBeVisible();
     await page.getByRole('button', { name: /start my plan/i }).click();
 
+    // First run lands on Today, greeted by name, with training set up from the goals.
+    await expect(page).toHaveURL(/\/today\/$/);
+    await expect(page.getByRole('heading', { name: /, Sam$/ })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => JSON.parse(localStorage.getItem('ethereal:train:v1') ?? '{}').setup?.weekdays?.length,
+      ),
+    ).toBe(3);
+
     // Dashboard
-    await expect(page).toHaveURL(/\/progress\/$/);
-    await expect(page.locator('astro-island[ssr]:not([client="visible"])')).toHaveCount(0);
+    await ready(page, '/progress/');
     await expect(page.getByText(/to go/)).toBeVisible();
     await expect(page.getByRole('progressbar')).toBeVisible();
     await expect(page.getByText(/Logged .* today/)).toBeVisible();

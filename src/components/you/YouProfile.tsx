@@ -2,13 +2,11 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import {
   COMMON_AVOID,
   COMMON_CONDITIONS,
-  GOALS,
   lifeStore,
   MED_RULES,
   medTimes,
   uid,
   type Busy,
-  type Goal,
   type Life,
   type Med,
   type MedRule,
@@ -28,6 +26,7 @@ import { withBase } from '@/lib/url';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon, type IconName } from '../ui/Icon';
 import { Segmented } from '../ui/Segmented';
+import { GoalGrid } from './GoalGrid';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -170,10 +169,6 @@ function ChipSet({
 }
 
 function Goals({ life, patch }: { life: Life; patch: (p: Partial<Life>) => void }) {
-  const toggle = (g: Goal) =>
-    patch({
-      goals: life.goals.includes(g) ? life.goals.filter((x) => x !== g) : [...life.goals, g],
-    });
   return (
     <Card
       id="goals"
@@ -197,38 +192,7 @@ function Goals({ life, patch }: { life: Life; patch: (p: Partial<Life>) => void 
       </div>
       <fieldset>
         <legend class="label">What are you working on?</legend>
-        <div class="grid gap-2 sm:grid-cols-2">
-          {GOALS.map((g) => {
-            const i = life.goals.indexOf(g.id);
-            const on = i >= 0;
-            return (
-              <button
-                key={g.id}
-                type="button"
-                aria-pressed={on}
-                class={`pressable flex items-center gap-3 rounded-2xl border p-3 text-left ${
-                  on
-                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-400/10'
-                    : 'border-line hover:bg-muted'
-                }`}
-                onClick={() => toggle(g.id)}
-              >
-                <span
-                  class={`grid h-7 w-7 flex-none place-items-center rounded-full text-xs font-bold ${
-                    on ? 'bg-brand-600 text-white' : 'border-line-strong border'
-                  }`}
-                  aria-hidden="true"
-                >
-                  {on ? i + 1 : ''}
-                </span>
-                <span>
-                  <span class="block text-sm font-semibold">{g.label}</span>
-                  <span class="text-muted block text-xs">{g.hint}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <GoalGrid value={life.goals} onChange={(goals) => patch({ goals })} />
       </fieldset>
       <div>
         <label class="label" for="you-why">

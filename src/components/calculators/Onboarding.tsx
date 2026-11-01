@@ -4,11 +4,19 @@ import { MACRO_PRESETS } from '@/lib/calc/macros';
 import { humaniseWeeks } from '@/lib/calc/timeline';
 import { formatNumber, formatWeight, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { readShareLink } from '@/lib/backup';
+
+const readShareLinkPending = () =>
+  typeof location !== 'undefined' && location.hash.startsWith('#import=');
 import { prefsStore } from '@/lib/food-store';
 import { logStore, upsertEntry } from '@/lib/log';
 import { buildPlanSummary, planProfile, planStore, todayIso, DEFAULT_PLAN } from '@/lib/plan';
 import { getProfile, updateProfile, useProfile } from '@/lib/profile';
+import { lifeStore } from '@/lib/life';
+import { CITIES, suggestMethod } from '@/lib/prayer';
+import { defaultSetup } from '@/lib/train/program';
+import { trainStore } from '@/lib/train/store';
 import { withBase } from '@/lib/url';
+import { GoalGrid } from '../you/GoalGrid';
 import { Callout } from '../ui/Callout';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
@@ -20,6 +28,7 @@ import { SelectField } from '../ui/SelectField';
 import { Stat } from '../ui/Stat';
 
 const STEPS = ['About you', 'Your goal', 'Your plan'] as const;
+const FIRST_STEPS = ['What matters', ...STEPS] as const;
 
 function OnboardingInner() {
   const [profile, update] = useProfile();
@@ -27,8 +36,17 @@ function OnboardingInner() {
   const [prefs, patchPrefs] = prefsStore.use();
   const [step, setStep] = useState(0);
   const [imported, setImported] = useState(false);
+  const [life, patchLife] = lifeStore.use();
   const imperial = profile.units === 'imperial';
   const editing = plan.active;
+  // The first time through, start with what you want from the app, not your weight.
+  const [withGoals, setWithGoals] = useState(false);
+  useEffect(() => {
+    setWithGoals(!planStore.get().active && !lifeStore.get().ready && !readShareLinkPending());
+  }, []);
+  const steps: readonly string[] = withGoals ? FIRST_STEPS : STEPS;
+  const s = withGoals ? step - 1 : step;
+  const last = steps.length - 1;
 
   // A share link (#import=…) pre-fills everything.
   useEffect(() => {
@@ -37,6 +55,7 @@ function OnboardingInner() {
       updateProfile(shared.profile);
       patchPlan({ ...shared.plan, active: false });
       setImported(true);
+      setWithGoals(false);
       history.replaceState(null, '', location.pathname);
     }
   }, []);
@@ -94,13 +113,22 @@ function OnboardingInner() {
     const changed =
       openedWeight.current !== null && Math.abs(profile.weightKg - openedWeight.current) >= 0.05;
     if (!editing || changed) upsertEntry({ date: today, weightKg: profile.weightKg });
-    location.assign(withBase('/progress/'));
+    if (editing) return location.assign(withBase('/progress/'));
+    const trains = life.goals.some((g) => g === 'get-stronger' || g === 'move-more');
+    lifeStore.patch({ ready: true });
+    if (trains && !trainStore.get().setup) {
+      const level = profile.activity === 'sedentary' || profile.activity === 'light' ? 1 : 2;
+      trainStore.patch({
+        setup: { ...defaultSetup(today, level), easyOnLegs: life.conditions.includes('Knee pain') },
+      });
+    }
+    location.assign(withBase('/today/'));
   };
 
   return (
     <div class="mx-auto max-w-2xl">
       <ol class="mb-8 flex items-center gap-2 text-sm" aria-label="Progress">
-        {STEPS.map((label, i) => (
+        {steps.map((label, i) => (
           <li key={label} class="flex flex-1 items-center gap-2">
             <span
               class={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-bold ${i < step ? 'bg-brand-600 text-white' : i === step ? 'bg-brand-100 text-brand-800 dark:bg-brand-400/20 dark:text-brand-100 ring-brand-500 ring-2' : 'bg-muted text-subtle'}`}
@@ -113,7 +141,7 @@ function OnboardingInner() {
             >
               {label}
             </span>
-            {i < STEPS.length - 1 && (
+            {i < steps.length - 1 && (
               <span class="bg-line mx-1 h-px flex-1" style="background: var(--border)" />
             )}
           </li>
@@ -127,7 +155,99 @@ function OnboardingInner() {
       )}
 
       <section class="surface p-6 sm:p-8">
-        {step === 0 && (
+        {withGoals && step === 0 && (
+          <div class="grid gap-6">
+            <header>
+              <h2 class="font-display text-3xl tracking-tight">What do you want to work on?</h2>
+              <p class="text-muted mt-1 text-sm">
+                Pick as many as you like, most important first. Ethereal plans each day around them,
+                and you can change them any time.
+              </p>
+            </header>
+            <div>
+              <label class="label" for="ob-name">
+                What should we call you? <span class="text-subtle font-normal">(optional)</span>
+              </label>
+              <input
+                id="ob-name"
+                class="field"
+                value={life.name}
+                maxLength={40}
+                autocomplete="given-name"
+                onInput={(e) => patchLife({ name: e.currentTarget.value })}
+              />
+            </div>
+            <fieldset>
+              <legend class="label">Your goals</legend>
+              <GoalGrid value={life.goals} onChange={(goals) => patchLife({ goals })} />
+            </fieldset>
+            <label class="flex items-start gap-3">
+              <input
+                type="checkbox"
+                class="mt-0.5 h-5 w-5 accent-[var(--color-brand-600)]"
+                checked={life.conditions.includes('Knee pain')}
+                onChange={(e) =>
+                  patchLife({
+                    conditions: e.currentTarget.checked
+                      ? [...life.conditions, 'Knee pain']
+                      : life.conditions.filter((c) => c !== 'Knee pain'),
+                  })
+                }
+              />
+              <span>
+                <span class="block font-semibold">My knees or legs hurt sometimes</span>
+                <span class="text-muted block text-sm">
+                  Workouts skip jumping, lunging and deep single-leg moves.
+                </span>
+              </span>
+            </label>
+            <div class="grid gap-2">
+              <label class="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  class="h-5 w-5 accent-[var(--color-brand-600)]"
+                  checked={life.prayer.on}
+                  onChange={(e) =>
+                    patchLife({ prayer: { ...life.prayer, on: e.currentTarget.checked } })
+                  }
+                />
+                <span class="font-semibold">Plan my day around prayer times</span>
+              </label>
+              {life.prayer.on && (
+                <select
+                  class="field"
+                  aria-label="Your city"
+                  value={CITIES.some((c) => c.name === life.prayer.city) ? life.prayer.city : ''}
+                  onChange={(e) => {
+                    const c = CITIES.find((x) => x.name === e.currentTarget.value);
+                    if (c)
+                      patchLife({
+                        prayer: {
+                          ...life.prayer,
+                          on: true,
+                          city: c.name,
+                          lat: c.lat,
+                          lon: c.lon,
+                          method: suggestMethod(c.lat, c.lon),
+                        },
+                      });
+                  }}
+                >
+                  <option value="" disabled>
+                    Pick your city
+                  </option>
+                  {CITIES.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
+        )}
+
+        {s === 0 && (
           <div class="grid gap-6">
             <header>
               <h2 class="font-display text-3xl tracking-tight">About you</h2>
@@ -167,7 +287,7 @@ function OnboardingInner() {
           </div>
         )}
 
-        {step === 1 && (
+        {s === 1 && (
           <div class="grid gap-6">
             <header>
               <h2 class="font-display text-3xl tracking-tight">Your goal</h2>
@@ -245,7 +365,7 @@ function OnboardingInner() {
           </div>
         )}
 
-        {step === 2 && summary && (
+        {s === 2 && summary && (
           <div class="grid gap-6">
             <header>
               <h2 class="font-display text-3xl tracking-tight">Your plan</h2>
@@ -307,18 +427,18 @@ function OnboardingInner() {
           <button
             type="button"
             class="btn btn-ghost"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            onClick={() => setStep((x) => Math.max(0, x - 1))}
             disabled={step === 0}
             aria-disabled={step === 0}
           >
             Back
           </button>
-          {step < 2 ? (
+          {step < last ? (
             <button
               type="button"
               class="btn btn-primary"
-              onClick={() => setStep((s) => s + 1)}
-              disabled={step === 1 && goalInvalid}
+              onClick={() => setStep((x) => x + 1)}
+              disabled={s === 1 && goalInvalid}
             >
               Continue <Icon name="arrow" size={16} />
             </button>

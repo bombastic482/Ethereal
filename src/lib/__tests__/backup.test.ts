@@ -94,4 +94,18 @@ describe('backup', () => {
     const log = await import('../log');
     expect(log.logStore.get().entries).toHaveLength(1);
   });
+
+  it('opens share links made by the old encoder, accents included', async () => {
+    const { readShareLink } = await import('../backup');
+    const json = JSON.stringify({ profile: { age: 40 }, plan: { macroPreset: 'Zoë’s plan' } });
+    // The previous encoder: btoa(unescape(encodeURIComponent(s))), base64url without padding.
+    const old = Buffer.from(json, 'utf8')
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    const got = readShareLink(`#import=${old}`);
+    expect(got?.profile.age).toBe(40);
+    expect((got?.plan as { macroPreset?: string }).macroPreset).toBe('Zoë’s plan');
+  });
 });

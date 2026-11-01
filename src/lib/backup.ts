@@ -106,13 +106,18 @@ export function logToCsv(log: WeightLog): string {
   return rows.map((r) => r.map((c) => (/[",\n]/.test(c) ? `"${c}"` : c)).join(',')).join('\n');
 }
 
+// UTF-8 safe base64url, without the deprecated escape/unescape. Links made by the old encoder
+// carry the same bytes, so they still open.
 const b64url = {
-  encode: (s: string) =>
-    btoa(unescape(encodeURIComponent(s)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, ''),
-  decode: (s: string) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))),
+  encode: (s: string) => {
+    let bin = '';
+    for (const byte of new TextEncoder().encode(s)) bin += String.fromCharCode(byte);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  },
+  decode: (s: string) =>
+    new TextDecoder().decode(
+      Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0)),
+    ),
 };
 
 /** Builds a share URL carrying the profile and plan (never the weigh-in log; it can be large and personal). */
