@@ -92,5 +92,13 @@ test.describe('today plan', () => {
     await page.reload();
     await expect(page.getByText('Yesterday, your good thing')).toBeVisible();
     await expect(page.getByText('“Walked with my son after dinner”')).toBeVisible();
+
+    // And it is kept with the others on the Mind page.
+    await page.goto('/you/mind/');
+    await expect(
+      page
+        .getByRole('region', { name: 'Good things' })
+        .getByText('Walked with my son after dinner'),
+    ).toBeVisible();
   });
 });

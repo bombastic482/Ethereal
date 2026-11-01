@@ -13,6 +13,7 @@ function MindHubInner() {
   const [mind] = mindStore.use();
   const [today, setToday] = useState('');
   const [breathe, setBreathe] = useState<null | 'calm' | 'box' | 'sleep'>(null);
+  const [showAll, setShowAll] = useState(false);
   useEffect(() => setToday(todayIso()), []);
   if (!today) return <div class="surface h-[32rem] animate-pulse" aria-hidden="true" />;
 
@@ -23,6 +24,7 @@ function MindHubInner() {
   );
   const by = new Map(mind.checkins.map((c) => [c.date, c]));
   const recharges = mind.recharges.filter((d) => dates.includes(d)).length;
+  const goods = Object.entries(mind.goods).sort(([a], [b]) => b.localeCompare(a));
 
   return (
     <div class="grid grid-cols-[minmax(0,1fr)] gap-6">
@@ -85,6 +87,50 @@ function MindHubInner() {
             ))}
             <p class="text-subtle text-xs">Oldest on the left. Red is rough, green is great.</p>
           </div>
+        )}
+      </section>
+
+      <section class="surface p-5 sm:p-6" aria-labelledby="goods-h">
+        <h2 id="goods-h" class="text-lg font-bold tracking-tight">
+          Good things
+        </h2>
+        {goods.length ? (
+          <>
+            <p class="text-muted text-sm">
+              {goods.length === 1
+                ? 'The first one you kept.'
+                : `${goods.length} you have kept. Worth a read on a hard day.`}
+            </p>
+            <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+              {goods.slice(0, showAll ? undefined : 6).map(([d, t]) => (
+                <li key={d} class="good-item">
+                  <span class="text-subtle block text-xs">
+                    {new Date(`${d}T12:00:00`).toLocaleDateString('en', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short',
+                    })}
+                  </span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+            {goods.length > 6 && (
+              <button
+                type="button"
+                class="text-brand-700 dark:text-brand-300 mt-3 text-sm font-semibold"
+                aria-expanded={showAll}
+                onClick={() => setShowAll(!showAll)}
+              >
+                {showAll ? 'Show fewer' : `Show all ${goods.length}`}
+              </button>
+            )}
+          </>
+        ) : (
+          <p class="text-muted text-sm">
+            Each evening, Today asks for one good thing from the day. They gather here, and the
+            morning after, the latest one is waiting for you.
+          </p>
         )}
       </section>
 

@@ -3258,6 +3258,14 @@
   color: oklch(62% 0.14 70);
 }
 
+.good-item {
+  padding: 0.75rem 0.9rem;
+  border-radius: 1rem;
+  background: oklch(80% 0.1 85 / 0.12);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
 /* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */
 .prayer-strip {
   display: grid;
