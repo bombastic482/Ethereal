@@ -3211,6 +3211,53 @@
   color: var(--color-brand-200);
 }
 
+/* Last night's good thing, shown back under the morning sky */
+.echo-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0.25rem 1.25rem 0;
+  padding: 0.85rem 1rem;
+  border-radius: 1.1rem;
+  background: oklch(80% 0.1 85 / 0.14);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  animation: var(--animate-rise);
+}
+.echo-card > svg {
+  flex: none;
+  margin-top: 0.1rem;
+  color: oklch(62% 0.14 70);
+}
+.echo-when {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--fg-subtle);
+}
+@media (min-width: 768px) {
+  .echo-card {
+    margin: 0.5rem 2rem 0;
+  }
+}
+
+/* One good thing */
+.good-form .field {
+  min-width: 0;
+}
+.good-saved {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 1rem;
+  font-size: 0.9375rem;
+  background: oklch(80% 0.1 85 / 0.14);
+}
+.good-saved > svg {
+  flex: none;
+  color: oklch(62% 0.14 70);
+}
+
 /* Prayer times under the sky: one quiet track, the next prayer lifted out of it. */
 .prayer-strip {
   display: grid;

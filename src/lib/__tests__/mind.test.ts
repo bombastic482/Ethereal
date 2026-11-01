@@ -69,3 +69,23 @@ describe('mind and momentum', () => {
     });
   });
 });
+
+describe('one good thing', () => {
+  it('keeps the note, trims it and clears it when emptied', async () => {
+    const { mindStore, saveGood, GOOD_MAX } = await import('../mind');
+    saveGood('2026-11-01', '  Walked with my son after dinner  ');
+    expect(mindStore.get().goods['2026-11-01']).toBe('Walked with my son after dinner');
+    saveGood('2026-11-02', 'x'.repeat(GOOD_MAX + 20));
+    expect(mindStore.get().goods['2026-11-02']).toHaveLength(GOOD_MAX);
+    saveGood('2026-11-01', '   ');
+    expect(mindStore.get().goods['2026-11-01']).toBeUndefined();
+  });
+
+  it('shows back the latest note from the last three days only', async () => {
+    const { lastGood } = await import('../mind');
+    const goods = { '2026-10-20': 'old', '2026-10-30': 'Cooked at home', '2026-11-02': 'later' };
+    expect(lastGood(goods, '2026-11-01')).toEqual({ date: '2026-10-30', text: 'Cooked at home' });
+    expect(lastGood(goods, '2026-10-25')).toBeNull();
+    expect(lastGood({}, '2026-11-01')).toBeNull();
+  });
+});

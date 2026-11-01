@@ -14,6 +14,8 @@ import { useProfile } from '@/lib/profile';
 import { buildWorkout, weekOf } from '@/lib/train/program';
 import { trainStore } from '@/lib/train/store';
 import { withBase } from '@/lib/url';
+import { lastGood, mindStore } from '@/lib/mind';
+import { GoodThing } from '../mind/GoodThing';
 import TodayMind from '../mind/TodayMind';
 import { DayDial, KIND_ICON, KindIcon } from './DayDial';
 import { PrayerStrip } from './PrayerStrip';
@@ -45,11 +47,21 @@ function relative(item: DayItem, now: number): string {
   return `${span(-diff)} ago`;
 }
 
+/** 'Yesterday', or the weekday for a note from two or three days back. */
+function echoWhen(from: string, today: string): string {
+  const days = (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 864e5;
+  return days <= 1
+    ? 'Yesterday'
+    : `On ${new Date(`${from}T12:00:00`).toLocaleDateString('en', { weekday: 'long' })}`;
+}
+
 /** One line under the greeting that says where the day stands, in words. */
 function dayLine(current: DayItem | null, done: number, total: number, now: number): string {
   const tally =
     done === 0
-      ? 'A fresh day.'
+      ? now < 660
+        ? 'A fresh day.'
+        : 'Nothing ticked yet.'
       : done >= total
         ? 'Everything is done.'
         : `${done} done, ${total - done} to go.`;
@@ -61,7 +73,7 @@ function dayLine(current: DayItem | null, done: number, total: number, now: numb
       ? current.title
       : current.title.charAt(0).toLowerCase() + current.title.slice(1);
   if (when === 'Now') return `${tally} Now: ${what}.`;
-  if (when.endsWith('ago')) return `${tally} Still open: ${what}.`;
+  if (when.endsWith('ago')) return `${tally} Still to tick off: ${what}.`;
   return `${tally} Next, ${what} at ${clock(current.time)}.`;
 }
 
@@ -85,6 +97,7 @@ function TodayPlanInner() {
   const [{ ticks }] = dayStore.use();
   const [body] = bodyStore.use();
   const [profile] = useProfile();
+  const [{ goods }] = mindStore.use();
   const [date, setDate] = useState('');
   const [now, setNow] = useState(0);
   const [lastPhoto, setLastPhoto] = useState<string | null | undefined>(undefined);
@@ -213,6 +226,8 @@ function TodayPlanInner() {
   const upcoming = current ? day.slice(day.indexOf(current) + 1).filter((i) => !i.done) : [];
   const shown = all ? day : upcoming.slice(0, 3);
   const why = life.why.trim();
+  // Mornings start with what you said was good last night.
+  const echo = now < 720 ? lastGood(goods, date) : null;
   const picked = sel ? (day.find((i) => i.id === sel) ?? null) : null;
 
   const tick = (item: DayItem) => {
@@ -245,6 +260,15 @@ function TodayPlanInner() {
             </a>
           </div>
         </SkyScene>
+        {echo && (
+          <div class="echo-card">
+            <Icon name="spark" size={18} />
+            <p>
+              <span class="echo-when">{echoWhen(echo.date, date)}, your good thing</span>
+              {`“${echo.text}”`}
+            </p>
+          </div>
+        )}
         {sky.prayers && <PrayerStrip times={sky.prayers} now={now} />}
         <div class="today-hero-grid">
           <DayDial
@@ -306,6 +330,9 @@ function TodayPlanInner() {
                       : 'Rest now. Tomorrow is a fresh page.'}
                   </h3>
                   {why && <p class="text-muted mt-2 italic">“{why}”</p>}
+                  <div class="mt-4">
+                    <GoodThing date={date} />
+                  </div>
                 </div>
               )}
             </div>
@@ -633,6 +660,11 @@ function NowCard({
               </button>
             )}
           </div>
+          {(item.kind === 'wind' || item.kind === 'sleep') && (
+            <div class="mt-4">
+              <GoodThing date={date} />
+            </div>
+          )}
         </div>
       </div>
     </div>

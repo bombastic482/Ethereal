@@ -22,17 +22,21 @@ export interface MindState {
   recharges: string[];
   /** Guardrail or card id → the date it was dismissed; it stays quiet for a week. */
   dismissed: Record<string, string>;
+  /** One good thing from each evening, by date; shown back the next morning. */
+  goods: Record<string, string>;
 }
 
 export const MOODS = ['Rough', 'Low', 'Okay', 'Good', 'Great'] as const;
 export const ENERGY = ['Empty', 'Low', 'Fine', 'Good', 'Full'] as const;
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
+/** The longest one-good-thing note kept. */
+export const GOOD_MAX = 140;
 const level = (v: unknown) => (typeof v === 'number' && v >= 1 && v <= 5 ? Math.round(v) : null);
 
 export const mindStore = createStore<MindState>(
   'ethereal:mind:v1',
-  { checkins: [], recharges: [], dismissed: {} },
+  { checkins: [], recharges: [], dismissed: {}, goods: {} },
   (raw) => {
     if (!raw || typeof raw !== 'object') return null;
     const r = raw as Partial<MindState>;
@@ -62,6 +66,14 @@ export const mindStore = createStore<MindState>(
         r.dismissed && typeof r.dismissed === 'object'
           ? Object.fromEntries(Object.entries(r.dismissed).filter(([, v]) => ISO.test(String(v))))
           : {},
+      goods:
+        r.goods && typeof r.goods === 'object'
+          ? Object.fromEntries(
+              Object.entries(r.goods)
+                .filter(([d, v]) => ISO.test(d) && typeof v === 'string' && v.trim())
+                .map(([d, v]) => [d, (v as string).trim().slice(0, GOOD_MAX)]),
+            )
+          : {},
     };
   },
 );
@@ -73,6 +85,29 @@ export function saveCheckIn(c: CheckIn): void {
       a.date.localeCompare(b.date),
     ),
   });
+}
+
+/** Keeps (or, when empty, clears) the evening's one good thing. */
+export function saveGood(date: string, text: string): void {
+  const goods = { ...mindStore.get().goods };
+  const t = text.trim().slice(0, GOOD_MAX);
+  if (t) goods[date] = t;
+  else delete goods[date];
+  mindStore.patch({ goods });
+}
+
+/** The most recent good thing from before `date`, within the last three days. */
+export function lastGood(
+  goods: Readonly<Record<string, string>>,
+  date: string,
+): { date: string; text: string } | null {
+  const before = Object.keys(goods)
+    .filter((d) => d < date)
+    .sort()
+    .pop();
+  if (!before) return null;
+  const days = (Date.parse(`${date}T00:00:00Z`) - Date.parse(`${before}T00:00:00Z`)) / 864e5;
+  return days <= 3 ? { date: before, text: goods[before]! } : null;
 }
 
 export function addRecharge(date: string): void {

@@ -77,4 +77,20 @@ test.describe('today plan', () => {
     await page.mouse.up();
     await expect(page.getByRole('button', { name: 'Dhuhr: done' })).toBeVisible();
   });
+
+  test('one good thing at night is shown back the next morning', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-11-01T22:20:00+03:00'));
+    await page.addInitScript(() => localStorage.setItem('ethereal:tour:v1', '1'));
+    await page.goto('/today/');
+    const now = page.getByRole('region', { name: "What's next" });
+    await expect(now.getByRole('heading', { name: 'Wind down' })).toBeVisible();
+    await now.getByLabel('One good thing from today').fill('Walked with my son after dinner');
+    await now.getByRole('button', { name: 'Keep' }).click();
+    await expect(now.getByText('“Walked with my son after dinner”')).toBeVisible();
+
+    await page.clock.setFixedTime(new Date('2026-11-02T08:00:00+03:00'));
+    await page.reload();
+    await expect(page.getByText('Yesterday, your good thing')).toBeVisible();
+    await expect(page.getByText('“Walked with my son after dinner”')).toBeVisible();
+  });
 });
