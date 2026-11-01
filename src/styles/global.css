@@ -657,3 +657,74 @@
     backdrop-filter: none !important;
   }
 }
+
+/* Exercise demo figure (components/train/Figure.tsx). */
+.fig {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.fig line {
+  stroke-linecap: round;
+}
+.fig-body line,
+.fig-near line {
+  stroke: var(--fg);
+}
+.fig-body circle {
+  fill: var(--fg);
+}
+.fig-far line {
+  stroke: color-mix(in oklab, var(--fg) 34%, var(--bg));
+}
+.fig-glow line {
+  stroke: var(--color-brand-400);
+  opacity: 0.95;
+}
+[data-theme='dark'] .fig-glow line {
+  stroke: var(--color-brand-300);
+}
+.fig-shadow {
+  fill: color-mix(in oklab, var(--fg) 9%, transparent);
+}
+.fig-floor {
+  stroke: var(--border-strong);
+  stroke-width: 1.2;
+}
+.fig-prop-body {
+  fill: var(--bg-muted);
+  stroke: var(--border-strong);
+  stroke-width: 0.8;
+}
+.fig-prop-soft {
+  fill: color-mix(in oklab, var(--color-brand-400) 22%, var(--bg-muted));
+}
+.fig-belt {
+  fill: color-mix(in oklab, var(--fg) 30%, var(--bg));
+}
+.fig-rail {
+  stroke: var(--border-strong);
+  stroke-width: 2.5;
+}
+.fig-mat {
+  fill: color-mix(in oklab, var(--color-brand-400) 25%, transparent);
+}
+.fig-towel {
+  stroke: var(--color-accent-500);
+  stroke-width: 2.4;
+}
+.fig-ghost {
+  display: none;
+}
+.fig-ghost line {
+  stroke: color-mix(in oklab, var(--fg) 14%, transparent);
+}
+.fig-ghost circle {
+  fill: color-mix(in oklab, var(--fg) 14%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fig-ghost {
+    display: inline;
+  }
+}
