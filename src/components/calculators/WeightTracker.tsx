@@ -3,6 +3,7 @@ import { daysBetween, trendSeries, weeklyAverages } from '@/lib/calc/trend';
 import { cmToIn, formatWeight, inToCm, kgToLb, lbToKg, round } from '@/lib/calc/units';
 import { logStore, removeEntry, upsertEntry } from '@/lib/log';
 import { planStore, todayIso } from '@/lib/plan';
+import { confetti, haptic } from '@/lib/fx';
 import { useProfile } from '@/lib/profile';
 import { withBase } from '@/lib/url';
 import { Callout } from '../ui/Callout';
@@ -10,6 +11,7 @@ import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { Icon } from '../ui/Icon';
 import { LineChart } from '../ui/LineChart';
 import { NumberField } from '../ui/NumberField';
+import { TapeScrubber } from '../ui/TapeScrubber';
 import { Segmented } from '../ui/Segmented';
 import { Stat } from '../ui/Stat';
 
@@ -47,6 +49,7 @@ function WeightTrackerInner() {
   const latest = entries[entries.length - 1] ?? null;
   const latestTrend = trend[trend.length - 1]?.trendKg ?? null;
   const w = (kg: number) => formatWeight(kg, profile.units, 1);
+  const toUnit = (kg: number) => (imperial ? kgToLb(kg) : kg);
 
   const changeOver = (days: number): number | null => {
     if (!latestTrend || !latest) return null;
@@ -100,14 +103,25 @@ function WeightTrackerInner() {
       ...extraEntries,
       ...(note.trim() ? { note: note.trim() } : {}),
     });
-    setFlash(`Saved ${w(weightKg)} for ${date}`);
+    // A new lowest trend is the number that matters, so it gets the fuss, not a single low day.
+    const after = trendSeries(
+      [...logStore.get().entries].sort((a, b) => a.date.localeCompare(b.date)),
+    );
+    const newest = after[after.length - 1];
+    const before = after.slice(0, -1);
+    const lowest = before.length >= 2 ? Math.min(...before.map((p) => p.trendKg)) : null;
+    if (newest && newest.date === date && lowest !== null && newest.trendKg < lowest - 0.05) {
+      setFlash(`New low: your trend is ${w(newest.trendKg)}, the lowest yet.`);
+      confetti({ x: 0.5, y: 0.3 }, 90);
+      haptic([12, 50, 12, 50, 20]);
+    } else setFlash(`Saved ${w(weightKg)} for ${date}`);
     setNote('');
     setWaist(null);
     setBodyFat(null);
     setMuscle(null);
     setWater(null);
     setVisceral(null);
-    setTimeout(() => setFlash(null), 2500);
+    setTimeout(() => setFlash(null), 4000);
   };
 
   const fmtChange = (v: number | null) =>
@@ -137,26 +151,20 @@ function WeightTrackerInner() {
               onChange={(e) => setDate((e.target as HTMLInputElement).value || today)}
             />
           </div>
+          <TapeScrubber
+            id="tr-weight"
+            label="Weight"
+            value={round(weight ?? toUnit(latest?.weightKg ?? profile.weightKg), 1)}
+            min={imperial ? 55 : 25}
+            max={imperial ? 880 : 400}
+            step={0.1}
+            unit={imperial ? 'lb' : 'kg'}
+            pxPerUnit={imperial ? 28 : 60}
+            labelEvery={imperial ? 5 : 1}
+            onChange={setWeight}
+            {...(latest ? { marker: round(toUnit(latest.weightKg), 1), markerLabel: 'last' } : {})}
+          />
           <div class="grid grid-cols-2 gap-4">
-            <NumberField
-              id="tr-weight"
-              label="Weight"
-              value={
-                weight ??
-                (latest
-                  ? imperial
-                    ? kgToLb(latest.weightKg)
-                    : latest.weightKg
-                  : imperial
-                    ? kgToLb(profile.weightKg)
-                    : profile.weightKg)
-              }
-              min={imperial ? 55 : 25}
-              max={imperial ? 880 : 400}
-              step={0.1}
-              suffix={imperial ? 'lb' : 'kg'}
-              onChange={setWeight}
-            />
             <NumberField
               id="tr-waist"
               label="Waist (optional)"

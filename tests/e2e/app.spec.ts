@@ -62,7 +62,9 @@ test.describe('plan and tracker', () => {
     await ready(page, '/track/');
     await expect(page.getByText('Trend weight')).toBeVisible();
     await page.locator('#tr-date').fill('2026-01-02');
-    await page.getByLabel('Weight', { exact: true }).fill('91.5');
+    await page.locator('#tr-weight-readout').click();
+    await page.locator('#tr-weight-readout').fill('91.5');
+    await page.locator('#tr-weight-readout').press('Enter');
     await page.getByRole('button', { name: /save entry/i }).click();
     await expect(page.getByRole('status')).toContainText('Saved');
     await expect(page.getByRole('heading', { name: 'Weekly averages' })).toBeVisible();

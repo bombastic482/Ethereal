@@ -194,13 +194,29 @@ test.describe('saved meals and sharing', () => {
   test('tracker offers a share card once there is a trend', async ({ page }) => {
     await ready(page, '/track/');
     await page.locator('#tr-date').fill('2026-01-01');
-    await page.getByLabel('Weight', { exact: true }).fill('90');
+    await page.locator('#tr-weight-readout').click();
+    await page.locator('#tr-weight-readout').fill('90');
+    await page.locator('#tr-weight-readout').press('Enter');
     await page.getByRole('button', { name: /save entry/i }).click();
     await page.locator('#tr-date').fill('2026-01-02');
-    await page.getByLabel('Weight', { exact: true }).fill('89.6');
+    await page.locator('#tr-weight-readout').click();
+    await page.locator('#tr-weight-readout').fill('89.6');
+    await page.locator('#tr-weight-readout').press('Enter');
     await page.getByRole('button', { name: /save entry/i }).click();
     await page.getByRole('region', { name: 'Share progress' }).scrollIntoViewIfNeeded();
     await expect(page.getByRole('button', { name: /create card/i })).toBeVisible();
+
+    // A third, lower weigh-in takes the trend to a new low, which is called out.
+    await page.locator('#tr-date').fill('2026-01-03');
+    await page.locator('#tr-weight').focus();
+    await page.keyboard.press('PageDown');
+    await page.keyboard.press('PageDown');
+    await expect(page.getByRole('slider', { name: 'Weight' })).toHaveAttribute(
+      'aria-valuenow',
+      '87.6',
+    );
+    await page.getByRole('button', { name: /save entry/i }).click();
+    await expect(page.getByRole('status').filter({ hasText: 'New low' })).toBeVisible();
   });
 });
 
