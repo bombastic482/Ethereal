@@ -3,7 +3,7 @@ import { bodyStore } from '@/lib/body';
 import { activity, exerciseKcal } from '@/lib/calc/exercise';
 import { buildDay, dayStore, missedItems, nowItem, toggleTick, type DayItem } from '@/lib/day';
 import { addExercise, diaryStore } from '@/lib/food-store';
-import { haptic } from '@/lib/fx';
+import { confetti, haptic } from '@/lib/fx';
 import { lifeStore, toMinutes } from '@/lib/life';
 import { logStore } from '@/lib/log';
 import { listPhotos, photosSupported } from '@/lib/photos';
@@ -187,6 +187,21 @@ function TodayPlanInner() {
     };
     return { events: eventsFrom(mins), prayers: p.on ? mins : null };
   }, [date, life.prayer, life.fasting]);
+
+  // Finishing the whole day, there and then, gets one celebration. Loading a finished day, or a
+  // new day starting, does not.
+  const doneNow = day ? day.filter((i) => !i.passive && i.done).length : 0;
+  const totalNow = day ? day.filter((i) => !i.passive).length : 0;
+  const seen = useRef<{ date: string; done: number } | null>(null);
+  useEffect(() => {
+    if (!date || !totalNow) return;
+    const prev = seen.current;
+    seen.current = { date, done: doneNow };
+    if (prev && prev.date === date && prev.done < totalNow && doneNow === totalNow) {
+      confetti({ x: 0.5, y: 0.3 }, 130);
+      haptic([14, 40, 14, 40, 24]);
+    }
+  }, [date, doneNow, totalNow]);
 
   if (!day || !sky)
     return <div class="surface mb-8 h-[54rem] animate-pulse sm:h-[46rem]" aria-hidden="true" />;
@@ -379,6 +394,18 @@ function Row({
   // Swipe right to tick. Vertical movement hands the gesture back to the page scroll.
   const canSwipe = !item.passive && !item.auto;
   const [dx, setDx] = useState(0);
+  // A small pop at the moment something is ticked, never on a plain re-render.
+  const wasDone = useRef(item.done);
+  const [justDone, setJustDone] = useState(false);
+  useEffect(() => {
+    if (item.done && !wasDone.current) {
+      setJustDone(true);
+      const t = window.setTimeout(() => setJustDone(false), 700);
+      wasDone.current = true;
+      return () => window.clearTimeout(t);
+    }
+    wasDone.current = item.done;
+  }, [item.done]);
   const drag = useRef<{ x: number; y: number; locked: boolean; moved: boolean } | null>(null);
   const THRESHOLD = 72;
   const end = () => {
@@ -392,7 +419,7 @@ function Row({
   };
   return (
     <li
-      class={`tl-row kind-${item.kind} ${item.done ? 'tl-done' : ''} ${current ? 'tl-current' : ''} ${item.passive ? 'tl-passive' : ''} ${dx ? 'is-dragging' : ''}`}
+      class={`tl-row kind-${item.kind} ${item.done ? 'tl-done' : ''} ${current ? 'tl-current' : ''} ${item.passive ? 'tl-passive' : ''} ${dx ? 'is-dragging' : ''} ${justDone ? 'is-just-done' : ''}`}
       onPointerDown={(e) => {
         if (!canSwipe || e.button !== 0) return;
         drag.current = { x: e.clientX, y: e.clientY, locked: false, moved: false };

@@ -1494,6 +1494,27 @@
   border-radius: inherit;
   transition: transform 0.25s var(--ease-spring);
 }
+.tl-row.is-just-done .tl-tick,
+.tl-row.is-just-done .tl-dot {
+  animation: tick-pop 0.5s var(--ease-spring);
+}
+@keyframes tick-pop {
+  0% {
+    transform: scale(0.7);
+  }
+  55% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl-row.is-just-done .tl-tick,
+  .tl-row.is-just-done .tl-dot {
+    animation: none;
+  }
+}
 .tl-row.is-dragging::after {
   opacity: 0;
 }

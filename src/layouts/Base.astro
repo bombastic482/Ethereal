@@ -24,9 +24,11 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
   /** Page-level class on <main>. */
   class?: string;
+  /** The one-line footer of app screens; defaults to on for pages in an app section. */
+  appFooter?: boolean;
 }
 
-const { class: cls, ...seo } = Astro.props;
+const { class: cls, appFooter, ...seo } = Astro.props;
 // The app section this page belongs to sets the colour mood (see "Section moods" in global.css).
 const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
 ---
@@ -84,7 +86,7 @@ const section = sectionOf(Astro.url.pathname.slice(BASE.length) || '/');
     <main id="main" class:list={['flex-1', cls]} transition:animate="fade">
       <slot />
     </main>
-    <Footer compact={section !== undefined} />
+    <Footer compact={appFooter ?? section !== undefined} />
     <TabBar />
     <script>
       import { startCounting } from '@/lib/analytics';

@@ -424,15 +424,17 @@ function OnboardingInner() {
         )}
 
         <div class="mt-8 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            class="btn btn-ghost"
-            onClick={() => setStep((x) => Math.max(0, x - 1))}
-            disabled={step === 0}
-            aria-disabled={step === 0}
-          >
-            Back
-          </button>
+          {step > 0 ? (
+            <button
+              type="button"
+              class="btn btn-ghost"
+              onClick={() => setStep((x) => Math.max(0, x - 1))}
+            >
+              Back
+            </button>
+          ) : (
+            <span />
+          )}
           {step < last ? (
             <button
               type="button"
