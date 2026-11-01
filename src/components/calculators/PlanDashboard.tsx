@@ -400,7 +400,10 @@ function PlanDashboardInner() {
         </div>
         {goalDate && weeksLeft !== null && (
           <p class="text-muted mt-4 text-sm leading-relaxed">
-            At your current trend you reach {w(plan.goalWeightKg)} in about{' '}
+            {report?.status === 'insufficient-data'
+              ? 'At your planned pace'
+              : 'At your current trend'}{' '}
+            you reach {w(plan.goalWeightKg)} in about{' '}
             <strong class="text-fg">{humaniseWeeks(weeksLeft)}</strong> (
             {goalDate.toLocaleDateString(undefined, {
               day: 'numeric',
@@ -516,7 +519,9 @@ function PlanDashboardInner() {
               ? 'Holding steady'
               : goalReached
                 ? `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}. Goal reached.`
-                : `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}, ${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`}
+                : Math.abs(lost) < 0.05
+                  ? `${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`
+                  : `${w(Math.abs(lost))} ${plan.goal === 'lose' ? 'down' : 'up'}, ${w(Math.abs(plan.goal === 'lose' ? latestTrend - plan.goalWeightKg : plan.goalWeightKg - latestTrend))} to go`}
           </h2>
         </div>
         <div class="flex gap-2">

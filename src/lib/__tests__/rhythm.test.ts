@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rhythm, showedUp, type RhythmInput } from '../rhythm';
+import { rhythm, showedUp, showedUpSince, type RhythmInput } from '../rhythm';
 
 const empty: RhythmInput = {
   foodDates: [],
@@ -61,5 +61,24 @@ describe('rhythm', () => {
       1,
     );
     expect(showedUp(days, 7)).toEqual({ days: 1, of: 3 });
+  });
+
+  it('is fair to someone who only just started', () => {
+    // First entry today, one habit so far: nothing is held against them yet.
+    const first = rhythm({ ...empty, weighDates: ['2026-11-04'] }, '2026-11-04', 4);
+    expect(showedUpSince(first, '2026-11-04')).toEqual({ days: 0, of: 0, since: true });
+    // Three days in, two of them held, today still going.
+    const three = rhythm(
+      {
+        ...empty,
+        foodDates: ['2026-11-02', '2026-11-03', '2026-11-04'],
+        weighDates: ['2026-11-02', '2026-11-03'],
+      },
+      '2026-11-04',
+      4,
+    );
+    expect(showedUpSince(three, '2026-11-02')).toEqual({ days: 2, of: 2, since: true });
+    // An old hand reads the plain last-28-days figure.
+    expect(showedUpSince(three, '2025-01-01')).toEqual({ ...showedUp(three), since: false });
   });
 });

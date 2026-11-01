@@ -115,7 +115,7 @@ function OnboardingInner() {
     if (!editing || changed) upsertEntry({ date: today, weightKg: profile.weightKg });
     if (editing) return location.assign(withBase('/progress/'));
     const trains = life.goals.some((g) => g === 'get-stronger' || g === 'move-more');
-    lifeStore.patch({ ready: true });
+    lifeStore.patch({ ready: true, joinedAt: life.joinedAt ?? new Date().toISOString() });
     if (trains && !trainStore.get().setup) {
       const level = profile.activity === 'sedentary' || profile.activity === 'light' ? 1 : 2;
       trainStore.patch({

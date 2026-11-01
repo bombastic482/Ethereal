@@ -204,18 +204,27 @@ function TrainHubInner() {
             <h2 id="stats-h" class="text-lg font-bold tracking-tight">
               So far
             </h2>
-            <dl class="mt-4 grid grid-cols-3 gap-2 text-center">
-              {[
-                ['Sessions', log.length],
-                ['Week streak', streak],
-                ['Minutes', log.reduce((n, l) => n + l.minutes, 0)],
-              ].map(([k, v]) => (
-                <div key={k} class="surface-muted rounded-2xl p-3">
-                  <dt class="text-subtle text-[11px] font-semibold">{k}</dt>
-                  <dd class="font-display tabular mt-1 text-2xl">{v}</dd>
-                </div>
-              ))}
-            </dl>
+            {log.length === 0 ? (
+              // Three zeros say nothing kind; the first session is the whole point right now.
+              <p class="text-muted mt-2 text-sm leading-relaxed">
+                Nothing yet, and that is fine. The first session is the hardest one to start, so
+                this week asks only that you turn up. Your sessions, streak and minutes gather here
+                after it.
+              </p>
+            ) : (
+              <dl class="mt-4 grid grid-cols-3 gap-2 text-center">
+                {[
+                  ['Sessions', log.length],
+                  ['Week streak', streak],
+                  ['Minutes', log.reduce((n, l) => n + l.minutes, 0)],
+                ].map(([k, v]) => (
+                  <div key={k} class="surface-muted rounded-2xl p-3">
+                    <dt class="text-subtle text-[11px] font-semibold">{k}</dt>
+                    <dd class="font-display tabular mt-1 text-2xl">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </section>
 
           <Ladders setup={setup} />
@@ -227,8 +236,10 @@ function TrainHubInner() {
       <section class="surface flex flex-wrap items-center gap-3 p-5" aria-label="Training settings">
         <div class="min-w-0 flex-1">
           <p class="font-semibold">
-            {setup.weekdays.length === 7 ? 'Every day' : `${setup.weekdays.length} days a week`} ·{' '}
-            {setup.minutes} minutes
+            <span class="whitespace-nowrap">
+              {setup.weekdays.length === 7 ? 'Every day' : `${setup.weekdays.length} days a week`}
+            </span>{' '}
+            <span class="whitespace-nowrap">· {setup.minutes} minutes</span>
           </p>
           <p class="text-muted text-sm">
             {[

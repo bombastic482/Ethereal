@@ -87,6 +87,8 @@ export interface Life {
   photoWeeks: number;
   /** First-run setup finished. */
   ready: boolean;
+  /** When first-run setup finished (ISO time), so the first day does not count what came before. */
+  joinedAt?: string;
 }
 
 export const DEFAULT_LIFE: Life = {
@@ -170,6 +172,9 @@ export const lifeStore = createStore<Life>('ethereal:life:v1', DEFAULT_LIFE, (ra
         ? r.photoWeeks
         : 4,
     ready: r.ready === true,
+    ...(typeof r.joinedAt === 'string' && !Number.isNaN(Date.parse(r.joinedAt))
+      ? { joinedAt: r.joinedAt }
+      : {}),
   };
 });
 

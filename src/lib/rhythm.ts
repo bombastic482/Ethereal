@@ -75,3 +75,21 @@ export function showedUp(days: readonly RhythmDay[], n = 28): { days: number; of
   const past = days.filter((d) => !d.future).slice(-n);
   return { days: past.filter((d) => d.score >= 2).length, of: past.length };
 }
+
+/**
+ * Showing up, fair to someone new: only days since their first entry count, and today counts
+ * once it holds rather than against them while it is still going. `since` is null when the
+ * first entry is older than the window, and then this is the same as `showedUp`.
+ */
+export function showedUpSince(
+  days: readonly RhythmDay[],
+  first: string | null,
+  n = 28,
+): { days: number; of: number; since: boolean } {
+  const past = days.filter((d) => !d.future).slice(-n);
+  if (!first || !past.length || first <= past[0]!.date)
+    return { ...showedUp(days, n), since: false };
+  let mine = past.filter((d) => d.date >= first);
+  if ((mine.at(-1)?.score ?? 0) < 2) mine = mine.slice(0, -1);
+  return { days: mine.filter((d) => d.score >= 2).length, of: mine.length, since: true };
+}

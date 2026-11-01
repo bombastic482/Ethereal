@@ -4,7 +4,7 @@ import { diaryStore } from '@/lib/food-store';
 import { logStore } from '@/lib/log';
 import { mindStore } from '@/lib/mind';
 import { todayIso } from '@/lib/plan';
-import { HABITS, HABIT_LABEL, rhythm, showedUp, type RhythmDay } from '@/lib/rhythm';
+import { HABITS, HABIT_LABEL, rhythm, showedUpSince, type RhythmDay } from '@/lib/rhythm';
 import { trainStore } from '@/lib/train/store';
 import { Icon } from '../ui/Icon';
 
@@ -56,7 +56,18 @@ export default function Rhythm() {
   );
   if (!today) return <div class="surface h-64 animate-pulse" aria-hidden="true" />;
 
-  const recent = showedUp(days, 28);
+  // The first day there is anything at all, so a new start is not measured against weeks
+  // before it existed.
+  const first =
+    [
+      ...diary.food.map((f) => f.date),
+      ...diary.exercise.map((e) => e.date),
+      ...train.log.map((l) => l.date),
+      ...mind.checkins.map((c) => c.date),
+      ...weights.entries.map((e) => e.date),
+      ...Object.keys(ticks),
+    ].sort()[0] ?? null;
+  const recent = showedUpSince(days, first, 28);
   const sel: RhythmDay = days.find((d) => d.date === (pick ?? today)) ?? days.at(-1)!;
   const weeks = Array.from({ length: WEEKS }, (_, w) => days.slice(w * 7, w * 7 + 7));
 
@@ -67,8 +78,16 @@ export default function Rhythm() {
           Your rhythm
         </h2>
         <p class="text-muted text-sm">
-          <span class="text-fg tabular font-semibold">{recent.days}</span> of the last {recent.of}{' '}
-          days you showed up
+          {recent.since && recent.of === 0 ? (
+            'Day one. Any two of the four below and today counts.'
+          ) : (
+            <>
+              <span class="text-fg tabular font-semibold">{recent.days}</span> of the{' '}
+              {recent.since
+                ? `${recent.of === 1 ? 'first day' : `${recent.of} days`} since you started`
+                : `last ${recent.of} days you showed up`}
+            </>
+          )}
         </p>
       </div>
       <p class="text-subtle mt-1 text-xs">

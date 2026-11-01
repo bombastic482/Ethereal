@@ -214,7 +214,14 @@ function TodayPlanInner() {
     return <div class="surface mb-8 h-[54rem] animate-pulse sm:h-[46rem]" aria-hidden="true" />;
 
   const current = nowItem(day, now);
-  const missed = missedItems(day, now).filter((i) => i.id !== current?.id);
+  // On the day you set up, nothing from before you arrived is "missed".
+  const joined = life.joinedAt ? new Date(life.joinedAt) : null;
+  const joinedToday = joined !== null && todayIso(joined) === date;
+  const missed = missedItems(day, now).filter(
+    (i) =>
+      i.id !== current?.id &&
+      !(joinedToday && toMinutes(i.time) < joined!.getHours() * 60 + joined!.getMinutes()),
+  );
   const actionable = day.filter((i) => !i.passive);
   const doneCount = actionable.filter((i) => i.done).length;
   const upcoming = current ? day.slice(day.indexOf(current) + 1).filter((i) => !i.done) : [];
