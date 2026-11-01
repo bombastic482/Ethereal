@@ -38,17 +38,17 @@ Most health apps do one thing, charge a subscription for it, and leave you to wo
 
 ## Always know the next step
 
-Today opens with your day, planned around you: the thing to do now, with one button to do it, and the rest of the day in order. Tell it when you wake, eat and work once, and it does the planning.
+Today opens under a living sky that follows your real time of day and your city's sun, from a lavender first light to a deep indigo night with the moon in tonight's phase. Beneath it is your day, planned around you: the thing to do now, with one button to do it, and the rest of the day in order. Tell it when you wake, eat and work once, and it does the planning.
 
-- **A Now card with a countdown.** Log lunch, start the workout, weigh in, or tick it done.
-- **Your whole day in one line.** Meals, medicines at the right time, prayer times calculated on the device, training placed clear of work and meals, winding down and sleep.
+- **A day dial and a Now card.** Every moment sits on a dial of your waking day, in its own colour. The Now card counts down to what is next: log lunch, start the workout, weigh in, or tick it done. Swipe a row to tick it off.
+- **Your whole day in one line.** Meals, medicines at the right time, prayer times calculated on the device (with the next one counting down under the sky), training placed clear of work and meals, winding down and sleep.
 - **No guilt.** Missed something? Catch me up gathers it: tick what you did, let the rest go. Fasting moves meals to suhoor and iftar and training to after iftar.
 
 ## Train at home, starting small
 
 A plan built from what you have (a towel, a chair, a bed, or nothing), the days that suit you and where you are starting. Week one is deliberately light, and each move climbs a ladder, from wall push-ups to the real thing.
 
-- **A guided player.** Animated demo, rep counter, timed holds, a rest timer with beeps and optional spoken cues, and the screen kept awake. Close it mid-set and it resumes from the same place.
+- **A guided player.** Animated demo, a rep counter you tap with each rep, a 3-2-1 count-in for timed holds, a rest timer with beeps and optional spoken cues, and the screen kept awake. Beat last time's number and it says so. Close it mid-set and it resumes from the same place.
 - **It moves you up when you're ready.** Hit the top of the range on every set and the next session offers the harder move. Too hard today? Swap down in one tap.
 - **41 exercises with animated demos,** the muscles they work, form cues and the mistakes to avoid. Knees complaining? One switch removes jumping, lunging and deep single-leg work.
 
@@ -85,7 +85,7 @@ A few questions give you a calorie target, protein, macros and a realistic goal 
 
 ## See the trend, not the noise
 
-Daily weigh-ins are smoothed into a trend, so water weight and one salty dinner never look like failure. On Sunday night the weekly review takes five minutes: the week in numbers, what it means, and next week's change applied in one tap.
+Daily weigh-ins are smoothed into a trend, so water weight and one salty dinner never look like failure; drag the scale to log one, and a new low in the trend gets a small celebration. Your rhythm shows twelve weeks of showing up, each day shaded by how much of food, movement, a check-in and the plan held. On Sunday night the weekly review takes five minutes: the week in numbers, what it means, and next week's change applied in one tap.
 
 <picture>
   <source media="(max-width: 700px)" srcset="docs/readme/track-mobile.webp" />
@@ -183,8 +183,8 @@ Your plan, diary, weigh-ins, training, profile and preferences live in `localSto
 
 | Check                 | What it covers                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 186 unit tests        | Every calculation, the trend and adjustment engine, insights, CSV import, the planners, food search, the exercise figures, training progression, prayer times and the day plan. |
-| 146 end-to-end tests  | Desktop and phone: first run, Today's plan, a workout from setup to diary, diary, planner, review, import, eating out, the tab bar, and an accessibility sweep.                 |
+| 218 unit tests        | Every calculation, the trend and adjustment engine, insights, CSV import, the planners, food search, the exercise figures, training progression, prayer times and the day plan. |
+| 162 end-to-end tests  | Desktop and phone: first run, Today's plan, a workout from setup to diary, diary, planner, review, import, eating out, the tab bar, and an accessibility sweep.                 |
 | Lighthouse CI         | Performance budgets on a simulated slow phone; key pages score 100.                                                                                                             |
 | Data validators       | Every food and recipe checked for shape, plausibility and energy consistency on each build.                                                                                     |
 | Type check and format | `astro check` in strict mode and Prettier across the tree.                                                                                                                      |
