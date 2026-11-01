@@ -110,8 +110,8 @@ function stand(x: number, over: Partial<Pose> = {}): Pose {
     torso: 0,
     armN: ang(6, 12),
     armF: ang(-4, 4),
-    legN: reach(x + 1, ANKLE, 1),
-    legF: reach(x - 2, ANKLE, 1),
+    legN: reach(x + 1, ANKLE, -1),
+    legF: reach(x - 2, ANKLE, -1),
     ...over,
   };
 }
@@ -131,8 +131,8 @@ function pushUp(): Key[] {
     torso: b.torso,
     armN: reach(hand[0], hand[1], 1),
     armF: reach(hand[0] + 2, hand[1], 1),
-    legN: reach(ankle[0], ankle[1], 1),
-    legF: reach(ankle[0] - 1, ankle[1] + 0.5, 1),
+    legN: reach(ankle[0], ankle[1], -1),
+    legF: reach(ankle[0] - 1, ankle[1] + 0.5, -1),
     footN: 22,
     footF: 22,
   });
@@ -167,8 +167,8 @@ function inclinePushUp(): Key[] {
     torso: b.torso,
     armN: reach(hand[0], hand[1], 1),
     armF: reach(hand[0] + 2, hand[1], 1),
-    legN: reach(ankle[0], ankle[1], 1),
-    legF: reach(ankle[0] - 1, ankle[1] + 0.5, 1),
+    legN: reach(ankle[0], ankle[1], -1),
+    legF: reach(ankle[0] - 1, ankle[1] + 0.5, -1),
     footN: 30,
     footF: 30,
   });
@@ -185,8 +185,8 @@ function wallPushUp(): Key[] {
     torso: b.torso,
     armN: reach(hand[0], hand[1], 1),
     armF: reach(hand[0], hand[1] + 2, 1),
-    legN: reach(ankle[0], ankle[1], 1),
-    legF: reach(ankle[0] - 1, ankle[1], 1),
+    legN: reach(ankle[0], ankle[1], -1),
+    legF: reach(ankle[0] - 1, ankle[1], -1),
     footN: 70,
     footF: 70,
   });
@@ -203,8 +203,8 @@ function declinePushUp(): Key[] {
     torso: b.torso,
     armN: reach(hand[0], hand[1], 1),
     armF: reach(hand[0] + 2, hand[1], 1),
-    legN: reach(ankle[0], ankle[1], 1),
-    legF: reach(ankle[0] - 1, ankle[1], 1),
+    legN: reach(ankle[0], ankle[1], -1),
+    legF: reach(ankle[0] - 1, ankle[1], -1),
     footN: 10,
     footF: 10,
   });
@@ -220,8 +220,8 @@ function pikePushUp(): Key[] {
     head: -10,
     armN: reach(hand[0], hand[1], -1),
     armF: reach(hand[0] + 2, hand[1], -1),
-    legN: reach(ankle[0], ankle[1], 1),
-    legF: reach(ankle[0] - 1, ankle[1], 1),
+    legN: reach(ankle[0], ankle[1], -1),
+    legF: reach(ankle[0] - 1, ankle[1], -1),
     footN: 30,
     footF: 30,
   });
@@ -254,8 +254,8 @@ function doorframeRow(): Key[] {
       torso: -theta,
       armN: reach(hand[0], hand[1], 1),
       armF: reach(hand[0], hand[1] + 3, 1),
-      legN: reach(ankle[0], ankle[1], 1),
-      legF: reach(ankle[0] - 2, ankle[1], 1),
+      legN: reach(ankle[0], ankle[1], -1),
+      legF: reach(ankle[0] - 2, ankle[1], -1),
       footN: 75,
       footF: 75,
     };
@@ -273,8 +273,8 @@ function tableRow(): Key[] {
       torso: b.torso,
       armN: reach(hand[0], hand[1], -1),
       armF: reach(hand[0] + 2, hand[1], -1),
-      legN: reach(heel[0], heel[1], 1),
-      legF: reach(heel[0] - 1, heel[1], 1),
+      legN: reach(heel[0], heel[1], -1),
+      legF: reach(heel[0] - 1, heel[1], -1),
       footN: 170,
       footF: 170,
     };
@@ -342,8 +342,8 @@ function squat(): Key[] {
     torso: 38,
     armN: ang(92, 92),
     armF: ang(88, 88),
-    legN: reach(x + 1, ANKLE, 1),
-    legF: reach(x - 2, ANKLE, 1),
+    legN: reach(x + 1, ANKLE, -1),
+    legF: reach(x - 2, ANKLE, -1),
   };
   return [k(stand(x, { armN: ang(80, 84), armF: ang(76, 80) }), 1000, 200), k(low, 1200, 150)];
 }
@@ -355,8 +355,8 @@ function chairSquat(): Key[] {
     torso: 34,
     armN: ang(88, 88),
     armF: ang(84, 84),
-    legN: reach(x + 1, ANKLE, 1),
-    legF: reach(x - 2, ANKLE, 1),
+    legN: reach(x + 1, ANKLE, -1),
+    legF: reach(x - 2, ANKLE, -1),
   };
   return [k(stand(x, { armN: ang(80, 84), armF: ang(76, 80) }), 1200, 200), k(low, 1300, 300)];
 }
@@ -369,8 +369,8 @@ function splitSquat(): Key[] {
     torso: 4,
     armN: ang(8, 16),
     armF: ang(-6, 2),
-    legN: reach(front[0], front[1], 1),
-    legF: reach(back[0], back[1], 1),
+    legN: reach(front[0], front[1], -1),
+    legF: reach(back[0], back[1], -1),
     footF: 20,
   });
   return [k(pose(72), 1000, 200), k(pose(91), 1200, 150)];
@@ -384,7 +384,7 @@ function bulgarianSplitSquat(): Key[] {
     torso: 12,
     armN: ang(8, 16),
     armF: ang(-6, 2),
-    legN: reach(front[0], front[1], 1),
+    legN: reach(front[0], front[1], -1),
     legF: reach(back[0], back[1], -1),
     footF: -110,
   });
@@ -398,8 +398,8 @@ function reverseLunge(): Key[] {
     torso: 6,
     armN: ang(10, 20),
     armF: ang(-8, 0),
-    legN: reach(front[0], front[1], 1),
-    legF: reach(70, 111, 1),
+    legN: reach(front[0], front[1], -1),
+    legF: reach(70, 111, -1),
     footF: 20,
   };
   return [k(stand(118), 1000, 250), k(lunge, 1100, 150)];
@@ -411,8 +411,8 @@ function wallSit(): Key[] {
     torso: 0,
     armN: ang(10, 14),
     armF: ang(4, 8),
-    legN: reach(97, ANKLE, 1),
-    legF: reach(95, ANKLE, 1),
+    legN: reach(97, ANKLE, -1),
+    legF: reach(95, ANKLE, -1),
   });
   return [k(pose(0), 1600, 400), k(pose(0.8), 1600, 400)];
 }
@@ -421,8 +421,8 @@ function calfRaise(): Key[] {
   const x = 112;
   const up = stand(x, {
     hip: pt(x, STAND_HIP - 9),
-    legN: reach(x + 1, ANKLE - 9, 1),
-    legF: reach(x - 2, ANKLE - 9, 1),
+    legN: reach(x + 1, ANKLE - 9, -1),
+    legF: reach(x - 2, ANKLE - 9, -1),
     footN: 30,
     footF: 30,
   });
@@ -484,7 +484,7 @@ function singleLegRdl(): Key[] {
     head: -4,
     armN: ang(6, 6),
     armF: ang(2, 2),
-    legN: reach(x, ANKLE, 1),
+    legN: reach(x, ANKLE, -1),
     legF: ang(-96, -96),
     footF: -10,
   };
@@ -500,8 +500,8 @@ function goodMorning(): Key[] {
     torso: 74,
     head: -6,
     ...arms(74),
-    legN: reach(x + 1, ANKLE, 1),
-    legF: reach(x - 2, ANKLE, 1),
+    legN: reach(x + 1, ANKLE, -1),
+    legF: reach(x - 2, ANKLE, -1),
   };
   return [k(stand(x, arms(0)), 1100, 200), k(low, 1200, 200)];
 }
@@ -517,8 +517,8 @@ function plank(knees = false): Key[] {
       torso: b.torso,
       armN: ang(0, 90),
       armF: ang(-2, 88),
-      legN: knees ? ang(b.back, -112) : reach(pivot[0], pivot[1], 1),
-      legF: knees ? ang(b.back, -116) : reach(pivot[0] - 1, pivot[1] + 0.5, 1),
+      legN: knees ? ang(b.back, -112) : reach(pivot[0], pivot[1], -1),
+      legF: knees ? ang(b.back, -116) : reach(pivot[0] - 1, pivot[1] + 0.5, -1),
       footN: knees ? -150 : 22,
       footF: knees ? -150 : 22,
     };
@@ -561,14 +561,14 @@ function mountainClimber(): Key[] {
   const b = bodyLine(ankle, 86);
   const hand = pt(b.shoulder[0], 116);
   // The driving knee comes up under the chest, foot just off the floor below the hips.
-  const tuck = reach(b.hip[0] + 6, 109, -1);
+  const tuck = reach(b.hip[0] - 2, 112, -1);
   const pose = (near: boolean): Pose => ({
     hip: b.hip,
     torso: b.torso,
     armN: reach(hand[0], hand[1], 1),
     armF: reach(hand[0] + 2, hand[1], 1),
-    legN: near ? tuck : reach(ankle[0], ankle[1], 1),
-    legF: near ? reach(ankle[0] - 1, ankle[1], 1) : tuck,
+    legN: near ? tuck : reach(ankle[0], ankle[1], -1),
+    legF: near ? reach(ankle[0] - 1, ankle[1], -1) : tuck,
     footN: near ? 60 : 22,
     footF: near ? 22 : 60,
   });
@@ -591,17 +591,23 @@ function hollowHold(): Key[] {
 }
 
 function reverseCrunch(): Key[] {
-  const pose = (curl: number): Pose => ({
-    hip: pt(100, 112 - curl * 5),
-    torso: 90 + curl * 6,
-    armN: ang(-90, -90),
-    armF: ang(-92, -92),
-    legN: ang(-140 - curl * 60, -80 - curl * 70),
-    legF: ang(-142 - curl * 60, -82 - curl * 70),
-    footN: -90 - curl * 60,
-    footF: -90 - curl * 60,
-  });
-  return [k(pose(0), 900, 150), k(pose(1), 900, 200)];
+  // Lying with the head to the right. From table-top (thighs up, shins level), the knees curl
+  // towards the chest and the hips peel off the floor, then lower slowly.
+  const pose = (curl: number): Pose => {
+    const thigh = 180 - curl * 48;
+    return {
+      hip: pt(100 + curl * 2, 112 - curl * 6),
+      torso: 90 + curl * 9,
+      head: -4,
+      armN: ang(-90, -90),
+      armF: ang(-92, -92),
+      legN: ang(thigh, thigh + 90 + curl * 12),
+      legF: ang(thigh - 2, thigh + 88 + curl * 12),
+      footN: 180 - curl * 30,
+      footF: 180 - curl * 30,
+    };
+  };
+  return [k(pose(0), 1000, 250), k(pose(1), 800, 250)];
 }
 
 /* ------------------------------------------------------------------ cardio */
@@ -627,8 +633,8 @@ function marchInPlace(): Key[] {
     stand(x, {
       armN: near ? ang(-30, 10) : ang(40, 80),
       armF: near ? ang(40, 80) : ang(-30, 10),
-      legN: near ? ang(70, 0) : reach(x + 1, ANKLE, 1),
-      legF: near ? reach(x - 2, ANKLE, 1) : ang(70, 0),
+      legN: near ? ang(70, 0) : reach(x + 1, ANKLE, -1),
+      legF: near ? reach(x - 2, ANKLE, -1) : ang(70, 0),
       footN: near ? 70 : 90,
       footF: near ? 90 : 70,
     });
@@ -642,8 +648,8 @@ function stepBackBurpee(): Key[] {
     torso: 50,
     armN: reach(126, 116, -1),
     armF: reach(128, 116, -1),
-    legN: reach(x, ANKLE, 1),
-    legF: reach(x - 3, ANKLE, 1),
+    legN: reach(x, ANKLE, -1),
+    legF: reach(x - 3, ANKLE, -1),
   };
   const ankle = pt(52, 113);
   const b = bodyLine(ankle, 86);
@@ -652,8 +658,8 @@ function stepBackBurpee(): Key[] {
     torso: b.torso,
     armN: reach(b.shoulder[0], 116, -1),
     armF: reach(b.shoulder[0] + 2, 116, -1),
-    legN: reach(ankle[0], ankle[1], 1),
-    legF: reach(ankle[0] - 1, ankle[1], 1),
+    legN: reach(ankle[0], ankle[1], -1),
+    legF: reach(ankle[0] - 1, ankle[1], -1),
     footN: 22,
     footF: 22,
   };
@@ -670,15 +676,15 @@ function stepBackBurpee(): Key[] {
 
 function catCow(): Key[] {
   const hand = pt(130, 116);
-  const knee = pt(96, 115);
+  // Knees under the hips on the floor, shins flat behind; the spine rounds and arches.
   const pose = (arch: number): Pose => ({
-    hip: pt(96, 88 + arch * 2),
+    hip: pt(96, 91 + arch * 0.6),
     torso: 90 - arch * 8,
     head: arch * 22,
     armN: reach(hand[0], hand[1], -1),
     armF: reach(hand[0] - 2, hand[1], -1),
-    legN: reach(knee[0], knee[1], 1),
-    legF: reach(knee[0] - 2, knee[1], 1),
+    legN: ang(0, -90),
+    legF: ang(2, -90),
     footN: -95,
     footF: -95,
   });
@@ -692,7 +698,7 @@ function hipFlexorStretch(): Key[] {
     torso: -2,
     armN: ang(4, 10),
     armF: ang(-6, 0),
-    legN: reach(front[0], front[1], 1),
+    legN: reach(front[0], front[1], -1),
     legF: ang(-30 - push * 8, -90),
     footF: -95,
   });

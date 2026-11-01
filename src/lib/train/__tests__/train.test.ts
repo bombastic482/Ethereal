@@ -258,3 +258,36 @@ describe('short and comeback sessions', async () => {
     );
   });
 });
+
+describe('anatomy', async () => {
+  const { EXERCISES } = await import('../exercises');
+  const { loopLength, poseAt, solve } = await import('../figure');
+  // Lying face up with the head to the right: here the knee points up, the other way round.
+  const SUPINE = new Set([
+    'glute-bridge',
+    'single-leg-glute-bridge',
+    'dead-bug',
+    'reverse-crunch',
+    'hollow-hold',
+  ]);
+
+  it('never folds a knee backwards, in any frame of any demo', () => {
+    const bad: string[] = [];
+    for (const e of EXERCISES) {
+      const L = loopLength(e.keys);
+      for (let i = 0; i < 48; i++) {
+        const j = solve(poseAt(e.keys, (L * i) / 48));
+        for (const side of ['n', 'f'] as const) {
+          const [knee, ankle] = j.leg[side];
+          const ax = ankle[0] - j.hip[0];
+          const ay = ankle[1] - j.hip[1];
+          const cross = ax * (knee[1] - j.hip[1]) - ay * (knee[0] - j.hip[0]);
+          // Only judge clearly bent knees: a straight leg has no direction.
+          if (Math.abs(cross) / Math.hypot(ax, ay) < 3) continue;
+          if (SUPINE.has(e.id) ? cross < 0 : cross > 0) bad.push(`${e.id} frame ${i} ${side}`);
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});

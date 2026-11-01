@@ -380,6 +380,9 @@ function WeightTrackerInner() {
                   }
                   xLabel={(x) => (x === 0 ? fmtDate(origin).replace(/^\w+,\s*/, '') : `+${x}d`)}
                   yLabel={(y) => `${round(y, 1)} ${imperial ? 'lb' : 'kg'}`}
+                  pointLabel={(p) =>
+                    `${fmtDate(new Date(Date.parse(`${origin}T12:00:00`) + p.x * 864e5).toISOString().slice(0, 10))} · ${round(p.y, 1)} ${imperial ? 'lb' : 'kg'}`
+                  }
                 />
               ) : (
                 <p class="text-subtle text-sm">

@@ -108,7 +108,7 @@ test.describe('calculators', () => {
     await page.getByLabel('Weight', { exact: true }).fill('90');
     await page.getByLabel('Goal weight', { exact: true }).fill('80');
     await expect(page.getByText(/You reach your goal in/i)).toBeVisible();
-    await expect(page.locator('svg[aria-label="Projected weight over time"]')).toBeVisible();
+    await expect(page.locator('svg[aria-label^="Projected weight over time"]')).toBeVisible();
   });
 
   test('macro calculator sums to the calorie target', async ({ page }) => {

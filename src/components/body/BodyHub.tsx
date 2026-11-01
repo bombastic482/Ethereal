@@ -494,6 +494,9 @@ function BodyHubInner() {
                 goal={target ?? undefined}
                 xLabel={(x) => (x === 0 ? 'start' : `+${x}d`)}
                 yLabel={(y) => `${round(y, 1)}%`}
+                pointLabel={(p) =>
+                  `${new Date(Date.parse(`${origin}T12:00:00`) + p.x * 864e5).toLocaleDateString('en', { day: 'numeric', month: 'short' })} · ${round(p.y, 1)}%`
+                }
               />
             </div>
           ) : (
