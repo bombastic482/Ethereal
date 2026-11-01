@@ -154,6 +154,8 @@ function TodayScreenInner() {
   const [prefs, patchPrefs] = prefsStore.use();
   const [log] = logStore.use();
   const today = todayIso();
+  /** The diary below the summary: what you ate, ideas for what is left, or movement and water. */
+  const [tab, setTab] = useState<'meals' | 'ideas' | 'move'>('meals');
   const [date, setDate] = useState(today);
   // A tab left open past midnight should show the new day when you come back to it.
   useEffect(() => {
@@ -252,6 +254,7 @@ function TodayScreenInner() {
         setAdding(mealForTime(new Date().getHours()));
       } else if (e.key === 'w') {
         e.preventDefault();
+        setTab('move');
         setWater(date, (diaryStore.get().water[date] ?? 0) + 1);
         haptic();
       } else if (e.key === 'e') {
@@ -534,253 +537,283 @@ function TodayScreenInner() {
         </Callout>
       )}
 
-      {/* Meals */}
-      <div class="grid gap-4 lg:grid-cols-2">
-        {MEALS.map((m) => {
-          const items = dayFood.filter((e) => e.meal === m.key);
-          const n = day.byMeal[m.key];
-          const budget = Math.round(day.target.kcal * m.share);
-          return (
-            <section key={m.key} class="surface p-4 sm:p-5" aria-label={m.label}>
-              <header class="flex items-center justify-between gap-3">
-                <div>
-                  <h2 class="font-bold tracking-tight">{m.label}</h2>
-                  <p class="text-subtle text-xs">
-                    <span class="tabular">{formatNumber(n.kcal)}</span> kcal · {n.protein} g protein
-                    · guide {formatNumber(budget)} kcal
-                  </p>
-                </div>
-                <div class="flex items-center gap-1">
-                  {items.length > 0 && (
-                    <button
-                      type="button"
-                      class="btn btn-ghost h-9 px-2 text-xs"
-                      onClick={() => {
-                        const name = prompt(
-                          `Name this ${m.label.toLowerCase()} so you can log it again in one tap:`,
-                          `${m.label} · ${new Date(date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
-                        );
-                        if (name && saveMealFromEntries(name, items)) {
-                          haptic();
-                          alert(`Saved "${name}". Find it under Add → Meals.`);
-                        }
-                      }}
-                      aria-label={`Save ${m.label.toLowerCase()} as a meal`}
-                      title="Save as meal"
-                    >
-                      <Icon name="copy" size={14} />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    class="btn btn-primary h-9 px-3 text-sm"
-                    onClick={() => setAdding(m.key)}
-                  >
-                    <Icon name="spark" size={14} /> Add
-                  </button>
-                </div>
-              </header>
-              {items.length > 0 ? (
-                <ul class="stagger mt-3 grid gap-1">
-                  {items.map((e, i) => (
-                    <FoodRow key={e.id} entry={e} index={i} />
-                  ))}
-                </ul>
-              ) : (
-                <div class="text-subtle mt-3 flex flex-wrap items-center gap-2 text-sm">
-                  <span>Nothing logged.</span>
-                  {diary.food.some((e) => e.date === yesterday && e.meal === m.key) && (
-                    <button
-                      type="button"
-                      class="text-brand-700 dark:text-brand-300 font-semibold underline"
-                      onClick={() => copyMeal(yesterday, date, m.key)}
-                    >
-                      Copy yesterday's {m.label.toLowerCase()}
-                    </button>
-                  )}
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
+      <Segmented
+        name="diary-view"
+        label="Diary"
+        options={[
+          { value: 'meals', label: 'Meals' },
+          { value: 'ideas', label: 'Ideas' },
+          { value: 'move', label: 'Activity' },
+        ]}
+        value={tab}
+        onChange={setTab}
+        class="today-tabs"
+      />
 
-      {/* Suggestions */}
-      {suggestions.length > 0 && (
-        <section class="surface-muted p-4 sm:p-5" aria-label="Suggestions">
-          <h2 class="font-bold tracking-tight">
-            {day.remaining.protein > 15
-              ? `You're ${Math.round(day.remaining.protein)} g short on protein. Good options:`
-              : 'Fits what you have left:'}
-          </h2>
-          <ul class="mt-3 grid gap-2 sm:grid-cols-2">
-            {suggestions.map((s) => (
-              <li
-                key={s.food.id}
-                class="bg-elevated border-line flex items-center justify-between gap-3 rounded-xl border p-3 text-sm"
-              >
-                <span>
-                  <span class="font-semibold">{s.food.name}</span>
-                  <span class="text-subtle block text-xs">
-                    {s.food.servings[0]?.label ?? `${s.grams} g`} · {s.reason}
-                  </span>
-                </span>
-                <button
-                  type="button"
-                  class="btn btn-secondary h-8 px-3 text-xs"
-                  onClick={() =>
-                    addFood({
-                      date,
-                      meal: mealForTime(new Date().getHours()),
-                      name: s.food.name,
-                      grams: s.grams,
-                      per100g: s.food.per100g,
-                      source: 'local',
-                      foodId: s.food.id,
-                      time: minutesNow(),
-                    })
-                  }
-                >
-                  Add
-                </button>
-              </li>
-            ))}
-          </ul>
-          <p class="text-subtle mt-3 text-xs">
-            Eating out instead?{' '}
-            <a
-              class="text-brand-700 dark:text-brand-300 font-semibold"
-              href={withBase(`/eating-out/?budget=${Math.max(0, Math.round(day.remaining.kcal))}`)}
-            >
-              The best order for your {Math.max(0, Math.round(day.remaining.kcal))} kcal →
-            </a>
-          </p>
-        </section>
+      {/* Meals */}
+      {tab === 'meals' && (
+        <div class="grid gap-4 lg:grid-cols-2">
+          {MEALS.map((m) => {
+            const items = dayFood.filter((e) => e.meal === m.key);
+            const n = day.byMeal[m.key];
+            const budget = Math.round(day.target.kcal * m.share);
+            return (
+              <section key={m.key} class="surface p-4 sm:p-5" aria-label={m.label}>
+                <header class="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 class="font-bold tracking-tight">{m.label}</h2>
+                    <p class="text-subtle text-xs">
+                      <span class="tabular">{formatNumber(n.kcal)}</span> kcal · {n.protein} g
+                      protein · guide {formatNumber(budget)} kcal
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-1">
+                    {items.length > 0 && (
+                      <button
+                        type="button"
+                        class="btn btn-ghost h-9 px-2 text-xs"
+                        onClick={() => {
+                          const name = prompt(
+                            `Name this ${m.label.toLowerCase()} so you can log it again in one tap:`,
+                            `${m.label} · ${new Date(date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`,
+                          );
+                          if (name && saveMealFromEntries(name, items)) {
+                            haptic();
+                            alert(`Saved "${name}". Find it under Add → Meals.`);
+                          }
+                        }}
+                        aria-label={`Save ${m.label.toLowerCase()} as a meal`}
+                        title="Save as meal"
+                      >
+                        <Icon name="copy" size={14} />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      class="btn btn-primary h-9 px-3 text-sm"
+                      onClick={() => setAdding(m.key)}
+                    >
+                      <Icon name="spark" size={14} /> Add
+                    </button>
+                  </div>
+                </header>
+                {items.length > 0 ? (
+                  <ul class="stagger mt-3 grid gap-1">
+                    {items.map((e, i) => (
+                      <FoodRow key={e.id} entry={e} index={i} />
+                    ))}
+                  </ul>
+                ) : (
+                  <div class="text-subtle mt-3 flex flex-wrap items-center gap-2 text-sm">
+                    <span>Nothing logged.</span>
+                    {diary.food.some((e) => e.date === yesterday && e.meal === m.key) && (
+                      <button
+                        type="button"
+                        class="text-brand-700 dark:text-brand-300 font-semibold underline"
+                        onClick={() => copyMeal(yesterday, date, m.key)}
+                      >
+                        Copy yesterday's {m.label.toLowerCase()}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
       )}
 
-      {date === today && dbReady && (
-        <RecipeIdea
-          date={date}
-          diet={prefs.diet}
-          remainingKcal={day.remaining.kcal}
-          remainingProtein={day.remaining.protein}
-          loggedIds={dayFood.map((e) => e.foodId ?? '')}
-        />
+      {tab === 'ideas' && (
+        <>
+          {/* Suggestions */}
+          {suggestions.length > 0 && (
+            <section class="surface-muted p-4 sm:p-5" aria-label="Suggestions">
+              <h2 class="font-bold tracking-tight">
+                {day.remaining.protein > 15
+                  ? `You're ${Math.round(day.remaining.protein)} g short on protein. Good options:`
+                  : 'Fits what you have left:'}
+              </h2>
+              <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                {suggestions.map((s) => (
+                  <li
+                    key={s.food.id}
+                    class="bg-elevated border-line flex items-center justify-between gap-3 rounded-xl border p-3 text-sm"
+                  >
+                    <span>
+                      <span class="font-semibold">{s.food.name}</span>
+                      <span class="text-subtle block text-xs">
+                        {s.food.servings[0]?.label ?? `${s.grams} g`} · {s.reason}
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      class="btn btn-secondary h-8 px-3 text-xs"
+                      onClick={() =>
+                        addFood({
+                          date,
+                          meal: mealForTime(new Date().getHours()),
+                          name: s.food.name,
+                          grams: s.grams,
+                          per100g: s.food.per100g,
+                          source: 'local',
+                          foodId: s.food.id,
+                          time: minutesNow(),
+                        })
+                      }
+                    >
+                      Add
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p class="text-subtle mt-3 text-xs">
+                Eating out instead?{' '}
+                <a
+                  class="text-brand-700 dark:text-brand-300 font-semibold"
+                  href={withBase(
+                    `/eating-out/?budget=${Math.max(0, Math.round(day.remaining.kcal))}`,
+                  )}
+                >
+                  The best order for your {Math.max(0, Math.round(day.remaining.kcal))} kcal →
+                </a>
+              </p>
+            </section>
+          )}
+
+          {date === today && dbReady && (
+            <RecipeIdea
+              date={date}
+              diet={prefs.diet}
+              remainingKcal={day.remaining.kcal}
+              remainingProtein={day.remaining.protein}
+              loggedIds={dayFood.map((e) => e.foodId ?? '')}
+            />
+          )}
+
+          {suggestions.length === 0 && !(date === today && dbReady) && (
+            <p class="text-muted text-sm">
+              Ideas appear here for today, based on what you have left.
+            </p>
+          )}
+          <DietPref diet={prefs.diet} onChange={(diet) => patchPrefs({ diet })} />
+        </>
       )}
 
       {/* Exercise + water */}
-      <div class="grid gap-4 lg:grid-cols-2">
-        <section class="surface p-4 sm:p-5" aria-label="Exercise">
-          <header class="flex items-center justify-between gap-3">
-            <div>
-              <h2 class="font-bold tracking-tight">Exercise</h2>
-              <p class="text-subtle text-xs">
-                <span class="tabular">{formatNumber(day.burned)}</span> kcal ·{' '}
-                {prefs.eatBack ? 'added to your target' : 'not added to your target'}
-              </p>
-            </div>
-            <button
-              type="button"
-              class="btn btn-secondary h-9 px-3 text-sm"
-              onClick={() => setExAdding(true)}
-            >
-              <Icon name="bolt" size={14} /> Add
-            </button>
-          </header>
-          <div class="mt-3 flex items-end gap-2">
-            <NumberField
-              id="steps-today"
-              label="Steps today"
-              value={steps}
-              min={0}
-              max={100000}
-              step={500}
-              dp={0}
-              inputMode="numeric"
-              onChange={(n) => setSteps(date, n)}
-              class="flex-1"
-              hint={
-                steps > 0
-                  ? `≈ ${stepsBurn} kcal above a 3,000-step baseline`
-                  : 'From your phone or watch. Routine steps are already in your activity level.'
-              }
-            />
-            <div class="flex gap-1 pb-6">
-              {[2000, 5000].map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  class="btn btn-secondary h-[46px] px-3 text-xs"
-                  onClick={() => setSteps(date, steps + n)}
-                  aria-label={`+${n / 1000}k steps`}
-                >
-                  +{n / 1000}k
-                </button>
-              ))}
-            </div>
-          </div>
-          {dayEx.length > 0 && (
-            <ul class="mt-3 grid gap-1 text-sm">
-              {dayEx.map((e) => (
-                <li key={e.id} class="border-line flex items-center gap-3 border-t py-2">
-                  <span class="flex-1">
-                    {ACTIVITIES.find((a) => a.key === e.activity)?.label ?? e.activity}{' '}
-                    <span class="text-subtle">· {e.minutes} min</span>
-                  </span>
-                  <span class="tabular font-semibold">{e.kcal} kcal</span>
-                  <button
-                    type="button"
-                    class="btn btn-ghost h-8 px-2 text-xs"
-                    onClick={() => removeExercise(e.id)}
-                    aria-label="Delete exercise"
-                  >
-                    <Icon name="close" size={14} />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        <section class="surface p-4 sm:p-5" aria-label="Water">
-          <header class="flex items-center justify-between gap-3">
-            <div>
-              <h2 class="font-bold tracking-tight">Water</h2>
-              <p class="text-subtle text-xs">
-                {water} of {prefs.waterGoalGlasses} glasses (250 ml)
-              </p>
-            </div>
-            <div class="flex gap-1">
+      {tab === 'move' && (
+        <div class="grid gap-4 lg:grid-cols-2">
+          <section class="surface p-4 sm:p-5" aria-label="Exercise">
+            <header class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="font-bold tracking-tight">Exercise</h2>
+                <p class="text-subtle text-xs">
+                  <span class="tabular">{formatNumber(day.burned)}</span> kcal ·{' '}
+                  {prefs.eatBack ? 'added to your target' : 'not added to your target'}
+                </p>
+              </div>
               <button
                 type="button"
-                class="btn btn-secondary h-9 w-9 p-0"
-                onClick={() => setWater(date, water - 1)}
-                aria-label="Remove a glass"
+                class="btn btn-secondary h-9 px-3 text-sm"
+                onClick={() => setExAdding(true)}
               >
-                −
+                <Icon name="bolt" size={14} /> Add
               </button>
-              <button
-                type="button"
-                class="btn btn-primary h-9 w-9 p-0"
-                onClick={() => {
-                  haptic(8);
-                  setWater(date, water + 1);
-                }}
-                aria-label="Add a glass"
-              >
-                +
-              </button>
-            </div>
-          </header>
-          <div class="mt-3 flex flex-wrap gap-1.5" aria-hidden="true">
-            {Array.from({ length: Math.max(prefs.waterGoalGlasses, water) }, (_, i) => (
-              <span
-                key={i}
-                class={`h-7 w-5 rounded-t-sm rounded-b-lg border transition-[background-color,border-color,transform] duration-300 ease-[var(--ease-spring)] ${i < water ? 'border-[oklch(62%_0.09_235)] bg-[oklch(72%_0.09_235)]' : 'border-line bg-muted scale-95'}`}
+            </header>
+            <div class="mt-3 flex items-end gap-2">
+              <NumberField
+                id="steps-today"
+                label="Steps today"
+                value={steps}
+                min={0}
+                max={100000}
+                step={500}
+                dp={0}
+                inputMode="numeric"
+                onChange={(n) => setSteps(date, n)}
+                class="flex-1"
+                hint={
+                  steps > 0
+                    ? `≈ ${stepsBurn} kcal above a 3,000-step baseline`
+                    : 'From your phone or watch. Routine steps are already in your activity level.'
+                }
               />
-            ))}
-          </div>
-        </section>
-      </div>
+              <div class="flex gap-1 pb-6">
+                {[2000, 5000].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    class="btn btn-secondary h-[46px] px-3 text-xs"
+                    onClick={() => setSteps(date, steps + n)}
+                    aria-label={`+${n / 1000}k steps`}
+                  >
+                    +{n / 1000}k
+                  </button>
+                ))}
+              </div>
+            </div>
+            {dayEx.length > 0 && (
+              <ul class="mt-3 grid gap-1 text-sm">
+                {dayEx.map((e) => (
+                  <li key={e.id} class="border-line flex items-center gap-3 border-t py-2">
+                    <span class="flex-1">
+                      {ACTIVITIES.find((a) => a.key === e.activity)?.label ?? e.activity}{' '}
+                      <span class="text-subtle">· {e.minutes} min</span>
+                    </span>
+                    <span class="tabular font-semibold">{e.kcal} kcal</span>
+                    <button
+                      type="button"
+                      class="btn btn-ghost h-8 px-2 text-xs"
+                      onClick={() => removeExercise(e.id)}
+                      aria-label="Delete exercise"
+                    >
+                      <Icon name="close" size={14} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section class="surface p-4 sm:p-5" aria-label="Water">
+            <header class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="font-bold tracking-tight">Water</h2>
+                <p class="text-subtle text-xs">
+                  {water} of {prefs.waterGoalGlasses} glasses (250 ml)
+                </p>
+              </div>
+              <div class="flex gap-1">
+                <button
+                  type="button"
+                  class="btn btn-secondary h-9 w-9 p-0"
+                  onClick={() => setWater(date, water - 1)}
+                  aria-label="Remove a glass"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary h-9 w-9 p-0"
+                  onClick={() => {
+                    haptic(8);
+                    setWater(date, water + 1);
+                  }}
+                  aria-label="Add a glass"
+                >
+                  +
+                </button>
+              </div>
+            </header>
+            <div class="mt-3 flex flex-wrap gap-1.5" aria-hidden="true">
+              {Array.from({ length: Math.max(prefs.waterGoalGlasses, water) }, (_, i) => (
+                <span
+                  key={i}
+                  class={`h-7 w-5 rounded-t-sm rounded-b-lg border transition-[background-color,border-color,transform] duration-300 ease-[var(--ease-spring)] ${i < water ? 'border-[oklch(62%_0.09_235)] bg-[oklch(72%_0.09_235)]' : 'border-line bg-muted scale-95'}`}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {adding && (
         <AddFoodSheet
@@ -804,27 +837,31 @@ function TodayScreenInner() {
           onClose={() => setExAdding(false)}
         />
       )}
-      <p class="text-subtle text-xs">
-        Diet preference for suggestions:{' '}
-        <select
-          class="text-fg bg-transparent font-semibold underline"
-          value={prefs.diet}
-          onChange={(e) =>
-            patchPrefs({ diet: (e.target as HTMLSelectElement).value as typeof prefs.diet })
-          }
-          aria-label="Diet preference"
-        >
-          <option value="omnivore">Omnivore</option>
-          <option value="vegetarian">Vegetarian</option>
-          <option value="vegan">Vegan</option>
-        </select>
-        . More options in{' '}
-        <a class="underline" href={withBase('/settings/')}>
-          settings
-        </a>
-        .
-      </p>
     </div>
+  );
+}
+
+/** The diet that shapes suggestions and recipe ideas, set right where they appear. */
+function DietPref({ diet, onChange }: { diet: Diet; onChange: (d: Diet) => void }) {
+  return (
+    <p class="text-subtle text-xs">
+      Showing ideas for{' '}
+      <select
+        class="text-fg bg-transparent font-semibold underline"
+        value={diet}
+        onChange={(e) => onChange((e.target as HTMLSelectElement).value as typeof diet)}
+        aria-label="Diet preference"
+      >
+        <option value="omnivore">any diet</option>
+        <option value="vegetarian">vegetarians</option>
+        <option value="vegan">vegans</option>
+      </select>
+      . More options in{' '}
+      <a class="underline" href={withBase('/settings/')}>
+        settings
+      </a>
+      .
+    </p>
   );
 }
 

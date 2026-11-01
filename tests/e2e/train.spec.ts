@@ -60,6 +60,7 @@ test.describe('training', () => {
     await expect(page.getByRole('heading', { name: 'Recent sessions' })).toBeVisible();
 
     await ready(page, '/today/');
+    await page.getByRole('radio', { name: 'Activity' }).check();
     await expect(page.getByText(/Bodyweight workout/).first()).toBeVisible();
   });
 

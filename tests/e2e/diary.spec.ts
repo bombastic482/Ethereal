@@ -63,6 +63,8 @@ test.describe('food diary', () => {
     await dialog.getByRole('button', { name: /Add 250 kcal/ }).click();
     await expect(page.getByRole('region', { name: 'Snacks' }).getByText('Quick add')).toBeVisible();
 
+    // Movement and water live on the diary's Activity tab.
+    await page.getByRole('radio', { name: 'Activity' }).check();
     await page
       .getByRole('region', { name: 'Exercise' })
       .getByRole('button', { name: 'Add' })
@@ -160,6 +162,7 @@ test.describe('saved meals and sharing', () => {
     page,
   }) => {
     await ready(page, '/today/');
+    await page.getByRole('radio', { name: 'Ideas' }).check();
     const idea = page.getByRole('region', { name: 'Recipe idea' });
     await expect(idea).toBeVisible();
     const first = await idea.getByRole('heading', { level: 2 }).textContent();
@@ -170,6 +173,7 @@ test.describe('saved meals and sharing', () => {
     await expect(idea.getByRole('status')).toContainText(`Logged ${name}`);
     // Once eaten, the same idea is not offered again and the diary has its ingredients.
     await expect(idea.getByRole('heading', { level: 2 })).not.toHaveText(name);
+    await page.getByRole('radio', { name: 'Meals' }).check();
     await expect(page.getByRole('button', { name: /^Delete / }).first()).toBeVisible();
   });
 

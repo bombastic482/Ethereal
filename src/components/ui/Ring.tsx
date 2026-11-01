@@ -56,7 +56,9 @@ export function Ring({ value, size = 180, stroke = 14, label, children, tone = '
           stroke-width={stroke}
           stroke-linecap="round"
           stroke-dasharray={`${first * c} ${c}`}
-          style="transition: stroke-dasharray .6s cubic-bezier(.22,1,.36,1)"
+          // A round cap on an empty arc still draws a dot; hide it until there is progress.
+          opacity={first > 0.004 ? 1 : 0}
+          style="transition: stroke-dasharray .6s cubic-bezier(.22,1,.36,1), opacity .2s"
         />
         {over > 0 && (
           <circle
